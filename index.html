@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TC RADIOS</title>
+<link rel="shortcut icon" href="https://raw.githubusercontent.com/simsonpeter/Tcradios/main/icons/favicon.ico"/>
+<meta name="theme-color" content="#f97316"/>
+<style>
+:root{--accent:#f97316;--bg:#111827;--card:#1f2937;--text:#f3f4f6;--border:#374151;--header:#000000;}
+[data-theme="light"]{--bg:#f5f7fa;--card:#ffffff;--text:#1e293b;--border:#d1d5db;--header:#ffffff;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}body{height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);overflow:hidden}
+header{background:var(--header);padding:.6rem .8rem;display:flex;justify-content:space-between;align-items:center;font-size:1.25rem;font-weight:700}
+header button{background:none;border:none;color:var(--accent);font-size:1.3rem;cursor:pointer}
+#langSelect{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:.3rem;padding:.3rem .6rem;font-size:.9rem}
+#tabs{display:flex;background:var(--header);border-bottom:1px solid var(--border)}
+#tabs span{flex:1;text-align:center;padding:.55rem 0;cursor:pointer;font-weight:600}
+#tabs span.active{background:var(--accent);color:#fff}
+#searchBox{display:flex;align-items:center;padding:.5rem;background:var(--card);margin:.5rem;border-radius:.5rem}
+#searchBox input{background:transparent;border:none;outline:none;color:var(--text);flex:1;font-size:1rem}
+#searchBox::before{content:'🔍';margin-right:.5rem;color:var(--accent)}
+#stations{flex:1;overflow-y:auto;padding:.4rem;display:flex;flex-direction:column;gap:.4rem}
+.card{display:flex;align-items:center;background:var(--card);border-radius:.5rem;padding:.6rem;gap:.6rem;position:relative}
+.card img{width:56px;height:56px;border-radius:.5rem;object-fit:cover}
+.card .text{flex:1}
+.card .title{font-size:1rem;font-weight:700}
+.card .genre{font-size:.8rem;color:var(--accent)}
+.card .heart{position:absolute;right:10px;top:10px;font-size:1.3rem;cursor:pointer;color:var(--heart)}
+.card .heart.on{color:var(--accent)}
+
+/* ABOUT CARDS */
+#about-panel{flex:1;overflow-y:auto;padding:.4rem;display:flex;flex-direction:column;gap:.8rem;align-items:center}
+.about-card{background:var(--card);border-radius:.5rem;padding:1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08);width:90%;max-width:400px}
+.about-card img{width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:.5rem}
+.about-card h2{margin:.3rem 0;font-size:1.2rem;color:var(--accent)}
+.about-card p{font-size:.9rem;line-height:1.4}
+
+/* PLAYER */
+#player{background:var(--header);border-top:1px solid var(--border);display:flex;align-items:center;padding:.5rem;gap:.5rem}
+#player img{width:48px;height:48px;border-radius:.5rem}
+#player .info{flex:1;display:flex;flex-direction:column}
+#player .title{font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#player .subtitle{font-size:.75rem;color:var(--accent)}
+#player button{background:none;border:none;color:var(--accent);font-size:1.5rem}
+</style>
+</head>
+<body>
+<header>
+  <span>TC RADIOS</span>
+  <select id="langSelect"></select>
+  <button id="themeToggle">🌙</button>
+</header>
+
+<div id="tabs">
+  <span id="tab-all" class="active">All</span>
+  <span id="tab-fav">Favorites</span>
+  <span id="tab-about">About</span>
+</div>
+
+<div id="searchBox"><input id="searchInput" placeholder="Search stations…" type="text"></div>
+<div id="stations">Loading…</div>
+
+<!-- ABOUT CARDS -->
+<div id="about-panel" style="display:none">
+  <!-- Logo Card -->
+  <div class="about-card">
+    <img src="https://raw.githubusercontent.com/simsonpeter/Tcradios/main/icons/icon-512x512.png" alt="Logo"/>
+    <h2>TC RADIOS</h2>
+  </div>
+
+  <!-- About Card -->
+  <div class="about-card">
+    <p>TC RADIOS is a passion project dedicated to bringing uplifting Christian music and messages to listeners worldwide. We curate stations in Tamil, Malayalam and many more languages, all focused on praise, worship, and the Word of God. Whether you’re commuting, working, or relaxing, tune in anywhere, anytime to feel His presence.</p>
+  </div>
+
+  <!-- Contact Card -->
+  <div class="about-card">
+    <h2>Contact Us</h2>
+    <p><strong>Developed by:</strong><br>JayathaSoft</p>
+    <p>📧 <a href="mailto:simsonpeter@gmail.com" style="color:var(--accent)">simsonpeter@gmail.com</a></p>
+    <p>📍 Antwerp, Belgium</p>
+  </div>
+</div>
+
+<div id="player">
+  <img id="p-img" src="https://raw.githubusercontent.com/simsonpeter/Tcradios/main/icons/default-artwork.jpg" alt=""/>
+  <div class="info">
+    <div class="title" id="p-title">Select a station</div>
+    <div class="subtitle" id="p-now">Live</div>
+  </div>
+  <button id="p-prev">⏮</button>
+  <button id="p-play">▶️</button>
+  <button id="p-next">⏭</button>
+</div>
+
+<script>
+const LANG_URLS = {
+  tamil:    'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/stations.json',
+  malayalam:'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json'
+};
+let stationsPerLang = {};
+let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
+let currentLang     = localStorage.getItem('currentLang') || 'tamil';
+let currentList     = [];
+let idx = 0;
+
+async function loadAll() {
+  const promises = Object.keys(LANG_URLS).map(async lang => {
+    const res = await fetch(LANG_URLS[lang]);
+    stationsPerLang[lang] = await res.json();
+  });
+  await Promise.allSettled(promises);
+  populateLangSelect();
+  renderStations();
+}
+loadAll();
+function populateLangSelect() {
+  const sel = document.getElementById('langSelect');
+  sel.innerHTML = '';
+  Object.keys(LANG_URLS).forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang;
+    opt.textContent = lang.charAt(0).toUpperCase() + lang.slice(1);
+    if (lang === currentLang) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+document.getElementById('langSelect').onchange = e => {
+  currentLang = e.target.value;
+  localStorage.setItem('currentLang', currentLang);
+  renderStations();
+};
+
+document.getElementById('tab-all').onclick   = () => renderStations();
+document.getElementById('tab-fav').onclick   = () => renderStations(true);
+document.getElementById('tab-about').onclick = () => {
+  document.querySelectorAll('#tabs span').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-about').classList.add('active');
+  document.getElementById('stations').style.display = 'none';
+  document.getElementById('about-panel').style.display = 'flex';
+};
+
+function renderStations(fav = false) {
+  document.querySelectorAll('#tabs span').forEach(s => s.classList.remove('active'));
+  document.getElementById(fav ? 'tab-fav' : 'tab-all').classList.add('active');
+  document.getElementById('stations').style.display = 'flex';
+  document.getElementById('about-panel').style.display = 'none';
+  let list = fav ? Object.values(stationsPerLang).flat().filter(s => favorites.includes(s.name))
+                 : stationsPerLang[currentLang] || [];
+  currentList = list;
+  const container = document.getElementById('stations');
+  container.innerHTML = '';
+  list.forEach((st, i) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <img src="${st.logo}" alt="">
+      <div class="text">
+        <div class="title">${st.name}</div>
+        <div class="genre">${st.genre}</div>
+      </div>
+      <span class="heart ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}">♥</span>`;
+    div.onclick = e => { if (!e.target.classList.contains('heart')) play(st, i); };
+    div.querySelector('.heart').onclick = e => {
+      e.stopPropagation(); toggleFav(st.name);
+    };
+    container.appendChild(div);
+  });
+}
+
+function toggleFav(name) {
+  const heart = document.querySelector(`[data-name="${name}"]`);
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(f => f !== name);
+    heart.classList.remove('on');
+  } else {
+    favorites.push(name);
+    heart.classList.add('on');
+  }
+  localStorage.setItem('tcr-fav', JSON.stringify(favorites));
+  if (currentTab === 'fav') renderStations(true);
+}
+
+function play(st, i) {
+  idx = i;
+  audio.src = st.url;
+  document.getElementById('p-img').src = st.logo || 'https://raw.githubusercontent.com/simsonpeter/Tcradios/main/icons/default-artwork.jpg';
+  document.getElementById('p-title').textContent = st.name;
+  document.getElementById('p-play').textContent = '⏸️';
+  audio.play().catch(()=>{});
+  fetchNowPlaying(st.url);
+}
+
+document.getElementById('p-play').onclick = () => audio.paused ? audio.play() : audio.pause();
+document.getElementById('p-prev').onclick = () => {
+  if (!currentList.length) return;
+  idx = (idx - 1 + currentList.length) % currentList.length;
+  play(currentList[idx], idx);
+};
+document.getElementById('p-next').onclick = () => {
+  idx = (idx + 1) % currentList.length;
+  play(currentList[idx], idx);
+};
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  const list = (currentTab === 'fav' ? Object.values(stationsPerLang).flat().filter(s => favorites.includes(s.name))
+                                      : stationsPerLang[currentLang] || [])
+               .filter(s => s.name.toLowerCase().includes(q) || s.genre.toLowerCase().includes(q));
+  const container = document.getElementById('stations');
+  container.innerHTML = '';
+  list.forEach((st, i) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <img src="${st.logo}" alt="">
+      <div class="text">
+        <div class="title">${st.name}</div>
+        <div class="genre">${st.genre}</div>
+      </div>
+      <span class="heart ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}">♥</span>`;
+    div.onclick = e => { if (!e.target.classList.contains('heart')) play(st, i); };
+    div.querySelector('.heart').onclick = e => { e.stopPropagation(); toggleFav(st.name); };
+    container.appendChild(div);
+  });
+});
+
+function fetchNowPlaying(url) {
+  const proxy = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
+  const check = () => {
+    fetch(proxy, {cache: 'no-store'}).then(r => r.text()).then(txt => {
+      const m = txt.match(/StreamTitle='([^']+)'/);
+      document.getElementById('p-now').textContent = m ? m[1] : 'Live';
+    }).catch(() => document.getElementById('p-now').textContent = 'Live');
+  };
+  check(); const t = setInterval(check, 15000);
+  audio.addEventListener('pause', () => clearInterval(t), {once: true});
+}
+
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.theme = t;
+  themeToggle.textContent = t === 'dark' ? '🌙' : '☀️';
+}
+applyTheme(localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+themeToggle.onclick = () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+</script>
+</body>
+</html>
