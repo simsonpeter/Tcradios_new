@@ -34,9 +34,9 @@
     <!-- Value from default config. -->
     <string name="hostName" translatable="false">tcradios-new.vercel.app</string>
     <!-- Value from default config. -->
-    <string name="launchUrl" translatable="false">https://tcradios-new.vercel.app/</string>
+    <string name="launchUrl" translatable="false">https://tcradios-new.vercel.app/index.html</string>
     <!-- Value from default config. -->
-    <string name="launcherName" translatable="false">TC Radios</string>
+    <string name="launcherName" translatable="false">tcradiod</string>
     <!-- Value from default config. -->
     <string name="orientation" translatable="false">portrait</string>
     <!-- Value from default config. -->

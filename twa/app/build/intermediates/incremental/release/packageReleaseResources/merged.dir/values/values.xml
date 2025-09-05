@@ -26,8 +26,8 @@
     <string name="fullScopeUrl" translatable="false">https://tcradios-new.vercel.app/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <string name="hostName" translatable="false">tcradios-new.vercel.app</string>
-    <string name="launchUrl" translatable="false">https://tcradios-new.vercel.app/</string>
-    <string name="launcherName" translatable="false">TC Radios</string>
+    <string name="launchUrl" translatable="false">https://tcradios-new.vercel.app/index.html</string>
+    <string name="launcherName" translatable="false">tcradiod</string>
     <string name="orientation" translatable="false">portrait</string>
     <string name="providerAuthority" translatable="false">app.vercel.tcradios_new.twa.fileprovider</string>
     <string name="webManifestUrl" translatable="false">https://tcradios-new.vercel.app/manifest.json</string>
