@@ -46,10 +46,13 @@ body{display:flex;flex-direction:column;font-family:system-ui;
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
        display:flex;justify-content:space-between;align-items:center;
-       padding:.5rem .8rem;font-size:1.25rem;font-weight:700}
-header button{background:none;border:none;font-size:1.4rem;cursor:pointer}
+       padding:1rem 1.2rem;font-size:1.25rem;font-weight:700;min-height:70px}
+header button{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:0.5rem;border-radius:50%;transition:all 0.2s ease}
+header button:hover{background:rgba(249,115,22,0.1);transform:scale(1.05)}
+header button:active{transform:scale(0.95)}
 header button i{font-size:1.2rem}
-#langBox{position:relative;margin-left:auto;margin-right:1rem}
+#headerControls{display:flex;align-items:center;gap:0.8rem}
+#langBox{position:relative}
 #langSelect{appearance:none;background:var(--card);color:var(--text);
             border:1px solid var(--border);border-radius:.4rem;
             padding:.35rem .6rem;font-size:1rem;cursor:pointer}
@@ -104,14 +107,6 @@ header button i{font-size:1.2rem}
 #p-play:hover,#p-prev:hover,#p-next:hover{background:rgba(249,115,22,0.2);transform:scale(1.05)}
 #p-play:active,#p-prev:active,#p-next:active{transform:scale(0.95)}
 #p-play i,#p-prev i,#p-next i{font-size:1.3rem}
-#sleepBtn{background:rgba(249,115,22,0.1);border:none;color:var(--accent);
-          font-size:1.5rem;cursor:pointer;padding:0.6rem;border-radius:50%;
-          transition:all 0.2s ease;min-width:40px;min-height:40px;
-          display:flex;align-items:center;justify-content:center;
-          box-shadow:0 2px 4px rgba(0,0,0,0.1)}
-#sleepBtn:hover{background:rgba(249,115,22,0.2);transform:scale(1.05)}
-#sleepBtn:active{transform:scale(0.95)}
-#sleepBtn i{font-size:1.1rem}
 
 /* Mobile responsive adjustments */
 @media (max-width: 480px) {
@@ -122,8 +117,8 @@ header button i{font-size:1.2rem}
   #player #p-now{font-size:0.75rem}
   #p-play,#p-prev,#p-next{padding:0.6rem;min-width:44px;min-height:44px}
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
-  #sleepBtn{padding:0.5rem;min-width:36px;min-height:36px}
-  #sleepBtn i{font-size:1rem}
+  header{padding:0.8rem 1rem;min-height:60px}
+  #headerControls{gap:0.6rem}
 }
 
 audio{display:none}
@@ -139,10 +134,13 @@ audio{display:none}
 <body>
 <header>
   <span>TC RADIOS</span>
-  <div id="langBox">
-    <select id="langSelect"></select>
+  <div id="headerControls">
+    <div id="langBox">
+      <select id="langSelect"></select>
+    </div>
+    <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
+    <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
   </div>
-  <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
 </header>
 
 <div id="tabs">
@@ -182,7 +180,6 @@ audio{display:none}
   <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
   <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
   <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
-  <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
 </div>
 
 <div id="sleepModal">
