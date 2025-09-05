@@ -212,6 +212,7 @@ let currentList     = [];
 let idx             = 0;
 let searchTerm      = '';
 let sleepTimer;
+let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
 
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
@@ -231,8 +232,33 @@ async function loadAll() {
   await Promise.allSettled(promises);
   populateLangSelect();
   switchTab(currentTab);
+  
+  // Auto-play last played station or first station
+  setTimeout(() => {
+    autoPlayLastOrFirst();
+  }, 500); // Small delay to ensure UI is ready
 }
 loadAll();
+
+function autoPlayLastOrFirst() {
+  // Check if there's a last played station
+  if (lastPlayedStation && lastPlayedStation.lang === currentLang) {
+    const stations = stationsPerLang[currentLang] || [];
+    const lastStation = stations.find(st => st.name === lastPlayedStation.station.name);
+    
+    if (lastStation) {
+      const index = stations.indexOf(lastStation);
+      play(lastStation, index);
+      return;
+    }
+  }
+  
+  // If no last played station or it's not found, play first station
+  const stations = stationsPerLang[currentLang] || [];
+  if (stations.length > 0) {
+    play(stations[0], 0);
+  }
+}
 
 function populateLangSelect() {
   const sel = document.getElementById('langSelect');
@@ -248,6 +274,11 @@ function populateLangSelect() {
     currentLang = sel.value;
     localStorage.setItem('currentLang', currentLang);
     switchTab(currentTab);
+    
+    // Auto-play last played station or first station when language changes
+    setTimeout(() => {
+      autoPlayLastOrFirst();
+    }, 100);
   };
 }
 
@@ -327,6 +358,10 @@ function play(st, i) {
   player.classList.add('playing');
   audio.play().catch(()=>{});
   updateMediaSession(st);
+  
+  // Save last played station
+  lastPlayedStation = { station: st, index: i, lang: currentLang };
+  localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
 }
 audio.onplay  = () => { pPlay.innerHTML = '<i class="fas fa-pause"></i>'; player.classList.add('playing'); };
 audio.onpause = () => { pPlay.innerHTML = '<i class="fas fa-play"></i>'; player.classList.remove('playing'); };
