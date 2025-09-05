@@ -19,6 +19,10 @@
 <meta name="msapplication-navbutton-color" content="#f97316">
 <meta name="msapplication-TileColor" content="#111827">
 <meta name="application-name" content="TC RADIOS">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 :root{
   --accent:#f97316;--bg:#111827;--card:#1f2937;--text:#f3f4f6;
@@ -44,6 +48,7 @@ header{background:var(--header);border-bottom:1px solid var(--border);
        display:flex;justify-content:space-between;align-items:center;
        padding:.5rem .8rem;font-size:1.25rem;font-weight:700}
 header button{background:none;border:none;font-size:1.4rem;cursor:pointer}
+header button i{font-size:1.2rem}
 #langBox{position:relative;margin-left:auto;margin-right:1rem}
 #langSelect{appearance:none;background:var(--card);color:var(--text);
             border:1px solid var(--border);border-radius:.4rem;
@@ -62,6 +67,7 @@ header button{background:none;border:none;font-size:1.4rem;cursor:pointer}
 .about-card img{width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:.5rem}
 .about-card h2{margin:.3rem 0;font-size:1.2rem;color:var(--accent)}
 .about-card p{font-size:.9rem;line-height:1.4}
+.about-card i{margin-right:.5rem;color:var(--accent)}
 #searchBar{width:100%;margin-bottom:.75rem;padding:.55rem .7rem;border-radius:.4rem;
            border:1px solid var(--border);background:var(--card);color:var(--text);
            font-size:1rem}
@@ -74,6 +80,7 @@ header button{background:none;border:none;font-size:1.4rem;cursor:pointer}
 .station-name{font-weight:600}
 .station-genre{font-size:.8rem;color:var(--accent)}
 .favorite-button{font-size:1.3rem;color:var(--heart);cursor:pointer}
+.favorite-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
 #player{background:var(--header);border-top:1px solid var(--border);
         display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;
@@ -90,7 +97,9 @@ header button{background:none;border:none;font-size:1.4rem;cursor:pointer}
 #player #p-now{font-size:.75rem;color:var(--accent);white-space:nowrap}
 #p-play,#p-prev,#p-next{background:none;border:none;color:var(--accent);
                         font-size:1.8rem;cursor:pointer;padding:.25rem}
+#p-play i,#p-prev i,#p-next i{font-size:1.2rem}
 #sleepBtn{background:none;border:none;color:var(--accent);font-size:1.5rem;cursor:pointer}
+#sleepBtn i{font-size:1.2rem}
 audio{display:none}
 #sleepModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
            display:none;align-items:center;justify-content:center;z-index:999}
@@ -107,7 +116,7 @@ audio{display:none}
   <div id="langBox">
     <select id="langSelect"></select>
   </div>
-  <button id="themeToggle" title="Dark / Light">🌙</button>
+  <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
 </header>
 
 <div id="tabs">
@@ -133,8 +142,8 @@ audio{display:none}
   <div class="about-card">
     <h2>Contact Us</h2>
     <p><strong>JayathaSoft</strong><br>
-       📧 <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a><br>
-       📍 Antwerp, Belgium</p>
+       <i class="fas fa-envelope"></i> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a><br>
+       <i class="fas fa-map-marker-alt"></i> Antwerp, Belgium</p>
   </div>
 </div>
 
@@ -144,10 +153,10 @@ audio{display:none}
     <div class="name"><span id="p-name"></span></div>
     <div id="p-now">Live</div>
   </div>
-  <button id="p-prev" title="Previous">⏮</button>
-  <button id="p-play" title="Play/Pause">▶</button>
-  <button id="p-next" title="Next">⏭</button>
-  <button id="sleepBtn" title="Sleep timer">⏰</button>
+  <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
+  <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
+  <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
+  <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
 </div>
 
 <div id="sleepModal">
@@ -275,7 +284,7 @@ function render(list) {
         <div class="station-name">${st.name}</div>
         <div class="station-genre">${st.genre}</div>
       </div>
-      <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}">♥</div>
+      <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}"><i class="fas fa-heart"></i></div>
     `;
     div.onclick = e => { if (!e.target.classList.contains('favorite-button')) play(st, i); };
     div.querySelector('.favorite-button').onclick = e => {
@@ -295,8 +304,8 @@ function play(st, i) {
   audio.play().catch(()=>{});
   updateMediaSession(st);
 }
-audio.onplay  = () => { pPlay.textContent = '⏸'; player.classList.add('playing'); };
-audio.onpause = () => { pPlay.textContent = '▶'; player.classList.remove('playing'); };
+audio.onplay  = () => { pPlay.innerHTML = '<i class="fas fa-pause"></i>'; player.classList.add('playing'); };
+audio.onpause = () => { pPlay.innerHTML = '<i class="fas fa-play"></i>'; player.classList.remove('playing'); };
 pPlay.onclick = () => audio.paused ? audio.play() : audio.pause();
 function prevNext(dir) {
   if (!currentList.length) return;
@@ -320,7 +329,7 @@ const themeToggle = document.getElementById('themeToggle');
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   localStorage.theme = t;
-  themeToggle.textContent = t === 'dark' ? '☀️' : '🌙';
+  themeToggle.innerHTML = t === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 applyTheme(localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 themeToggle.onclick = () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
