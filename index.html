@@ -27,11 +27,12 @@
 :root{
   --accent:#f97316;--bg:#111827;--card:#1f2937;--text:#f3f4f6;
   --border:#374151;--header:#000000;--heart:#f3f4f6;
-  --player-height:80px;
+  --header-btn:#f3f4f6;--player-height:80px;
 }
 [data-theme="light"]{
   --bg:#f5f7fa;--card:#ffffff;--text:#1e293b;
   --border:#d1d5db;--header:#ffffff;--heart:#1e293b;
+  --header-btn:#1e293b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;height:100vh;height:100dvh;width:100%;overflow:hidden}
@@ -47,10 +48,10 @@ body{display:flex;flex-direction:column;font-family:system-ui;
 header{background:var(--header);border-bottom:1px solid var(--border);
        display:flex;justify-content:space-between;align-items:center;
        padding:1rem 1.2rem;font-size:1.25rem;font-weight:700;min-height:70px}
-header button{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:0.5rem;border-radius:50%;transition:all 0.2s ease}
+header button{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:0.5rem;border-radius:50%;transition:all 0.2s ease;color:var(--header-btn)}
 header button:hover{background:rgba(249,115,22,0.1);transform:scale(1.05)}
 header button:active{transform:scale(0.95)}
-header button i{font-size:1.2rem}
+header button i{font-size:1.2rem;color:var(--header-btn)}
 #headerControls{display:flex;align-items:center;gap:0.8rem}
 #langBox{position:relative}
 #langSelect{appearance:none;background:var(--card);color:var(--text);
