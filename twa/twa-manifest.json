@@ -36,7 +36,12 @@
   "fullScopeUrl": "https://tcradios-new.vercel.app/",
   "minSdkVersion": 21,
   "orientation": "portrait",
-  "fingerprints": [],
+  "fingerprints": [
+    {
+      "name": "release",
+      "value": "36:DC:00:A3:4A:21:04:A2:EF:53:A9:B7:F2:33:4A:A8:A6:B9:E3:BB:66:28:DA:B5:D1:6B:D6:8E:4B:8B:37:A3"
+    }
+  ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "protocolHandlers": [],
