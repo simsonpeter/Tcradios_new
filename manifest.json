@@ -42,5 +42,17 @@
   "related_applications": [],
   "edge_side_panel": {
     "preferred_width": 400
+  },
+  "wear": {
+    "supported": true,
+    "min_sdk": 25,
+    "target_sdk": 30
+  },
+  "wear_os": {
+    "supported": true,
+    "round_screen": true,
+    "square_screen": true,
+    "ambient_mode": true,
+    "always_on": true
   }
 }
