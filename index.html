@@ -195,10 +195,11 @@ audio{display:none}
 <header>
   <span>TC RADIOS</span>
   <div id="headerControls">
-    <div id="langBox">
-      <select id="langSelect"></select>
+  <div id="langBox">
+    <select id="langSelect"></select>
     </div>
     <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
+    <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
     <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
   </div>
 </header>
@@ -319,6 +320,13 @@ async function loadAll() {
           play(lastStation, index);
           return;
         }
+      }
+    } else if (action === 'quickplay') {
+      // Quick play first station
+      const stations = stationsPerLang[currentLang] || [];
+      if (stations.length > 0) {
+        play(stations[0], 0);
+        return;
       }
     }
     autoPlayLastOrFirst();
@@ -820,14 +828,42 @@ function handleAndroidAutoCommand(command) {
 }
 
 /* ---- MOBILE NOTIFICATIONS ---- */
-function showNotification(message) {
+/* ---- ENHANCED NOTIFICATIONS ---- */
+function showNotification(message, actions = []) {
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('TC RADIOS', {
+    const notification = new Notification('TC RADIOS', {
       body: message,
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-192x192.png',
-      tag: 'tcradios-control'
+      tag: 'tcradios-control',
+      actions: actions,
+      requireInteraction: true,
+      silent: false
     });
+    
+    // Handle notification click
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+    
+    // Auto-close after 5 seconds unless it has actions
+    if (actions.length === 0) {
+      setTimeout(() => notification.close(), 5000);
+    }
+  }
+}
+
+function showMediaNotification(station) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const actions = [
+      { action: 'play', title: 'Play', icon: '/icons/icon-192x192.png' },
+      { action: 'pause', title: 'Pause', icon: '/icons/icon-192x192.png' },
+      { action: 'next', title: 'Next', icon: '/icons/icon-192x192.png' },
+      { action: 'prev', title: 'Previous', icon: '/icons/icon-192x192.png' }
+    ];
+    
+    showNotification(`Now Playing: ${station.name}`, actions);
   }
 }
 
@@ -893,6 +929,43 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   });
 }
+
+/* ---- PWA INSTALLATION ---- */
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  // Show install button
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) {
+    installBtn.style.display = 'block';
+  }
+});
+
+// Handle install button click
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    // Clear the deferredPrompt variable
+    deferredPrompt = null;
+    // Hide install button
+    document.getElementById('installBtn').style.display = 'none';
+  }
+});
+
+// Handle app installed event
+window.addEventListener('appinstalled', () => {
+  console.log('PWA was installed');
+  document.getElementById('installBtn').style.display = 'none';
+  showNotification('TC RADIOS installed successfully!');
+});
 
 /* ---- INITIALIZE MOBILE FEATURES ---- */
 window.addEventListener('load', () => {
