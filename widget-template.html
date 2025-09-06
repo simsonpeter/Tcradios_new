@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC RADIOS Widget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            color: #f3f4f6;
+            padding: 12px;
+            min-height: 100vh;
+        }
+        
+        .widget-container {
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .widget-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f97316;
+        }
+        
+        .widget-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 4px;
+            color: #f97316;
+        }
+        
+        .station-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .station-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(249, 115, 22, 0.3);
+        }
+        
+        .station-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .station-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f3f4f6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        
+        .station-genre {
+            font-size: 10px;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .widget-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-button {
+            background: rgba(249, 115, 22, 0.1);
+            border: none;
+            color: #f97316;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .control-button:hover {
+            background: rgba(249, 115, 22, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .control-button:active {
+            transform: scale(0.95);
+        }
+        
+        .play-button {
+            background: rgba(249, 115, 22, 0.2);
+            width: 44px;
+            height: 44px;
+            font-size: 16px;
+        }
+        
+        .play-button.playing {
+            background: rgba(249, 115, 22, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .widget-footer {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(55, 65, 81, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .quick-action {
+            background: rgba(55, 65, 81, 0.5);
+            border: none;
+            color: #9ca3af;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+        
+        .quick-action:hover {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+        
+        .widget-time {
+            font-size: 10px;
+            color: #6b7280;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 300px) {
+            .widget-container {
+                padding: 12px;
+            }
+            
+            .station-image {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .control-button {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .play-button {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <div class="widget-title">TC RADIOS</div>
+            <div class="widget-status" id="widgetStatus">Ready</div>
+        </div>
+        
+        <div class="station-info">
+            <img src="/icons/default-artwork.jpg" alt="Station" class="station-image" id="widgetStationImage">
+            <div class="station-details">
+                <div class="station-name" id="widgetStationName">Select a Station</div>
+                <div class="station-genre" id="widgetStationGenre">Christian Radio</div>
+            </div>
+        </div>
+        
+        <div class="widget-controls">
+            <button class="control-button" id="widgetPrev" title="Previous Station">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button class="control-button play-button" id="widgetPlay" title="Play/Pause">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="control-button" id="widgetNext" title="Next Station">
+                <i class="fas fa-step-forward"></i>
+            </button>
+        </div>
+        
+        <div class="widget-footer">
+            <div class="quick-actions">
+                <button class="quick-action" id="widgetFav" title="Toggle Favorite">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <button class="quick-action" id="widgetTheme" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="quick-action" id="widgetTimer" title="Sleep Timer">
+                    <i class="fas fa-clock"></i>
+                </button>
+            </div>
+            <div class="widget-time" id="widgetTime"></div>
+        </div>
+    </div>
+
+    <script>
+        // Widget functionality
+        let isPlaying = false;
+        let currentStation = null;
+        let favorites = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
+        
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('widgetTime').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Initialize widget
+        function initWidget() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Load last played station
+            const lastPlayed = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
+            if (lastPlayed) {
+                updateStationInfo(lastPlayed.station);
+            }
+            
+            // Set up event listeners
+            document.getElementById('widgetPlay').addEventListener('click', togglePlay);
+            document.getElementById('widgetPrev').addEventListener('click', () => sendMessage('prev'));
+            document.getElementById('widgetNext').addEventListener('click', () => sendMessage('next'));
+            document.getElementById('widgetFav').addEventListener('click', toggleFavorite);
+            document.getElementById('widgetTheme').addEventListener('click', () => sendMessage('theme'));
+            document.getElementById('widgetTimer').addEventListener('click', () => sendMessage('timer'));
+        }
+        
+        // Send message to main app
+        function sendMessage(action) {
+            if (window.parent !== window) {
+                window.parent.postMessage({ action: action }, '*');
+            }
+        }
+        
+        // Toggle play/pause
+        function togglePlay() {
+            sendMessage('play');
+        }
+        
+        // Toggle favorite
+        function toggleFavorite() {
+            if (currentStation) {
+                const isFav = favorites.includes(currentStation.name);
+                if (isFav) {
+                    favorites = favorites.filter(f => f !== currentStation.name);
+                } else {
+                    favorites.push(currentStation.name);
+                }
+                localStorage.setItem('tcr-fav', JSON.stringify(favorites));
+                updateFavoriteButton();
+            }
+        }
+        
+        // Update station info
+        function updateStationInfo(station) {
+            currentStation = station;
+            document.getElementById('widgetStationName').textContent = station.name;
+            document.getElementById('widgetStationGenre').textContent = station.genre || 'Christian Radio';
+            document.getElementById('widgetStationImage').src = station.logo || '/icons/default-artwork.jpg';
+            updateFavoriteButton();
+        }
+        
+        // Update favorite button
+        function updateFavoriteButton() {
+            const favBtn = document.getElementById('widgetFav');
+            const isFav = currentStation && favorites.includes(currentStation.name);
+            favBtn.style.color = isFav ? '#f97316' : '#9ca3af';
+        }
+        
+        // Update play button
+        function updatePlayButton(playing) {
+            isPlaying = playing;
+            const playBtn = document.getElementById('widgetPlay');
+            const icon = playBtn.querySelector('i');
+            
+            if (playing) {
+                icon.className = 'fas fa-pause';
+                playBtn.classList.add('playing');
+                document.getElementById('widgetStatus').textContent = 'Playing';
+            } else {
+                icon.className = 'fas fa-play';
+                playBtn.classList.remove('playing');
+                document.getElementById('widgetStatus').textContent = 'Paused';
+            }
+        }
+        
+        // Listen for messages from main app
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'stationUpdate') {
+                updateStationInfo(event.data.station);
+            } else if (event.data.type === 'playStateUpdate') {
+                updatePlayButton(event.data.playing);
+            }
+        });
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initWidget);
+    </script>
+</body>
+</html>

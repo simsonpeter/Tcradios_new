@@ -35,5 +35,24 @@
   "related_applications": [],
   "edge_side_panel": {
     "preferred_width": 400
-  }
+  },
+  "widgets": [
+    {
+      "name": "TC RADIOS Player",
+      "short_name": "Player",
+      "description": "Quick access to radio controls",
+      "tag": "tcradios-player",
+      "template": "widget-template",
+      "ms_ac_template": "widget-template",
+      "data": "widget-data",
+      "type": "application",
+      "launch_url": "/?widget=true",
+      "icons": [
+        { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ],
+      "screenshots": [
+        { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "form_factor": "wide" }
+      ]
+    }
+  ]
 }

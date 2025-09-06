@@ -153,6 +153,25 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
   .favorite-button{min-width:44px;min-height:44px}
 }
 
+/* Widget mode styles */
+.widget-mode {
+  padding: 0;
+  background: transparent;
+}
+
+.widget-mode header,
+.widget-mode .tabs,
+.widget-mode .station-list {
+  display: none;
+}
+
+.widget-mode #player {
+  position: relative;
+  border-radius: 12px;
+  margin: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 audio{display:none}
 #sleepModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
            display:none;align-items:center;justify-content:center;z-index:999}
@@ -427,11 +446,13 @@ audio.onplay  = () => {
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
   player.classList.add('playing'); 
   hapticFeedback('light');
+  updateWidget('playStateUpdate', { playing: true });
 };
 audio.onpause = () => { 
   pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
   player.classList.remove('playing'); 
   hapticFeedback('light');
+  updateWidget('playStateUpdate', { playing: false });
 };
 pPlay.onclick = () => {
   hapticFeedback('medium');
@@ -506,14 +527,16 @@ function updateMediaSession(st) {
       }]
     });
     
-    // Enhanced media session controls
+    // Enhanced media session controls for Android Auto
     navigator.mediaSession.setActionHandler('play', () => {
       audio.play();
       showNotification('Playing: ' + st.name);
+      updateWidget('playStateUpdate', { playing: true });
     });
     navigator.mediaSession.setActionHandler('pause', () => {
       audio.pause();
       showNotification('Paused: ' + st.name);
+      updateWidget('playStateUpdate', { playing: false });
     });
     navigator.mediaSession.setActionHandler('previoustrack', () => {
       prevNext(-1);
@@ -529,7 +552,113 @@ function updateMediaSession(st) {
       audio.pause();
       audio.currentTime = 0;
       showNotification('Stopped');
+      updateWidget('playStateUpdate', { playing: false });
     });
+    
+    // Android Auto specific handlers
+    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+      // Skip backward 10 seconds (if supported by stream)
+      showNotification('Seek backward');
+    });
+    
+    navigator.mediaSession.setActionHandler('seekforward', (details) => {
+      // Skip forward 10 seconds (if supported by stream)
+      showNotification('Seek forward');
+    });
+    
+    // Update widget with station info
+    updateWidget('stationUpdate', { station: st });
+  }
+}
+
+/* ---- WIDGET COMMUNICATION ---- */
+function updateWidget(type, data) {
+  // Send message to widget iframe
+  const widgetFrame = document.querySelector('iframe[src*="widget-template"]');
+  if (widgetFrame) {
+    widgetFrame.contentWindow.postMessage({ type: type, ...data }, '*');
+  }
+  
+  // Also send to any open widget windows
+  if (window.widgetWindow && !window.widgetWindow.closed) {
+    window.widgetWindow.postMessage({ type: type, ...data }, '*');
+  }
+}
+
+// Listen for messages from widget
+window.addEventListener('message', (event) => {
+  if (event.data.action) {
+    switch(event.data.action) {
+      case 'play':
+        audio.paused ? audio.play() : audio.pause();
+        break;
+      case 'prev':
+        prevNext(-1);
+        break;
+      case 'next':
+        prevNext(1);
+        break;
+      case 'theme':
+        toggleTheme();
+        break;
+      case 'timer':
+        document.getElementById('sleepBtn').click();
+        break;
+    }
+  }
+});
+
+/* ---- ANDROID AUTO SUPPORT ---- */
+function initAndroidAuto() {
+  // Enhanced media session for Android Auto
+  if ('mediaSession' in navigator) {
+    // Set playback state
+    navigator.mediaSession.playbackState = 'none';
+    
+    // Add position state for Android Auto
+    navigator.mediaSession.setPositionState({
+      duration: Infinity, // Radio streams are continuous
+      playbackRate: 1.0,
+      position: 0
+    });
+    
+    // Handle Android Auto specific events
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if (details.seekTime !== undefined) {
+        audio.currentTime = details.seekTime;
+        showNotification('Seek to ' + Math.round(details.seekTime) + 's');
+      }
+    });
+  }
+  
+  // Register for Android Auto
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data.type === 'ANDROID_AUTO_COMMAND') {
+        handleAndroidAutoCommand(event.data.command);
+      }
+    });
+  }
+}
+
+function handleAndroidAutoCommand(command) {
+  switch(command.action) {
+    case 'PLAY':
+      audio.play();
+      break;
+    case 'PAUSE':
+      audio.pause();
+      break;
+    case 'NEXT':
+      prevNext(1);
+      break;
+    case 'PREVIOUS':
+      prevNext(-1);
+      break;
+    case 'STOP':
+      audio.pause();
+      audio.currentTime = 0;
+      break;
   }
 }
 
@@ -607,6 +736,18 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   });
 }
+
+/* ---- INITIALIZE MOBILE FEATURES ---- */
+window.addEventListener('load', () => {
+  // Initialize Android Auto support
+  initAndroidAuto();
+  
+  // Initialize widget support
+  if (window.location.search.includes('widget=true')) {
+    // Widget mode - show minimal interface
+    document.body.classList.add('widget-mode');
+  }
+});
 
 /* ---- DYNAMIC PLAYER HEIGHT ---- */
 document.documentElement.style.setProperty('--player-height', document.getElementById('player').offsetHeight + 'px');
