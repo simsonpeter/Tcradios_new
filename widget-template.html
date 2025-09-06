@@ -88,6 +88,29 @@
             text-overflow: ellipsis;
         }
         
+        .station-metadata {
+            margin-top: 4px;
+            font-size: 9px;
+        }
+        
+        .song-title {
+            color: #f3f4f6;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        
+        .artist-name {
+            color: #f97316;
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0.8;
+        }
+        
         .widget-controls {
             display: flex;
             justify-content: space-between;
@@ -209,10 +232,14 @@
         
         <div class="station-info">
             <img src="/icons/default-artwork.jpg" alt="Station" class="station-image" id="widgetStationImage">
-            <div class="station-details">
-                <div class="station-name" id="widgetStationName">Select a Station</div>
-                <div class="station-genre" id="widgetStationGenre">Christian Radio</div>
+        <div class="station-details">
+            <div class="station-name" id="widgetStationName">Select a Station</div>
+            <div class="station-genre" id="widgetStationGenre">Christian Radio</div>
+            <div class="station-metadata" id="widgetMetadata">
+                <div class="song-title" id="widgetSong">Live Radio</div>
+                <div class="artist-name" id="widgetArtist"></div>
             </div>
+        </div>
         </div>
         
         <div class="widget-controls">
@@ -334,12 +361,23 @@
             }
         }
         
+        // Update metadata display
+        function updateMetadata(song, artist) {
+            const songElement = document.getElementById('widgetSong');
+            const artistElement = document.getElementById('widgetArtist');
+            
+            if (songElement) songElement.textContent = song || 'Live Radio';
+            if (artistElement) artistElement.textContent = artist || '';
+        }
+        
         // Listen for messages from main app
         window.addEventListener('message', (event) => {
             if (event.data.type === 'stationUpdate') {
                 updateStationInfo(event.data.station);
             } else if (event.data.type === 'playStateUpdate') {
                 updatePlayButton(event.data.playing);
+            } else if (event.data.type === 'metadataUpdate') {
+                updateMetadata(event.data.song, event.data.artist);
             }
         });
         
