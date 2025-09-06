@@ -110,6 +110,7 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
 #p-play i,#p-prev i,#p-next i{font-size:1.3rem}
 
 /* Mobile responsive adjustments */
+/* Mobile Portrait */
 @media (max-width: 480px) {
   #player{gap:0.8rem;padding:0.8rem 1rem}
   #player img{width:48px;height:48px}
@@ -120,6 +121,36 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
   #headerControls{gap:0.6rem}
+}
+
+/* Mobile Landscape */
+@media (max-width: 896px) and (orientation: landscape) {
+  body{padding-bottom:60px}
+  #player{
+    flex-direction:row;
+    padding:0.5rem 1rem;
+    gap:1rem;
+    min-height:60px;
+  }
+  #player img{width:40px;height:40px}
+  #player .info{margin:0 0.5rem}
+  #player .name{font-size:0.85rem;margin-bottom:0.1rem}
+  #player #p-now{font-size:0.7rem}
+  #p-play,#p-prev,#p-next{padding:0.4rem;min-width:40px;min-height:40px}
+  #p-play i,#p-prev i,#p-next i{font-size:1.1rem}
+  header{padding:0.5rem 1rem;min-height:50px}
+  .station-list .item{padding:0.6rem}
+  .station-list .item img{width:32px;height:32px}
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  .station-list .item{padding:1rem;margin-bottom:0.5rem}
+  .station-list .item:hover{transform:none}
+  .station-list .item:active{transform:scale(0.98)}
+  #p-play,#p-prev,#p-next{min-width:48px;min-height:48px}
+  header button{min-width:44px;min-height:44px}
+  .favorite-button{min-width:44px;min-height:44px}
 }
 
 audio{display:none}
@@ -231,10 +262,33 @@ async function loadAll() {
   });
   await Promise.allSettled(promises);
   populateLangSelect();
+  
+  // Handle URL parameters for shortcuts
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  const tab = urlParams.get('tab');
+  
+  if (tab) {
+    currentTab = tab;
+    localStorage.setItem('currentTab', currentTab);
+  }
+  
   switchTab(currentTab);
   
   // Auto-play last played station or first station
   setTimeout(() => {
+    if (action === 'resume') {
+      // Force resume last played station
+      if (lastPlayedStation && lastPlayedStation.lang === currentLang) {
+        const stations = stationsPerLang[currentLang] || [];
+        const lastStation = stations.find(st => st.name === lastPlayedStation.station.name);
+        if (lastStation) {
+          const index = stations.indexOf(lastStation);
+          play(lastStation, index);
+          return;
+        }
+      }
+    }
     autoPlayLastOrFirst();
   }, 500); // Small delay to ensure UI is ready
 }
@@ -362,14 +416,32 @@ function play(st, i) {
   // Save last played station
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
+  
+  // Haptic feedback for mobile
+  hapticFeedback('success');
+  
+  // Request notification permission on first play
+  requestNotificationPermission();
 }
-audio.onplay  = () => { pPlay.innerHTML = '<i class="fas fa-pause"></i>'; player.classList.add('playing'); };
-audio.onpause = () => { pPlay.innerHTML = '<i class="fas fa-play"></i>'; player.classList.remove('playing'); };
-pPlay.onclick = () => audio.paused ? audio.play() : audio.pause();
+audio.onplay  = () => { 
+  pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
+  player.classList.add('playing'); 
+  hapticFeedback('light');
+};
+audio.onpause = () => { 
+  pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
+  player.classList.remove('playing'); 
+  hapticFeedback('light');
+};
+pPlay.onclick = () => {
+  hapticFeedback('medium');
+  audio.paused ? audio.play() : audio.pause();
+};
 function prevNext(dir) {
   if (!currentList.length) return;
   idx = (idx + dir + currentList.length) % currentList.length;
   play(currentList[idx], idx);
+  hapticFeedback('light');
 }
 document.getElementById('p-prev').onclick = () => prevNext(-1);
 document.getElementById('p-next').onclick = () => prevNext(1);
@@ -381,6 +453,9 @@ function toggleFav(name) {
     : [...favorites, name];
   localStorage.setItem('tcr-fav', JSON.stringify(favorites));
   switchTab(currentTab);
+  
+  // Haptic feedback for favorite toggle
+  hapticFeedback(favorites.includes(name) ? 'success' : 'light');
 }
 
 /* ---- THEME ---- */
@@ -430,10 +505,99 @@ function updateMediaSession(st) {
         sizes: '512x512', type: 'image/png'
       }]
     });
-    navigator.mediaSession.setActionHandler('play', () => audio.play());
-    navigator.mediaSession.setActionHandler('pause', () => audio.pause());
-    navigator.mediaSession.setActionHandler('previoustrack', () => prevNext(-1));
-    navigator.mediaSession.setActionHandler('nexttrack', () => prevNext(1));
+    
+    // Enhanced media session controls
+    navigator.mediaSession.setActionHandler('play', () => {
+      audio.play();
+      showNotification('Playing: ' + st.name);
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audio.pause();
+      showNotification('Paused: ' + st.name);
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      prevNext(-1);
+      showNotification('Previous station');
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      prevNext(1);
+      showNotification('Next station');
+    });
+    
+    // Add stop action for better mobile support
+    navigator.mediaSession.setActionHandler('stop', () => {
+      audio.pause();
+      audio.currentTime = 0;
+      showNotification('Stopped');
+    });
+  }
+}
+
+/* ---- MOBILE NOTIFICATIONS ---- */
+function showNotification(message) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('TC RADIOS', {
+      body: message,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png',
+      tag: 'tcradios-control'
+    });
+  }
+}
+
+// Request notification permission on first interaction
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+/* ---- SWIPE GESTURES ---- */
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, false);
+
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipe();
+}, false);
+
+function handleSwipe() {
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  const minSwipeDistance = 50;
+  
+  // Only handle horizontal swipes
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+    if (deltaX > 0) {
+      // Swipe right - previous station
+      prevNext(-1);
+      showNotification('Previous station');
+    } else {
+      // Swipe left - next station
+      prevNext(1);
+      showNotification('Next station');
+    }
+  }
+}
+
+/* ---- HAPTIC FEEDBACK ---- */
+function hapticFeedback(type = 'light') {
+  if ('vibrate' in navigator) {
+    switch(type) {
+      case 'light': navigator.vibrate(10); break;
+      case 'medium': navigator.vibrate(50); break;
+      case 'heavy': navigator.vibrate([100, 50, 100]); break;
+      case 'success': navigator.vibrate([50, 50, 50]); break;
+      case 'error': navigator.vibrate([200, 100, 200]); break;
+    }
   }
 }
 
