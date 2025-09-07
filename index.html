@@ -103,9 +103,6 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
 #player .metadata{margin-top:0.3rem;font-size:0.75rem}
 #player .song-title{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.1rem}
 #player .artist-name{color:var(--accent);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
-#refresh-metadata{background:none;border:none;color:var(--accent);font-size:0.7rem;cursor:pointer;margin-top:0.2rem;opacity:0.7;transition:opacity 0.2s ease;padding:0.2rem 0.4rem;border-radius:0.2rem}
-#refresh-metadata:hover{opacity:1;background:rgba(249,115,22,0.1)}
-#refresh-metadata:active{transform:scale(0.95)}
 #p-play,#p-prev,#p-next{background:rgba(249,115,22,0.1);border:none;color:var(--accent);
                         font-size:1.8rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                         transition:all 0.2s ease;min-width:48px;min-height:48px;
@@ -376,10 +373,9 @@ audio{display:none}
   <div class="info">
     <div class="name"><span id="p-name"></span></div>
     <div id="p-now">Live</div>
-    <div id="p-metadata" class="metadata">
-      <div id="p-song" class="song-title">Loading metadata...</div>
+    <div id="p-metadata" class="metadata" style="display:none;">
+      <div id="p-song" class="song-title"></div>
       <div id="p-artist" class="artist-name"></div>
-      <button id="refresh-metadata" title="Refresh metadata"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
   </div>
   <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
@@ -596,10 +592,7 @@ function play(st, i) {
   // Update Wear OS media session
   updateWearOSMediaSession(st);
   
-  // Initialize metadata display
-  updateMetadata('Loading metadata...', '');
-  
-  // Start metadata fetching
+  // Start metadata fetching (will show only if metadata is available)
   startMetadataFetching(st);
   
   // Save last played station
@@ -649,17 +642,25 @@ const MAX_METADATA_ATTEMPTS = 3;
 function updateMetadata(song, artist) {
   const songElement = document.getElementById('p-song');
   const artistElement = document.getElementById('p-artist');
+  const metadataContainer = document.getElementById('p-metadata');
   
-  if (songElement) songElement.textContent = song || 'Live Radio';
-  if (artistElement) artistElement.textContent = artist || '';
-  
-  currentMetadata = { song, artist };
-  
-  // Update widget with metadata
-  updateWidget('metadataUpdate', { song, artist });
-  
-  // Debug logging
-  console.log('Metadata updated:', { song, artist });
+  // Only show metadata if we have actual content
+  if (song && song.trim() && song !== 'Loading metadata...' && song !== 'Metadata not available' && song !== 'Refreshing...') {
+    if (songElement) songElement.textContent = song;
+    if (artistElement) artistElement.textContent = artist || '';
+    if (metadataContainer) metadataContainer.style.display = 'block';
+    
+    currentMetadata = { song, artist };
+    
+    // Update widget with metadata
+    updateWidget('metadataUpdate', { song, artist });
+    
+    // Debug logging
+    console.log('Metadata updated:', { song, artist });
+  } else {
+    // Hide metadata container if no valid metadata
+    if (metadataContainer) metadataContainer.style.display = 'none';
+  }
 }
 
 function startMetadataFetching(station) {
@@ -671,8 +672,9 @@ function startMetadataFetching(station) {
   // Reset attempts counter
   metadataAttempts = 0;
   
-  // Show loading state
-  updateMetadata('Loading metadata...', '');
+  // Hide metadata initially
+  const metadataContainer = document.getElementById('p-metadata');
+  if (metadataContainer) metadataContainer.style.display = 'none';
   
   // Try to fetch metadata from various sources
   fetchMetadataFromStream(station);
@@ -681,8 +683,7 @@ function startMetadataFetching(station) {
   metadataInterval = setInterval(() => {
     metadataAttempts++;
     if (metadataAttempts >= MAX_METADATA_ATTEMPTS) {
-      // Stop trying after max attempts
-      updateMetadata('Metadata not available', '');
+      // Stop trying after max attempts - don't show any message
       stopMetadataFetching();
       return;
     }
@@ -710,6 +711,23 @@ function fetchMetadataFromStream(station) {
     // Direct stream metadata (if supported)
     station.url
   ];
+  
+  // Add station-specific metadata sources
+  if (station.name.toLowerCase().includes('shalom')) {
+    metadataSources.push(
+      station.url.replace(/\/stream.*$/, '/shoutcast'),
+      station.url.replace(/\/stream.*$/, '/info'),
+      station.url.replace(/\/stream.*$/, '/title')
+    );
+  }
+  
+  if (station.name.toLowerCase().includes('sweety')) {
+    metadataSources.push(
+      station.url.replace(/\/stream.*$/, '/sweety'),
+      station.url.replace(/\/stream.*$/, '/current'),
+      station.url.replace(/\/stream.*$/, '/playing')
+    );
+  }
   
   // Try each source
   metadataSources.forEach((source, index) => {
@@ -1361,18 +1379,6 @@ window.addEventListener('load', () => {
     document.body.classList.add('widget-mode');
   }
   
-  // Add metadata refresh button listener
-  const refreshBtn = document.getElementById('refresh-metadata');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      if (currentList[idx]) {
-        console.log('Manual metadata refresh requested');
-        updateMetadata('Refreshing...', '');
-        fetchMetadataFromStream(currentList[idx]);
-        hapticFeedback('light');
-      }
-    });
-  }
 });
 
 /* ---- DYNAMIC PLAYER HEIGHT ---- */
