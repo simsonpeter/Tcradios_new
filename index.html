@@ -103,6 +103,9 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
 #player .metadata{margin-top:0.3rem;font-size:0.75rem}
 #player .song-title{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.1rem}
 #player .artist-name{color:var(--accent);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
+#refresh-metadata{background:none;border:none;color:var(--accent);font-size:0.7rem;cursor:pointer;margin-top:0.2rem;opacity:0.7;transition:opacity 0.2s ease;padding:0.2rem 0.4rem;border-radius:0.2rem}
+#refresh-metadata:hover{opacity:1;background:rgba(249,115,22,0.1)}
+#refresh-metadata:active{transform:scale(0.95)}
 #p-play,#p-prev,#p-next{background:rgba(249,115,22,0.1);border:none;color:var(--accent);
                         font-size:1.8rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                         transition:all 0.2s ease;min-width:48px;min-height:48px;
@@ -376,6 +379,7 @@ audio{display:none}
     <div id="p-metadata" class="metadata">
       <div id="p-song" class="song-title">Loading metadata...</div>
       <div id="p-artist" class="artist-name"></div>
+      <button id="refresh-metadata" title="Refresh metadata"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
   </div>
   <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
@@ -639,6 +643,8 @@ document.getElementById('p-next').onclick = () => prevNext(1);
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
+let metadataAttempts = 0;
+const MAX_METADATA_ATTEMPTS = 3;
 
 function updateMetadata(song, artist) {
   const songElement = document.getElementById('p-song');
@@ -651,6 +657,9 @@ function updateMetadata(song, artist) {
   
   // Update widget with metadata
   updateWidget('metadataUpdate', { song, artist });
+  
+  // Debug logging
+  console.log('Metadata updated:', { song, artist });
 }
 
 function startMetadataFetching(station) {
@@ -659,16 +668,31 @@ function startMetadataFetching(station) {
     clearInterval(metadataInterval);
   }
   
+  // Reset attempts counter
+  metadataAttempts = 0;
+  
+  // Show loading state
+  updateMetadata('Loading metadata...', '');
+  
   // Try to fetch metadata from various sources
   fetchMetadataFromStream(station);
   
   // Set up periodic metadata updates
   metadataInterval = setInterval(() => {
+    metadataAttempts++;
+    if (metadataAttempts >= MAX_METADATA_ATTEMPTS) {
+      // Stop trying after max attempts
+      updateMetadata('Metadata not available', '');
+      stopMetadataFetching();
+      return;
+    }
     fetchMetadataFromStream(station);
-  }, 10000); // Update every 10 seconds
+  }, 15000); // Update every 15 seconds
 }
 
 function fetchMetadataFromStream(station) {
+  console.log('Fetching metadata for:', station.name);
+  
   // Try multiple metadata sources
   const metadataSources = [
     // Icecast metadata endpoint
@@ -677,39 +701,53 @@ function fetchMetadataFromStream(station) {
     station.url.replace(/\/stream.*$/, '/stats?json=1'),
     // Generic metadata endpoint
     station.url.replace(/\/stream.*$/, '/metadata'),
+    // Alternative Icecast endpoint
+    station.url.replace(/\/stream.*$/, '/status.xsl'),
+    // Alternative endpoints
+    station.url.replace(/\/stream.*$/, '/7.html'),
+    station.url.replace(/\/stream.*$/, '/currentsong'),
+    station.url.replace(/\/stream.*$/, '/nowplaying'),
     // Direct stream metadata (if supported)
     station.url
   ];
   
   // Try each source
-  metadataSources.forEach(source => {
-    fetchMetadataFromSource(source, station);
+  metadataSources.forEach((source, index) => {
+    setTimeout(() => {
+      fetchMetadataFromSource(source, station, index);
+    }, index * 1000); // Stagger requests
   });
   
   // Also try to extract metadata from audio element if available
   extractMetadataFromAudio();
+  
+  // Try to get metadata from stream headers
+  fetchStreamHeaders(station);
 }
 
-function fetchMetadataFromSource(url, station) {
+function fetchMetadataFromSource(url, station, sourceIndex) {
+  console.log(`Trying metadata source ${sourceIndex + 1}:`, url);
+  
   fetch(url, { 
     method: 'GET',
     mode: 'cors',
     headers: {
       'Accept': 'application/json, text/plain, */*'
-    }
+    },
+    timeout: 5000
   })
   .then(response => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error('Metadata not available');
+    throw new Error(`HTTP ${response.status}`);
   })
   .then(data => {
+    console.log('Metadata response:', data);
     parseMetadataResponse(data, station);
   })
   .catch(error => {
-    // Silently fail - metadata is optional
-    console.log('Metadata fetch failed for:', url);
+    console.log(`Metadata fetch failed for source ${sourceIndex + 1}:`, error.message);
   });
 }
 
@@ -739,11 +777,16 @@ function parseMetadataResponse(data, station) {
     // Alternative format
     song = data.currentsong;
     artist = data.artist || '';
+  } else if (data.now_playing) {
+    // Another alternative format
+    song = data.now_playing;
+    artist = data.artist || '';
   }
   
   // Update display if we got valid metadata
   if (song && song !== currentMetadata.song) {
     updateMetadata(song, artist);
+    console.log('Successfully parsed metadata:', { song, artist });
   }
 }
 
@@ -757,11 +800,58 @@ function extractMetadataFromAudio() {
         const artist = parts[0] || '';
         const song = parts[1] || metadata.title;
         updateMetadata(song, artist);
+        console.log('Extracted metadata from audio:', { song, artist });
       }
     } catch (e) {
-      // Silently fail
+      console.log('Audio metadata extraction failed:', e);
     }
   }
+  
+  // Try to get metadata from audio events
+  audio.addEventListener('loadedmetadata', () => {
+    if (audio.mozGetMetadata) {
+      try {
+        const metadata = audio.mozGetMetadata();
+        if (metadata && metadata.title) {
+          const parts = metadata.title.split(' - ');
+          const artist = parts[0] || '';
+          const song = parts[1] || metadata.title;
+          updateMetadata(song, artist);
+          console.log('Audio metadata loaded:', { song, artist });
+        }
+      } catch (e) {
+        console.log('Audio metadata load failed:', e);
+      }
+    }
+  });
+}
+
+function fetchStreamHeaders(station) {
+  // Try to get metadata from stream headers
+  fetch(station.url, {
+    method: 'HEAD',
+    mode: 'cors'
+  })
+  .then(response => {
+    const icyName = response.headers.get('icy-name');
+    const icyDescription = response.headers.get('icy-description');
+    const icyGenre = response.headers.get('icy-genre');
+    const icyTitle = response.headers.get('icy-title');
+    
+    if (icyTitle) {
+      const parts = icyTitle.split(' - ');
+      const artist = parts[0] || '';
+      const song = parts[1] || icyTitle;
+      updateMetadata(song, artist);
+      console.log('Stream header metadata:', { song, artist });
+    } else if (icyName) {
+      updateMetadata(icyName, icyDescription || '');
+      console.log('Stream name metadata:', icyName);
+    }
+  })
+  .catch(error => {
+    console.log('Stream header fetch failed:', error.message);
+  });
 }
 
 function stopMetadataFetching() {
@@ -769,6 +859,7 @@ function stopMetadataFetching() {
     clearInterval(metadataInterval);
     metadataInterval = null;
   }
+  console.log('Metadata fetching stopped');
 }
 
 /* ---- FAVORITES ---- */
@@ -1268,6 +1359,19 @@ window.addEventListener('load', () => {
   if (window.location.search.includes('widget=true')) {
     // Widget mode - show minimal interface
     document.body.classList.add('widget-mode');
+  }
+  
+  // Add metadata refresh button listener
+  const refreshBtn = document.getElementById('refresh-metadata');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      if (currentList[idx]) {
+        console.log('Manual metadata refresh requested');
+        updateMetadata('Refreshing...', '');
+        fetchMetadataFromStream(currentList[idx]);
+        hapticFeedback('light');
+      }
+    });
   }
 });
 
