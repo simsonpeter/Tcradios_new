@@ -2,7 +2,7 @@
   "packageId": "app.vercel.tcradios_new.twa",
   "host": "tcradios-new.vercel.app",
   "name": "TC RADIOS",
-  "launcherName": "tcradiod",
+  "launcherName": "TC RADIOS",
   "display": "standalone",
   "themeColor": "#F97316",
   "themeColorDark": "#000000",
@@ -20,8 +20,8 @@
     "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/android.keystore",
     "alias": "android"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": "2",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://tcradios-new.vercel.app/manifest.json",
@@ -42,5 +42,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "1"
+  "appVersion": "2"
 }
