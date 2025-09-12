@@ -4,7 +4,6 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover"/>
 <title>TC RADIOS</title>
-
 <!-- PWA essentials -->
 <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,16 +12,13 @@
 <meta name="apple-mobile-web-app-title" content="TC RADIOS">
 <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
 <link rel="icon" href="/icons/favicon.ico">
-
 <!-- TWA/Android specific meta tags -->
 <meta name="theme-color" content="#f97316">
 <meta name="msapplication-navbutton-color" content="#f97316">
 <meta name="msapplication-TileColor" content="#111827">
 <meta name="application-name" content="TC RADIOS">
-
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
 :root{
   --accent:#f97316;--bg:#111827;--card:#1f2937;--text:#f3f4f6;
@@ -111,7 +107,6 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
 #p-play:hover,#p-prev:hover,#p-next:hover{background:rgba(249,115,22,0.2);transform:scale(1.05)}
 #p-play:active,#p-prev:active,#p-next:active{transform:scale(0.95)}
 #p-play i,#p-prev i,#p-next i{font-size:1.3rem}
-
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -128,7 +123,6 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
   header{padding:0.8rem 1rem;min-height:60px}
   #headerControls{gap:0.6rem}
 }
-
 /* Mobile Landscape */
 @media (max-width: 896px) and (orientation: landscape) {
   body{padding-bottom:60px}
@@ -151,7 +145,6 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
   .station-list .item{padding:0.6rem}
   .station-list .item img{width:32px;height:32px}
 }
-
 /* Touch-friendly enhancements */
 @media (hover: none) and (pointer: coarse) {
   .station-list .item{padding:1rem;margin-bottom:0.5rem}
@@ -161,159 +154,128 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
   header button{min-width:44px;min-height:44px}
   .favorite-button{min-width:44px;min-height:44px}
 }
-
 /* Widget mode styles */
 .widget-mode {
   padding: 0;
   background: transparent;
 }
-
 .widget-mode header,
 .widget-mode .tabs,
 .widget-mode .station-list {
   display: none;
 }
-
 .widget-mode #player {
   position: relative;
   border-radius: 12px;
   margin: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-
 audio{display:none}
-
 /* Android Wear / Smartwatch Styles */
 @media (max-width: 400px) and (max-height: 400px) {
   body {
     font-size: 12px;
     padding: 4px;
   }
-  
   header {
     padding: 0.3rem 0.5rem;
     min-height: 40px;
     font-size: 0.9rem;
   }
-  
   #headerControls {
     gap: 0.3rem;
   }
-  
   header button {
     min-width: 32px;
     min-height: 32px;
     font-size: 1rem;
     padding: 0.3rem;
   }
-  
   #tabs {
     padding: 0.2rem;
   }
-  
   #tabs span {
     padding: 0.3rem 0.2rem;
     font-size: 0.8rem;
   }
-  
   .station-list .item {
     padding: 0.4rem;
     margin-bottom: 0.2rem;
   }
-  
   .station-list .item img {
     width: 24px;
     height: 24px;
   }
-  
   .station-name {
     font-size: 0.8rem;
   }
-  
   .station-genre {
     font-size: 0.7rem;
   }
-  
   #player {
     padding: 0.4rem 0.6rem;
     gap: 0.4rem;
     min-height: 50px;
   }
-  
   #player img {
     width: 32px;
     height: 32px;
   }
-  
   #player .info {
     margin: 0 0.3rem;
   }
-  
   #player .name {
     font-size: 0.8rem;
     margin-bottom: 0.1rem;
   }
-  
   #player #p-now {
     font-size: 0.6rem;
   }
-  
   #player .metadata {
     font-size: 0.6rem;
     margin-top: 0.1rem;
   }
-  
   #player .song-title {
     font-size: 0.6rem;
   }
-  
   #player .artist-name {
     font-size: 0.55rem;
   }
-  
   #p-play, #p-prev, #p-next {
     padding: 0.3rem;
     min-width: 32px;
     min-height: 32px;
     font-size: 1rem;
   }
-  
   #p-play i, #p-prev i, #p-next i {
     font-size: 0.9rem;
   }
 }
-
 /* Round screen support for smartwatches */
 @media (max-width: 400px) and (max-height: 400px) and (aspect-ratio: 1/1) {
   body {
     border-radius: 50%;
     overflow: hidden;
   }
-  
   #content {
     border-radius: 50%;
     padding: 0.5rem;
   }
-  
   .station-list .item {
     border-radius: 8px;
   }
-  
   #player {
     border-radius: 20px;
   }
 }
-
 /* Ambient mode for smartwatches */
 @media (prefers-reduced-motion: reduce) {
   #player img {
     animation: none;
   }
-  
   .station-list .item:hover {
     transform: none;
   }
-  
   .station-list .item:active {
     transform: scale(0.98);
   }
@@ -339,18 +301,15 @@ audio{display:none}
     <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
   </div>
 </header>
-
 <div id="tabs">
   <span id="tab-all" class="active">All</span>
   <span id="tab-fav">Favorites</span>
   <span id="tab-about">About</span>
 </div>
-
 <div id="content" aria-busy="true">
   <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
   <div class="station-list"></div>
 </div>
-
 <div id="about-panel">
   <div class="about-card">
     <img src="/icons/icon-512x512.png" alt="Logo"/>
@@ -367,7 +326,6 @@ audio{display:none}
        <i class="fas fa-map-marker-alt"></i> Antwerp, Belgium</p>
   </div>
 </div>
-
 <div id="player">
   <img id="p-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
   <div class="info">
@@ -382,7 +340,6 @@ audio{display:none}
   <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
   <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
 </div>
-
 <div id="sleepModal">
   <div>
     <h3>Sleep Timer</h3>
@@ -393,9 +350,7 @@ audio{display:none}
     <button id="cancelSleep">Cancel</button>
   </div>
 </div>
-
 <audio id="audio"></audio>
-
 <script>
 /* ---- CONFIG ---- */
 const LANG_URLS = {
@@ -403,8 +358,10 @@ const LANG_URLS = {
   dutch: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/dutch.json',
   hindi: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/hindi.json',
   malayalam:'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json'
+  // --- FUTURE LANGUAGES GO HERE ---
+  // spanish: 'https://yourdomain.com/path/to/spanish.json',
+  // french: 'https://yourdomain.com/path/to/french.json'
 };
-
 /* ---- STATE ---- */
 let stationsPerLang = {};
 let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
@@ -415,7 +372,6 @@ let idx             = 0;
 let searchTerm      = '';
 let sleepTimer;
 let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
-
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const stationList = document.querySelector('.station-list');
@@ -424,7 +380,6 @@ const pImg        = document.getElementById('p-img');
 const pName       = document.getElementById('p-name');
 const pPlay       = document.getElementById('p-play');
 const player      = document.getElementById('player');
-
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -432,20 +387,22 @@ async function loadAll() {
     stationsPerLang[lang] = await res.json();
   });
   await Promise.allSettled(promises);
+  // Data is now loaded. The calling function will handle UI updates.
+}
+// Make the main initialization async
+(async function initApp() {
+  await loadAll(); // <-- AWAIT the loading to finish
+  // Now that data is loaded, populate UI
   populateLangSelect();
-  
   // Handle URL parameters for shortcuts
   const urlParams = new URLSearchParams(window.location.search);
   const action = urlParams.get('action');
   const tab = urlParams.get('tab');
-  
   if (tab) {
     currentTab = tab;
     localStorage.setItem('currentTab', currentTab);
   }
-  
   switchTab(currentTab);
-  
   // Auto-play last played station or first station
   setTimeout(() => {
     if (action === 'resume') {
@@ -469,29 +426,24 @@ async function loadAll() {
     }
     autoPlayLastOrFirst();
   }, 500); // Small delay to ensure UI is ready
-}
-loadAll();
-
+})();
 function autoPlayLastOrFirst() {
   // Check if there's a last played station
   if (lastPlayedStation && lastPlayedStation.lang === currentLang) {
     const stations = stationsPerLang[currentLang] || [];
     const lastStation = stations.find(st => st.name === lastPlayedStation.station.name);
-    
     if (lastStation) {
       const index = stations.indexOf(lastStation);
       play(lastStation, index);
       return;
     }
   }
-  
   // If no last played station or it's not found, play first station
   const stations = stationsPerLang[currentLang] || [];
   if (stations.length > 0) {
     play(stations[0], 0);
   }
 }
-
 function populateLangSelect() {
   const sel = document.getElementById('langSelect');
   sel.innerHTML = '';
@@ -506,14 +458,12 @@ function populateLangSelect() {
     currentLang = sel.value;
     localStorage.setItem('currentLang', currentLang);
     switchTab(currentTab);
-    
     // Auto-play last played station or first station when language changes
     setTimeout(() => {
       autoPlayLastOrFirst();
     }, 100);
   };
 }
-
 /* ---- TABS + SEARCH ---- */
 document.getElementById('tab-all').onclick   = () => switchTab('all');
 document.getElementById('tab-fav').onclick   = () => switchTab('fav');
@@ -533,7 +483,6 @@ searchBar.addEventListener('input', e => {
   searchTerm = e.target.value.trim().toLowerCase();
   switchTab(currentTab);
 });
-
 function switchTab(tab) {
   currentTab = tab;
   localStorage.setItem('currentTab', tab);
@@ -554,7 +503,6 @@ function switchTab(tab) {
     render(currentList);
   }
 }
-
 /* ---- RENDER ---- */
 function render(list) {
   stationList.innerHTML = '';
@@ -580,7 +528,6 @@ function render(list) {
     stationList.appendChild(div);
   });
 }
-
 /* ---- PLAYER ---- */
 function play(st, i) {
   idx = i;
@@ -590,20 +537,15 @@ function play(st, i) {
   player.classList.add('playing');
   audio.play().catch(()=>{});
   updateMediaSession(st);
-  
   // Update Wear OS media session
   updateWearOSMediaSession(st);
-  
   // Start metadata fetching (will show only if metadata is available)
   startMetadataFetching(st);
-  
   // Save last played station
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
-  
   // Haptic feedback for mobile
   hapticFeedback('success');
-  
   // Request notification permission on first play
   requestNotificationPermission();
 }
@@ -618,7 +560,6 @@ audio.onpause = () => {
   player.classList.remove('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
-  
   // Stop metadata fetching when paused
   stopMetadataFetching();
 };
@@ -634,29 +575,23 @@ function prevNext(dir) {
 }
 document.getElementById('p-prev').onclick = () => prevNext(-1);
 document.getElementById('p-next').onclick = () => prevNext(1);
-
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
 let metadataAttempts = 0;
 const MAX_METADATA_ATTEMPTS = 3;
-
 function updateMetadata(song, artist) {
   const songElement = document.getElementById('p-song');
   const artistElement = document.getElementById('p-artist');
   const metadataContainer = document.getElementById('p-metadata');
-  
   // Only show metadata if we have actual content
   if (song && song.trim() && song !== 'Loading metadata...' && song !== 'Metadata not available' && song !== 'Refreshing...') {
     if (songElement) songElement.textContent = song;
     if (artistElement) artistElement.textContent = artist || '';
     if (metadataContainer) metadataContainer.style.display = 'block';
-    
     currentMetadata = { song, artist };
-    
     // Update widget with metadata
     updateWidget('metadataUpdate', { song, artist });
-    
     // Debug logging
     console.log('Metadata updated:', { song, artist });
   } else {
@@ -664,23 +599,18 @@ function updateMetadata(song, artist) {
     if (metadataContainer) metadataContainer.style.display = 'none';
   }
 }
-
 function startMetadataFetching(station) {
   // Clear existing interval
   if (metadataInterval) {
     clearInterval(metadataInterval);
   }
-  
   // Reset attempts counter
   metadataAttempts = 0;
-  
   // Hide metadata initially
   const metadataContainer = document.getElementById('p-metadata');
   if (metadataContainer) metadataContainer.style.display = 'none';
-  
   // Try to fetch metadata from various sources
   fetchMetadataFromStream(station);
-  
   // Set up periodic metadata updates
   metadataInterval = setInterval(() => {
     metadataAttempts++;
@@ -692,10 +622,8 @@ function startMetadataFetching(station) {
     fetchMetadataFromStream(station);
   }, 15000); // Update every 15 seconds
 }
-
 function fetchMetadataFromStream(station) {
   console.log('Fetching metadata for:', station.name);
-  
   // Try multiple metadata sources
   const metadataSources = [
     // Icecast metadata endpoint
@@ -713,7 +641,6 @@ function fetchMetadataFromStream(station) {
     // Direct stream metadata (if supported)
     station.url
   ];
-  
   // Add station-specific metadata sources
   if (station.name.toLowerCase().includes('shalom')) {
     metadataSources.push(
@@ -722,7 +649,6 @@ function fetchMetadataFromStream(station) {
       station.url.replace(/\/stream.*$/, '/title')
     );
   }
-  
   if (station.name.toLowerCase().includes('sweety')) {
     metadataSources.push(
       station.url.replace(/\/stream.*$/, '/sweety'),
@@ -730,24 +656,19 @@ function fetchMetadataFromStream(station) {
       station.url.replace(/\/stream.*$/, '/playing')
     );
   }
-  
   // Try each source
   metadataSources.forEach((source, index) => {
     setTimeout(() => {
       fetchMetadataFromSource(source, station, index);
     }, index * 1000); // Stagger requests
   });
-  
   // Also try to extract metadata from audio element if available
   extractMetadataFromAudio();
-  
   // Try to get metadata from stream headers
   fetchStreamHeaders(station);
 }
-
 function fetchMetadataFromSource(url, station, sourceIndex) {
   console.log(`Trying metadata source ${sourceIndex + 1}:`, url);
-  
   fetch(url, { 
     method: 'GET',
     mode: 'cors',
@@ -770,11 +691,9 @@ function fetchMetadataFromSource(url, station, sourceIndex) {
     console.log(`Metadata fetch failed for source ${sourceIndex + 1}:`, error.message);
   });
 }
-
 function parseMetadataResponse(data, station) {
   let song = '';
   let artist = '';
-  
   // Parse different metadata formats
   if (data.icestats && data.icestats.source) {
     // Icecast format
@@ -802,14 +721,12 @@ function parseMetadataResponse(data, station) {
     song = data.now_playing;
     artist = data.artist || '';
   }
-  
   // Update display if we got valid metadata
   if (song && song !== currentMetadata.song) {
     updateMetadata(song, artist);
     console.log('Successfully parsed metadata:', { song, artist });
   }
 }
-
 function extractMetadataFromAudio() {
   // Try to get metadata from audio element if browser supports it
   if (audio.mozGetMetadata) {
@@ -826,7 +743,6 @@ function extractMetadataFromAudio() {
       console.log('Audio metadata extraction failed:', e);
     }
   }
-  
   // Try to get metadata from audio events
   audio.addEventListener('loadedmetadata', () => {
     if (audio.mozGetMetadata) {
@@ -845,7 +761,6 @@ function extractMetadataFromAudio() {
     }
   });
 }
-
 function fetchStreamHeaders(station) {
   // Try to get metadata from stream headers
   fetch(station.url, {
@@ -857,7 +772,6 @@ function fetchStreamHeaders(station) {
     const icyDescription = response.headers.get('icy-description');
     const icyGenre = response.headers.get('icy-genre');
     const icyTitle = response.headers.get('icy-title');
-    
     if (icyTitle) {
       const parts = icyTitle.split(' - ');
       const artist = parts[0] || '';
@@ -873,7 +787,6 @@ function fetchStreamHeaders(station) {
     console.log('Stream header fetch failed:', error.message);
   });
 }
-
 function stopMetadataFetching() {
   if (metadataInterval) {
     clearInterval(metadataInterval);
@@ -881,7 +794,6 @@ function stopMetadataFetching() {
   }
   console.log('Metadata fetching stopped');
 }
-
 /* ---- FAVORITES ---- */
 function toggleFav(name) {
   favorites = favorites.includes(name)
@@ -889,11 +801,9 @@ function toggleFav(name) {
     : [...favorites, name];
   localStorage.setItem('tcr-fav', JSON.stringify(favorites));
   switchTab(currentTab);
-  
   // Haptic feedback for favorite toggle
   hapticFeedback(favorites.includes(name) ? 'success' : 'light');
 }
-
 /* ---- THEME ---- */
 const themeToggle = document.getElementById('themeToggle');
 function applyTheme(t) {
@@ -903,7 +813,6 @@ function applyTheme(t) {
 }
 applyTheme(localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 themeToggle.onclick = () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-
 /* ---- SLEEP TIMER ---- */
 const sleepModal = document.getElementById('sleepModal');
 const sleepBtn   = document.getElementById('sleepBtn');
@@ -928,7 +837,6 @@ function setSleep(min) {
   }, min * 60000);
   sleepModal.style.display = 'none';
 }
-
 /* ---- MEDIA SESSION ---- */
 function updateMediaSession(st) {
   if ('mediaSession' in navigator) {
@@ -941,7 +849,6 @@ function updateMediaSession(st) {
         sizes: '512x512', type: 'image/png'
       }]
     });
-    
     // Enhanced media session controls for Android Auto
     navigator.mediaSession.setActionHandler('play', () => {
       audio.play();
@@ -961,7 +868,6 @@ function updateMediaSession(st) {
       prevNext(1);
       showNotification('Next station');
     });
-    
     // Add stop action for better mobile support
     navigator.mediaSession.setActionHandler('stop', () => {
       audio.pause();
@@ -969,23 +875,19 @@ function updateMediaSession(st) {
       showNotification('Stopped');
       updateWidget('playStateUpdate', { playing: false });
     });
-    
     // Android Auto specific handlers
     navigator.mediaSession.setActionHandler('seekbackward', (details) => {
       // Skip backward 10 seconds (if supported by stream)
       showNotification('Seek backward');
     });
-    
     navigator.mediaSession.setActionHandler('seekforward', (details) => {
       // Skip forward 10 seconds (if supported by stream)
       showNotification('Seek forward');
     });
-    
     // Update widget with station info
     updateWidget('stationUpdate', { station: st });
   }
 }
-
 /* ---- WIDGET COMMUNICATION ---- */
 function updateWidget(type, data) {
   // Send message to widget iframe
@@ -993,13 +895,11 @@ function updateWidget(type, data) {
   if (widgetFrame) {
     widgetFrame.contentWindow.postMessage({ type: type, ...data }, '*');
   }
-  
   // Also send to any open widget windows
   if (window.widgetWindow && !window.widgetWindow.closed) {
     window.widgetWindow.postMessage({ type: type, ...data }, '*');
   }
 }
-
 // Listen for messages from widget
 window.addEventListener('message', (event) => {
   if (event.data.action) {
@@ -1022,21 +922,18 @@ window.addEventListener('message', (event) => {
     }
   }
 });
-
 /* ---- ANDROID AUTO SUPPORT ---- */
 function initAndroidAuto() {
   // Enhanced media session for Android Auto
   if ('mediaSession' in navigator) {
     // Set playback state
     navigator.mediaSession.playbackState = 'none';
-    
     // Add position state for Android Auto
     navigator.mediaSession.setPositionState({
       duration: Infinity, // Radio streams are continuous
       playbackRate: 1.0,
       position: 0
     });
-    
     // Handle Android Auto specific events
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime !== undefined) {
@@ -1045,7 +942,6 @@ function initAndroidAuto() {
       }
     });
   }
-  
   // Register for Android Auto
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
@@ -1055,7 +951,6 @@ function initAndroidAuto() {
     });
   }
 }
-
 function handleAndroidAutoCommand(command) {
   switch(command.action) {
     case 'PLAY':
@@ -1076,7 +971,6 @@ function handleAndroidAutoCommand(command) {
       break;
   }
 }
-
 /* ---- MOBILE NOTIFICATIONS ---- */
 /* ---- ENHANCED NOTIFICATIONS ---- */
 function showNotification(message, actions = []) {
@@ -1090,20 +984,17 @@ function showNotification(message, actions = []) {
       requireInteraction: true,
       silent: false
     });
-    
     // Handle notification click
     notification.onclick = () => {
       window.focus();
       notification.close();
     };
-    
     // Auto-close after 5 seconds unless it has actions
     if (actions.length === 0) {
       setTimeout(() => notification.close(), 5000);
     }
   }
 }
-
 function showMediaNotification(station) {
   if ('Notification' in window && Notification.permission === 'granted') {
     const actions = [
@@ -1112,40 +1003,33 @@ function showMediaNotification(station) {
       { action: 'next', title: 'Next', icon: '/icons/icon-192x192.png' },
       { action: 'prev', title: 'Previous', icon: '/icons/icon-192x192.png' }
     ];
-    
     showNotification(`Now Playing: ${station.name}`, actions);
   }
 }
-
 // Request notification permission on first interaction
 function requestNotificationPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 }
-
 /* ---- SWIPE GESTURES ---- */
 let touchStartX = 0;
 let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
-
 document.addEventListener('touchstart', e => {
   touchStartX = e.changedTouches[0].screenX;
   touchStartY = e.changedTouches[0].screenY;
 }, false);
-
 document.addEventListener('touchend', e => {
   touchEndX = e.changedTouches[0].screenX;
   touchEndY = e.changedTouches[0].screenY;
   handleSwipe();
 }, false);
-
 function handleSwipe() {
   const deltaX = touchEndX - touchStartX;
   const deltaY = touchEndY - touchStartY;
   const minSwipeDistance = 50;
-  
   // Only handle horizontal swipes
   if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
     if (deltaX > 0) {
@@ -1159,7 +1043,6 @@ function handleSwipe() {
     }
   }
 }
-
 /* ---- HAPTIC FEEDBACK ---- */
 function hapticFeedback(type = 'light') {
   if ('vibrate' in navigator) {
@@ -1172,17 +1055,14 @@ function hapticFeedback(type = 'light') {
     }
   }
 }
-
 /* ---- SERVICE WORKER (PWA) ---- */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js');
   });
 }
-
 /* ---- PWA INSTALLATION ---- */
 let deferredPrompt;
-
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
@@ -1194,7 +1074,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     installBtn.style.display = 'block';
   }
 });
-
 // Handle install button click
 document.getElementById('installBtn').addEventListener('click', async () => {
   if (deferredPrompt) {
@@ -1209,41 +1088,33 @@ document.getElementById('installBtn').addEventListener('click', async () => {
     document.getElementById('installBtn').style.display = 'none';
   }
 });
-
 // Handle app installed event
 window.addEventListener('appinstalled', () => {
   console.log('PWA was installed');
   document.getElementById('installBtn').style.display = 'none';
   showNotification('TC RADIOS installed successfully!');
 });
-
 /* ---- WEAR OS SUPPORT ---- */
 function initWearOS() {
   // Detect if running on Wear OS
   const isWearOS = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
-  
   if (isWearOS) {
     document.body.classList.add('wear-os');
-    
     // Optimize for smartwatch
     optimizeForWearOS();
-    
     // Add Wear OS specific event listeners
     addWearOSListeners();
   }
 }
-
 function optimizeForWearOS() {
   // Reduce animations for battery life
   document.documentElement.style.setProperty('--animation-duration', '0.2s');
-  
   // Optimize touch targets for small screens
   const buttons = document.querySelectorAll('button');
   buttons.forEach(btn => {
     btn.style.minWidth = '32px';
     btn.style.minHeight = '32px';
   });
-  
   // Simplify UI for small screen
   const header = document.querySelector('header');
   if (header) {
@@ -1251,14 +1122,12 @@ function optimizeForWearOS() {
     header.style.padding = '0.3rem 0.5rem';
   }
 }
-
 function addWearOSListeners() {
   // Add double-tap gesture for play/pause
   let lastTap = 0;
   document.addEventListener('touchend', (e) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
-    
     if (tapLength < 500 && tapLength > 0) {
       // Double tap detected
       e.preventDefault();
@@ -1267,7 +1136,6 @@ function addWearOSListeners() {
     }
     lastTap = currentTime;
   });
-  
   // Add long press for next station
   let longPressTimer;
   document.addEventListener('touchstart', (e) => {
@@ -1276,28 +1144,21 @@ function addWearOSListeners() {
       hapticFeedback('heavy');
     }, 800);
   });
-  
   document.addEventListener('touchend', () => {
     clearTimeout(longPressTimer);
   });
-  
   // Add swipe gestures for station navigation
   let startX, startY;
-  
   document.addEventListener('touchstart', (e) => {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
   });
-  
   document.addEventListener('touchend', (e) => {
     if (!startX || !startY) return;
-    
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
-    
     const diffX = startX - endX;
     const diffY = startY - endY;
-    
     // Horizontal swipe
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
       if (diffX > 0) {
@@ -1310,12 +1171,10 @@ function addWearOSListeners() {
         hapticFeedback('light');
       }
     }
-    
     startX = null;
     startY = null;
   });
 }
-
 // Enhanced media session for Wear OS
 function updateWearOSMediaSession(st) {
   if ('mediaSession' in navigator) {
@@ -1337,28 +1196,23 @@ function updateWearOSMediaSession(st) {
         }
       ]
     });
-    
     // Wear OS specific action handlers
     navigator.mediaSession.setActionHandler('play', () => {
       audio.play();
       hapticFeedback('light');
     });
-    
     navigator.mediaSession.setActionHandler('pause', () => {
       audio.pause();
       hapticFeedback('light');
     });
-    
     navigator.mediaSession.setActionHandler('previoustrack', () => {
       prevNext(-1);
       hapticFeedback('medium');
     });
-    
     navigator.mediaSession.setActionHandler('nexttrack', () => {
       prevNext(1);
       hapticFeedback('medium');
     });
-    
     navigator.mediaSession.setActionHandler('stop', () => {
       audio.pause();
       audio.currentTime = 0;
@@ -1366,23 +1220,18 @@ function updateWearOSMediaSession(st) {
     });
   }
 }
-
 /* ---- INITIALIZE MOBILE FEATURES ---- */
 window.addEventListener('load', () => {
   // Initialize Android Auto support
   initAndroidAuto();
-  
   // Initialize Wear OS support
   initWearOS();
-  
   // Initialize widget support
   if (window.location.search.includes('widget=true')) {
     // Widget mode - show minimal interface
     document.body.classList.add('widget-mode');
   }
-  
 });
-
 /* ---- DYNAMIC PLAYER HEIGHT ---- */
 document.documentElement.style.setProperty('--player-height', document.getElementById('player').offsetHeight + 'px');
 </script>
