@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.vercel.tcradios_new.twa",
-    "sha256_cert_fingerprints": ["4D:AA:D1:23:E4:E5:D9:C3:40:06:0C:06:CB:82:D4:F7:63:DF:FB:72:8E:2F:C7:E7:09:70:C1:44:36:28:E3:C2"]
+    "sha256_cert_fingerprints": ["36:DC:00:A3:4A:21:04:A2:EF:53:A9:B7:F2:33:4A:A8:A6:B9:E3:BB:66:28:DA:B5:D1:6B:D6:8E:4B:8B:37:A3"]
   }
 }]
