@@ -126,7 +126,7 @@ The command will prompt for the following information:
 
 #### Android App Details (2/5)
 - **Application name:** `TC RADIOS`
-- **Short name:** `tcradiod`
+- **Short name:** `tcradios`
 - **Application ID:** `com.jayathasoft.tcradios`
 - **Starting version code:** `1`
 - **Display mode:** `standalone`
@@ -243,7 +243,7 @@ twa/
   "packageId": "com.jayathasoft.tcradios",
   "host": "tcradios-new.vercel.app",
   "name": "TC RADIOS",
-  "launcherName": "tcradiod",
+  "launcherName": "tcradios",
   "display": "standalone",
   "themeColor": "#F97316",
   "backgroundColor": "#111827",
