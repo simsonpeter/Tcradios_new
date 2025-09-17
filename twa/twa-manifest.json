@@ -1,5 +1,5 @@
 {
-  "packageId": "app.vercel.tcradios_new.twa",
+  "packageId": "com.jayathasoft.tcradios",
   "host": "tcradios-new.vercel.app",
   "name": "TC RADIOS",
   "launcherName": "TC RADIOS",
@@ -17,12 +17,31 @@
   "maskableIconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/android.keystore",
-    "alias": "android"
+    "path": "/Users/atheesan/Documents/Leevit/Git/Tcradios_new/twa/jayathasoft.keystore",
+    "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
-  "shortcuts": [],
+  "appVersionName": "5",
+  "appVersionCode": 5,
+  "shortcuts": [
+    {
+      "name": "Play Last Station",
+      "shortName": "Resume",
+      "url": "https://tcradios-new.vercel.app/?action=resume",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    },
+    {
+      "name": "Favorites",
+      "shortName": "Favorites",
+      "url": "https://tcradios-new.vercel.app/?tab=fav",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    },
+    {
+      "name": "Quick Play",
+      "shortName": "Play",
+      "url": "https://tcradios-new.vercel.app/?action=quickplay",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    }
+  ],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://tcradios-new.vercel.app/manifest.json",
   "fallbackType": "customtabs",
@@ -35,12 +54,12 @@
   "isMetaQuest": false,
   "fullScopeUrl": "https://tcradios-new.vercel.app/",
   "minSdkVersion": 21,
-  "orientation": "portrait",
+  "orientation": "any",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "2"
+  "appVersion": "5"
 }
