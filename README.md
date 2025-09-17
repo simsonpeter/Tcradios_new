@@ -90,7 +90,7 @@ mkdir -p .well-known
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "app.vercel.tcradios_new.twa",
+    "package_name": "com.jayathasoft.tcradios",
     "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT_HERE"]
   }
 }]
@@ -127,7 +127,7 @@ The command will prompt for the following information:
 #### Android App Details (2/5)
 - **Application name:** `TC RADIOS`
 - **Short name:** `tcradiod`
-- **Application ID:** `app.vercel.tcradios_new.twa`
+- **Application ID:** `com.jayathasoft.tcradios`
 - **Starting version code:** `1`
 - **Display mode:** `standalone`
 - **Orientation:** `portrait`
@@ -144,8 +144,8 @@ The command will prompt for the following information:
 - **Request geolocation permission:** `No`
 
 #### Signing Key Information (5/5)
-- **Key store location:** `/path/to/twa/android.keystore`
-- **Key name:** `android`
+- **Key store location:** `/path/to/twa/jayathasoft.keystore`
+- **Key name:** `jayathasoft-keystore`
 
 ### Keystore Creation
 When prompted to create a new keystore:
@@ -175,7 +175,7 @@ When prompted, enter the passwords you set during keystore creation.
 After successful build, you'll have:
 - `app-release-signed.apk` - Ready-to-install Android APK
 - `app-release-bundle.aab` - Google Play Store bundle
-- `android.keystore` - Signing key for future updates
+- `jayathasoft.keystore` - Signing key for future updates
 
 ## Step 6: Extract SHA256 Fingerprint
 
@@ -187,7 +187,7 @@ sudo apt install -y openjdk-17-jdk
 
 ### Extract fingerprint from keystore
 ```bash
-keytool -list -v -keystore android.keystore -alias android
+keytool -list -v -keystore jayathasoft.keystore -alias jayathasoft-keystore
 ```
 
 ### Sample Output
@@ -207,7 +207,7 @@ Certificate fingerprints:
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "app.vercel.tcradios_new.twa",
+    "package_name": "com.jayathasoft.tcradios",
     "sha256_cert_fingerprints": ["6F:33:BF:A6:2F:03:2D:F7:9C:FC:1C:6C:75:3F:A7:8E:F6:12:13:67:BA:C9:BA:B5:EE:F2:57:F6:6F:5F:7B:47"]
   }
 }]
@@ -224,15 +224,15 @@ https://tcradios-new.vercel.app/.well-known/assetlinks.json
 ### TWA Directory Structure
 ```
 twa/
-├── android.keystore                    # Signing key
-├── app-release-signed.apk             # Installable APK (1.66 MB)
-├── app-release-bundle.aab             # Play Store bundle (1.78 MB)
-├── app-release-unsigned-aligned.apk   # Unsigned APK
-├── twa-manifest.json                  # TWA configuration
-├── build.gradle                       # Build configuration
-├── settings.gradle                    # Gradle settings
-├── gradlew                           # Gradle wrapper
-└── app/                              # Android project files
+├── jayathasoft.keystore                  # Signing key
+├── app-release-signed.apk               # Installable APK (1.76 MB)
+├── app-release-bundle.aab               # Play Store bundle (1.88 MB)
+├── app-release-unsigned-aligned.apk     # Unsigned APK
+├── twa-manifest.json                     # TWA configuration
+├── build.gradle                          # Build configuration
+├── settings.gradle                       # Gradle settings
+├── gradlew                              # Gradle wrapper
+└── app/                                 # Android project files
 ```
 
 ### Key Configuration Files
@@ -240,7 +240,7 @@ twa/
 #### twa-manifest.json
 ```json
 {
-  "packageId": "app.vercel.tcradios_new.twa",
+  "packageId": "com.jayathasoft.tcradios",
   "host": "tcradios-new.vercel.app",
   "name": "TC RADIOS",
   "launcherName": "tcradiod",
@@ -252,11 +252,11 @@ twa/
   "iconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
   "maskableIconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
   "signingKey": {
-    "path": "/path/to/twa/android.keystore",
-    "alias": "android"
+    "path": "/path/to/twa/jayathasoft.keystore",
+    "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1
+  "appVersionName": "7",
+  "appVersionCode": 7
 }
 ```
 
@@ -345,6 +345,33 @@ aapt dump badging app-release-signed.apk
 - Update `appVersionCode` for each release
 - Update `appVersionName` for user-facing version
 - Keep track of changes in release notes
+
+## Current Configuration
+
+### Package Details
+- **Package Name:** `com.jayathasoft.tcradios`
+- **App Name:** `TC RADIOS`
+- **Version:** 7 (Version Code: 7)
+- **Host:** `tcradios-new.vercel.app`
+
+### Keystore Information
+- **Keystore File:** `jayathasoft.keystore`
+- **Alias:** `jayathasoft-keystore`
+- **SHA1 Fingerprint:** `90:08:41:62:4C:AB:C0:DF:38:ED:8F:BC:AA:74:06:97:3C:B7:CE:E1`
+- **SHA256 Fingerprint:** `92:EE:EA:62:F5:73:BC:4C:23:20:A5:A4:6A:FE:FD:A3:87:BD:25:FE:85:A0:FD:18:58:1E:24:9F:95:3E:5D:FD`
+
+### Digital Asset Links
+The assetlinks.json file is configured with:
+```json
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.jayathasoft.tcradios",
+    "sha256_cert_fingerprints": ["92:EE:EA:62:F5:73:BC:4C:23:20:A5:A4:6A:FE:FD:A3:87:BD:25:FE:85:A0:FD:18:58:1E:24:9F:95:3E:5D:FD"]
+  }
+}]
+```
 
 ## Conclusion
 
