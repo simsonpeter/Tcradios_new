@@ -17,11 +17,11 @@
   "maskableIconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/Users/atheesan/Documents/Leevit/Git/Tcradios_new/twa/jayathasoft.keystore",
+    "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "7",
-  "appVersionCode": 7,
+  "appVersionName": "10",
+  "appVersionCode": 10,
   "shortcuts": [
     {
       "name": "Play Last Station",
@@ -61,5 +61,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "7"
+  "appVersion": "10"
 }
