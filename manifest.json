@@ -1,7 +1,7 @@
 {
   "name": "TC RADIOS",
   "short_name": "TC",
-  "description": "Uplifting Tamil & Malayalam Christian Radio Stations",
+  "description": "Uplifting Tamil, English, Malayalam, Hindi & Dutch Christian Radio Stations",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
