@@ -20,8 +20,8 @@
     "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "12",
-  "appVersionCode": 12,
+  "appVersionName": "14",
+  "appVersionCode": 14,
   "shortcuts": [
     {
       "name": "Play Last Station",
@@ -61,5 +61,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "12"
+  "appVersion": "14"
 }

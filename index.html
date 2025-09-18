@@ -287,6 +287,61 @@ audio{display:none}
 #sleepModal button{margin:.3rem;padding:.4rem .8rem;border:1px solid var(--border);
                    border-radius:.3rem;background:var(--bg);color:var(--text)}
 #sleepModal button:hover{background:var(--accent);color:#fff}
+
+/* Drag and Drop Styles */
+.item.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+}
+
+.item.drag-over {
+  border-top: 3px solid var(--accent);
+  transform: translateY(-2px);
+}
+
+.item.drag-handle {
+  cursor: grab;
+  position: relative;
+}
+
+.item.drag-handle:active {
+  cursor: grabbing;
+}
+
+.item.drag-handle::before {
+  content: "⋮⋮";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--border);
+  font-size: 12px;
+  line-height: 8px;
+  opacity: 0.6;
+}
+
+.item.drag-handle:hover::before {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.favorites-reorder-hint {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+  color: var(--text);
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.favorites-reorder-hint i {
+  color: var(--accent);
+  margin-right: 8px;
+}
 </style>
 </head>
 <body>
@@ -366,6 +421,7 @@ const LANG_URLS = {
 /* ---- STATE ---- */
 let stationsPerLang = {};
 let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
+let favoritesOrder  = JSON.parse(localStorage.getItem('tcr-fav-order') || '[]'); // Custom order for favorites
 let currentLang     = localStorage.getItem('currentLang') || 'tamil';
 let currentTab      = localStorage.getItem('currentTab') || 'all';
 let currentList     = [];
@@ -498,7 +554,7 @@ function switchTab(tab) {
     document.getElementById('about-panel').style.display = 'none';
     searchBar.style.display = '';
     let base = tab === 'fav'
-      ? Object.values(stationsPerLang).flat().filter(s => favorites.includes(s.name))
+      ? getFavoritesInOrder()
       : stationsPerLang[currentLang] || [];
     currentList = base.filter(s => !searchTerm || s.name.toLowerCase().includes(searchTerm));
     render(currentList);
@@ -507,13 +563,37 @@ function switchTab(tab) {
 /* ---- RENDER ---- */
 function render(list) {
   stationList.innerHTML = '';
+  
+  // Add reorder hint for favorites tab
+  if (currentTab === 'fav' && list.length > 1) {
+    const hint = document.createElement('div');
+    hint.className = 'favorites-reorder-hint';
+    hint.innerHTML = '<i class="fas fa-grip-vertical"></i>Hold and drag to reorder your favorites';
+    stationList.appendChild(hint);
+  }
+  
   if (!list || !list.length) {
     stationList.innerHTML = '<div class="item">No stations found.</div>';
     return;
   }
+  
   list.forEach((st, i) => {
     const div = document.createElement('div');
     div.className = 'item';
+    
+    // Add drag handle class for favorites tab
+    if (currentTab === 'fav') {
+      div.className += ' drag-handle';
+      div.draggable = true;
+      div.dataset.index = i;
+      
+      // Drag and drop event listeners
+      div.addEventListener('dragstart', handleDragStart);
+      div.addEventListener('dragover', handleDragOver);
+      div.addEventListener('drop', handleDrop);
+      div.addEventListener('dragend', handleDragEnd);
+    }
+    
     div.innerHTML = `
       <img src="${st.logo}" alt="" class="station-icon">
       <div class="station-info">
@@ -522,6 +602,7 @@ function render(list) {
       </div>
       <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}"><i class="fas fa-heart"></i></div>
     `;
+    
     div.onclick = e => { if (!e.target.classList.contains('favorite-button')) play(st, i); };
     div.querySelector('.favorite-button').onclick = e => {
       e.stopPropagation(); toggleFav(st.name);
@@ -797,14 +878,139 @@ function stopMetadataFetching() {
 }
 /* ---- FAVORITES ---- */
 function toggleFav(name) {
-  favorites = favorites.includes(name)
-    ? favorites.filter(f => f !== name)
-    : [...favorites, name];
+  const wasFavorite = favorites.includes(name);
+  
+  if (wasFavorite) {
+    // Remove from favorites
+    favorites = favorites.filter(f => f !== name);
+    favoritesOrder = favoritesOrder.filter(f => f !== name);
+  } else {
+    // Add to favorites
+    favorites = [...favorites, name];
+    favoritesOrder = [...favoritesOrder, name];
+  }
+  
   localStorage.setItem('tcr-fav', JSON.stringify(favorites));
+  localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
   switchTab(currentTab);
   // Haptic feedback for favorite toggle
   hapticFeedback(favorites.includes(name) ? 'success' : 'light');
 }
+
+function getFavoritesInOrder() {
+  const allStations = Object.values(stationsPerLang).flat();
+  const favoriteStations = [];
+  
+  // First, add stations in custom order
+  favoritesOrder.forEach(stationName => {
+    const station = allStations.find(s => s.name === stationName);
+    if (station && favorites.includes(stationName)) {
+      favoriteStations.push(station);
+    }
+  });
+  
+  // Then add any new favorites that aren't in the order yet
+  favorites.forEach(stationName => {
+    if (!favoritesOrder.includes(stationName)) {
+      const station = allStations.find(s => s.name === stationName);
+      if (station) {
+        favoriteStations.push(station);
+        favoritesOrder.push(stationName);
+      }
+    }
+  });
+  
+  // Save updated order
+  localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
+  
+  return favoriteStations;
+}
+
+function reorderFavorites(fromIndex, toIndex) {
+  if (fromIndex === toIndex) return;
+  
+  // Move item in favoritesOrder array
+  const item = favoritesOrder.splice(fromIndex, 1)[0];
+  favoritesOrder.splice(toIndex, 0, item);
+  
+  // Save new order
+  localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
+  
+  // Re-render favorites tab if currently active
+  if (currentTab === 'fav') {
+    switchTab('fav');
+  }
+  
+  // Haptic feedback
+  hapticFeedback('success');
+}
+
+// Drag and Drop Variables
+let draggedElement = null;
+let draggedIndex = null;
+
+// Drag and Drop Event Handlers
+function handleDragStart(e) {
+  draggedElement = e.target;
+  draggedIndex = parseInt(e.target.dataset.index);
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', e.target.outerHTML);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  
+  const afterElement = getDragAfterElement(stationList, e.clientY);
+  const dragging = document.querySelector('.dragging');
+  
+  if (afterElement == null) {
+    stationList.appendChild(dragging);
+  } else {
+    stationList.insertBefore(dragging, afterElement);
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  
+  if (draggedElement) {
+    const dropIndex = Array.from(stationList.children).indexOf(e.target);
+    
+    // Only reorder if it's a valid drop and we're in favorites tab
+    if (currentTab === 'fav' && dropIndex >= 0 && dropIndex !== draggedIndex) {
+      reorderFavorites(draggedIndex, dropIndex);
+    }
+  }
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging');
+  draggedElement = null;
+  draggedIndex = null;
+  
+  // Remove drag-over class from all items
+  document.querySelectorAll('.item').forEach(item => {
+    item.classList.remove('drag-over');
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
+  
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
 /* ---- THEME ---- */
 const themeToggle = document.getElementById('themeToggle');
 function applyTheme(t) {
