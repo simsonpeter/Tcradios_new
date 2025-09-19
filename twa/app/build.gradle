@@ -21,7 +21,7 @@ plugins {
 }
 
 def twaManifest = [
-    applicationId: 'com.jayathasoft.tcradios',
+    applicationId: 'com.jayathasoft.tcradios.app',
     hostName: 'tcradios-new.vercel.app', // The domain being opened in the TWA.
     launchUrl: '/index.html', // The start path for the TWA. Must be relative to the domain.
     name: 'TC RADIOS', // The application name.
@@ -52,13 +52,13 @@ def twaManifest = [
 
 android {
     compileSdkVersion 36
-    namespace "com.jayathasoft.tcradios"
+    namespace "com.jayathasoft.tcradios.app"
     defaultConfig {
-        applicationId "com.jayathasoft.tcradios"
+        applicationId "com.jayathasoft.tcradios.app"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 14
-        versionName "14"
+        versionCode 16
+        versionName "16"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

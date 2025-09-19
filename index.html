@@ -291,8 +291,9 @@ audio{display:none}
 /* Drag and Drop Styles */
 .item.dragging {
   opacity: 0.5;
-  transform: rotate(5deg);
+  transform: rotate(5deg) scale(1.05);
   z-index: 1000;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .item.drag-over {
@@ -303,6 +304,10 @@ audio{display:none}
 .item.drag-handle {
   cursor: grab;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .item.drag-handle:active {
@@ -312,18 +317,34 @@ audio{display:none}
 .item.drag-handle::before {
   content: "⋮⋮";
   position: absolute;
-  left: 8px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--border);
-  font-size: 12px;
-  line-height: 8px;
-  opacity: 0.6;
+  font-size: 14px;
+  line-height: 6px;
+  opacity: 0.7;
+  font-weight: bold;
+  pointer-events: none;
 }
 
 .item.drag-handle:hover::before {
   opacity: 1;
   color: var(--accent);
+}
+
+.item.drag-handle:active::before {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Touch-friendly drag handle */
+@media (hover: none) and (pointer: coarse) {
+  .item.drag-handle::before {
+    opacity: 1;
+    color: var(--accent);
+    font-size: 16px;
+  }
 }
 
 .favorites-reorder-hint {
@@ -592,6 +613,11 @@ function render(list) {
       div.addEventListener('dragover', handleDragOver);
       div.addEventListener('drop', handleDrop);
       div.addEventListener('dragend', handleDragEnd);
+      
+      // Touch event listeners for mobile
+      div.addEventListener('touchstart', handleTouchStart, { passive: false });
+      div.addEventListener('touchmove', handleTouchMove, { passive: false });
+      div.addEventListener('touchend', handleTouchEnd, { passive: false });
     }
     
     div.innerHTML = `
@@ -948,44 +974,60 @@ function reorderFavorites(fromIndex, toIndex) {
 // Drag and Drop Variables
 let draggedElement = null;
 let draggedIndex = null;
+let touchStartY = 0;
+let touchStartElement = null;
+let isDragging = false;
 
 // Drag and Drop Event Handlers
 function handleDragStart(e) {
+  console.log('Drag start:', e.target);
   draggedElement = e.target;
   draggedIndex = parseInt(e.target.dataset.index);
   e.target.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', e.target.outerHTML);
+  e.dataTransfer.setData('text/plain', draggedIndex.toString());
+  
+  // Prevent default to allow custom drag behavior
+  e.stopPropagation();
 }
 
 function handleDragOver(e) {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
   
+  // Add visual feedback
   const afterElement = getDragAfterElement(stationList, e.clientY);
   const dragging = document.querySelector('.dragging');
   
-  if (afterElement == null) {
-    stationList.appendChild(dragging);
-  } else {
-    stationList.insertBefore(dragging, afterElement);
+  if (dragging) {
+    if (afterElement == null) {
+      stationList.appendChild(dragging);
+    } else {
+      stationList.insertBefore(dragging, afterElement);
+    }
   }
 }
 
 function handleDrop(e) {
   e.preventDefault();
+  e.stopPropagation();
   
-  if (draggedElement) {
-    const dropIndex = Array.from(stationList.children).indexOf(e.target);
+  console.log('Drop event:', e.target);
+  
+  if (draggedElement && currentTab === 'fav') {
+    const dropIndex = Array.from(stationList.querySelectorAll('.item')).indexOf(e.target);
     
-    // Only reorder if it's a valid drop and we're in favorites tab
-    if (currentTab === 'fav' && dropIndex >= 0 && dropIndex !== draggedIndex) {
+    console.log('Drop index:', dropIndex, 'Dragged index:', draggedIndex);
+    
+    // Only reorder if it's a valid drop and indices are different
+    if (dropIndex >= 0 && dropIndex !== draggedIndex) {
       reorderFavorites(draggedIndex, dropIndex);
     }
   }
 }
 
 function handleDragEnd(e) {
+  console.log('Drag end');
   e.target.classList.remove('dragging');
   draggedElement = null;
   draggedIndex = null;
@@ -1009,6 +1051,67 @@ function getDragAfterElement(container, y) {
       return closest;
     }
   }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Touch Event Handlers for Mobile
+function handleTouchStart(e) {
+  if (currentTab !== 'fav') return;
+  
+  touchStartElement = e.target.closest('.item');
+  touchStartY = e.touches[0].clientY;
+  draggedIndex = parseInt(touchStartElement.dataset.index);
+  
+  console.log('Touch start:', touchStartElement);
+  
+  // Add visual feedback
+  touchStartElement.classList.add('dragging');
+  isDragging = false;
+}
+
+function handleTouchMove(e) {
+  if (!touchStartElement || currentTab !== 'fav') return;
+  
+  const touchY = e.touches[0].clientY;
+  const deltaY = touchY - touchStartY;
+  
+  // Start dragging if moved more than 10px
+  if (Math.abs(deltaY) > 10 && !isDragging) {
+    isDragging = true;
+    e.preventDefault();
+    console.log('Started dragging');
+  }
+  
+  if (isDragging) {
+    e.preventDefault();
+    
+    // Move the element visually
+    const afterElement = getDragAfterElement(stationList, touchY);
+    if (afterElement == null) {
+      stationList.appendChild(touchStartElement);
+    } else {
+      stationList.insertBefore(touchStartElement, afterElement);
+    }
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!touchStartElement || currentTab !== 'fav') return;
+  
+  if (isDragging) {
+    const dropIndex = Array.from(stationList.querySelectorAll('.item')).indexOf(touchStartElement);
+    
+    console.log('Touch drop index:', dropIndex, 'Dragged index:', draggedIndex);
+    
+    if (dropIndex >= 0 && dropIndex !== draggedIndex) {
+      reorderFavorites(draggedIndex, dropIndex);
+    }
+  }
+  
+  // Clean up
+  touchStartElement.classList.remove('dragging');
+  touchStartElement = null;
+  draggedIndex = null;
+  isDragging = false;
 }
 
 /* ---- THEME ---- */

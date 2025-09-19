@@ -1,5 +1,5 @@
 {
-  "packageId": "com.jayathasoft.tcradios",
+  "packageId": "com.jayathasoft.tcradios.app",
   "host": "tcradios-new.vercel.app",
   "name": "TC RADIOS",
   "launcherName": "TC RADIOS",
@@ -20,8 +20,8 @@
     "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "14",
-  "appVersionCode": 14,
+  "appVersionName": "16",
+  "appVersionCode": 16,
   "shortcuts": [
     {
       "name": "Play Last Station",
@@ -61,5 +61,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "14"
+  "appVersion": "16"
 }

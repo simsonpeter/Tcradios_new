@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "com.jayathasoft.tcradios",
+          "package_name": "com.jayathasoft.tcradios.app",
         "sha256_cert_fingerprints": ["92:EE:EA:62:F5:73:BC:4C:23:20:A5:A4:6A:FE:FD:A3:87:BD:25:FE:85:A0:FD:18:58:1E:24:9F:95:3E:5D:FD"]
       }
     }]
