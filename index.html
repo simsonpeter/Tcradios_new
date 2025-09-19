@@ -459,6 +459,42 @@ const pName       = document.getElementById('p-name');
 const pPlay       = document.getElementById('p-play');
 const player      = document.getElementById('player');
 /* ---- LOAD + INIT ---- */
+// Fallback station data in case network fails
+const FALLBACK_STATIONS = {
+  english: [
+    {
+      "name": "CBN Christmas",
+      "url": "https://streams.cbnradio.com/christmas-128K",
+      "logo": "https://cbn.com/sites/default/files/styles/480x270_16_9/public/images/Christmas-1920x1080.jpg",
+      "genre": "English Christian",
+      "metadata": true
+    },
+    {
+      "name": "CBN Contemporary",
+      "url": "https://streams.cbnradio.com/contemporary-128K",
+      "logo": "https://cbn.com/sites/default/files/styles/480x270_16_9/public/images/Contemporary-1920x1080.jpg",
+      "genre": "English Christian",
+      "metadata": true
+    },
+    {
+      "name": "K-LOVE Radio",
+      "url": "https://playerservices.streamtheworld.com/api/livestream?station=KLVEAM&transports=http&format=aac",
+      "logo": "https://www.klove.com/images/klove-logo.png",
+      "genre": "English Christian",
+      "metadata": true
+    }
+  ],
+  tamil: [
+    {
+      "name": "Tamil Christian Radio",
+      "url": "https://stream.zeno.fm/8wvvgqmdn8zuv",
+      "logo": "https://via.placeholder.com/100x100/FF6B35/FFFFFF?text=TC",
+      "genre": "Tamil Christian",
+      "metadata": true
+    }
+  ]
+};
+
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
     try {
@@ -471,18 +507,62 @@ async function loadAll() {
       console.log(`${lang} stations loaded:`, stationsPerLang[lang].length, 'stations');
     } catch (error) {
       console.error(`Error loading ${lang} stations:`, error);
-      stationsPerLang[lang] = []; // Set empty array on error
+      // Use fallback data if available
+      if (FALLBACK_STATIONS[lang]) {
+        console.log(`Using fallback data for ${lang}`);
+        stationsPerLang[lang] = FALLBACK_STATIONS[lang];
+      } else {
+        stationsPerLang[lang] = []; // Set empty array on error
+      }
     }
   });
   await Promise.allSettled(promises);
   console.log('All stations loaded:', stationsPerLang);
   // Data is now loaded. The calling function will handle UI updates.
 }
+// Error message function
+function showErrorMessage(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ff4444;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 10000;
+    text-align: center;
+    max-width: 300px;
+  `;
+  errorDiv.innerHTML = `
+    <h3>⚠️ Error</h3>
+    <p>${message}</p>
+    <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: white; color: #ff4444; border: none; border-radius: 4px; cursor: pointer;">Retry</button>
+  `;
+  document.body.appendChild(errorDiv);
+}
+
 // Make the main initialization async
 (async function initApp() {
-  await loadAll(); // <-- AWAIT the loading to finish
-  // Now that data is loaded, populate UI
-  populateLangSelect();
+  try {
+    console.log('Starting app initialization...');
+    await loadAll(); // <-- AWAIT the loading to finish
+    
+    // Check if any stations were loaded
+    const totalStations = Object.values(stationsPerLang).reduce((sum, stations) => sum + stations.length, 0);
+    console.log('Total stations loaded:', totalStations);
+    
+    if (totalStations === 0) {
+      console.error('No stations loaded!');
+      showErrorMessage('No radio stations could be loaded. Please check your internet connection and try again.');
+      return;
+    }
+    
+    console.log('Stations loaded successfully, populating UI...');
+    // Now that data is loaded, populate UI
+    populateLangSelect();
   // Handle URL parameters for shortcuts
   const urlParams = new URLSearchParams(window.location.search);
   const action = urlParams.get('action');
@@ -515,6 +595,11 @@ async function loadAll() {
     }
     autoPlayLastOrFirst();
   }, 500); // Small delay to ensure UI is ready
+  
+  } catch (error) {
+    console.error('App initialization failed:', error);
+    showErrorMessage('Failed to initialize the app. Please refresh the page and try again.');
+  }
 })();
 function autoPlayLastOrFirst() {
   // Check if there's a last played station
