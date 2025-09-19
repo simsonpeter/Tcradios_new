@@ -443,7 +443,7 @@ const LANG_URLS = {
 let stationsPerLang = {};
 let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
 let favoritesOrder  = JSON.parse(localStorage.getItem('tcr-fav-order') || '[]'); // Custom order for favorites
-let currentLang     = localStorage.getItem('currentLang') || 'tamil';
+let currentLang     = localStorage.getItem('currentLang') || 'english';
 let currentTab      = localStorage.getItem('currentTab') || 'all';
 let currentList     = [];
 let idx             = 0;
@@ -461,10 +461,21 @@ const player      = document.getElementById('player');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
-    const res = await fetch(LANG_URLS[lang]);
-    stationsPerLang[lang] = await res.json();
+    try {
+      console.log(`Loading ${lang} stations from:`, LANG_URLS[lang]);
+      const res = await fetch(LANG_URLS[lang]);
+      if (!res.ok) {
+        throw new Error(`Failed to load ${lang} stations: ${res.status}`);
+      }
+      stationsPerLang[lang] = await res.json();
+      console.log(`${lang} stations loaded:`, stationsPerLang[lang].length, 'stations');
+    } catch (error) {
+      console.error(`Error loading ${lang} stations:`, error);
+      stationsPerLang[lang] = []; // Set empty array on error
+    }
   });
   await Promise.allSettled(promises);
+  console.log('All stations loaded:', stationsPerLang);
   // Data is now loaded. The calling function will handle UI updates.
 }
 // Make the main initialization async
@@ -534,6 +545,8 @@ function populateLangSelect() {
   });
   sel.onchange = () => {
     currentLang = sel.value;
+    console.log('Language changed to:', currentLang);
+    console.log('Available stations for', currentLang, ':', stationsPerLang[currentLang]);
     localStorage.setItem('currentLang', currentLang);
     switchTab(currentTab);
     // Auto-play last played station or first station when language changes
