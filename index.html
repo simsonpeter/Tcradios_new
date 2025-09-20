@@ -60,14 +60,217 @@ header button i{font-size:1.2rem;color:var(--header-btn)}
 #tabs span.active{background:var(--accent);color:#fff;border-radius:.4rem}
 #content,#about-panel{flex:1;overflow-y:auto;padding:.75rem 1rem var(--player-height);
                       display:flex;flex-direction:column}
-#about-panel{display:none;align-items:center;justify-content:center}
-.about-card{background:var(--card);border-radius:.5rem;padding:1rem;
-            text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08);
-            width:90%;max-width:400px;margin-bottom:1rem}
-.about-card img{width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:.5rem}
-.about-card h2{margin:.3rem 0;font-size:1.2rem;color:var(--accent)}
-.about-card p{font-size:.9rem;line-height:1.4}
-.about-card i{margin-right:.5rem;color:var(--accent)}
+#about-panel{
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:2rem 1rem;
+  background:linear-gradient(135deg, var(--bg) 0%, rgba(249,115,22,0.05) 100%);
+  min-height:100vh;
+}
+
+.about-hero{
+  text-align:center;
+  margin-bottom:3rem;
+  max-width:600px;
+}
+
+.about-hero img{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-bottom:1.5rem;
+  box-shadow:0 8px 32px rgba(249,115,22,0.3);
+  border:4px solid var(--accent);
+}
+
+.about-hero h1{
+  font-size:2.5rem;
+  font-weight:700;
+  color:var(--accent);
+  margin-bottom:0.5rem;
+  text-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+
+.about-hero .tagline{
+  font-size:1.2rem;
+  color:var(--text);
+  opacity:0.8;
+  margin-bottom:2rem;
+  font-weight:300;
+}
+
+.about-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+  gap:2rem;
+  max-width:1000px;
+  width:100%;
+}
+
+.about-card{
+  background:var(--card);
+  border-radius:1rem;
+  padding:2rem;
+  box-shadow:0 8px 32px rgba(0,0,0,0.1);
+  border:1px solid var(--border);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.about-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:4px;
+  background:linear-gradient(90deg, var(--accent), #ff6b35);
+}
+
+.about-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.15);
+}
+
+.about-card h2{
+  font-size:1.5rem;
+  color:var(--accent);
+  margin-bottom:1rem;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.about-card h2 i{
+  font-size:1.3rem;
+}
+
+.about-card p{
+  font-size:1rem;
+  line-height:1.6;
+  color:var(--text);
+  margin-bottom:1rem;
+}
+
+.about-card ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+.about-card li{
+  padding:0.5rem 0;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+}
+
+.about-card li:last-child{
+  border-bottom:none;
+}
+
+.about-card li i{
+  color:var(--accent);
+  width:20px;
+  text-align:center;
+}
+
+.about-card a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:500;
+  transition:color 0.2s ease;
+}
+
+.about-card a:hover{
+  color:#ff6b35;
+  text-decoration:underline;
+}
+
+.features-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:1rem;
+  margin-top:1rem;
+}
+
+.feature-item{
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.75rem;
+  background:rgba(249,115,22,0.1);
+  border-radius:0.5rem;
+  font-size:0.9rem;
+}
+
+.feature-item i{
+  color:var(--accent);
+  font-size:1.1rem;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+  gap:1rem;
+  margin-top:1.5rem;
+}
+
+.stat-item{
+  text-align:center;
+  padding:1rem;
+  background:rgba(249,115,22,0.05);
+  border-radius:0.75rem;
+  border:1px solid rgba(249,115,22,0.2);
+}
+
+.stat-number{
+  font-size:2rem;
+  font-weight:700;
+  color:var(--accent);
+  display:block;
+}
+
+.stat-label{
+  font-size:0.8rem;
+  color:var(--text);
+  opacity:0.8;
+  margin-top:0.25rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .about-hero h1{
+    font-size:2rem;
+  }
+  
+  .about-hero .tagline{
+    font-size:1rem;
+  }
+  
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+  }
+  
+  .about-card{
+    padding:1.5rem;
+  }
+  
+  .features-list{
+    grid-template-columns:1fr;
+  }
+  
+  .stats-grid{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
 #searchBar{width:100%;margin-bottom:.75rem;padding:.55rem .7rem;border-radius:.4rem;
            border:1px solid var(--border);background:var(--card);color:var(--text);
            font-size:1rem}
@@ -319,11 +522,43 @@ audio{display:none}
   font-size: 12px;
   line-height: 8px;
   opacity: 0.6;
+  pointer-events: none;
 }
 
 .item.drag-handle:hover::before {
   opacity: 1;
   color: var(--accent);
+}
+
+/* Mobile-specific drag handle styling */
+@media (hover: none) and (pointer: coarse) {
+  .item.drag-handle::before {
+    opacity: 0.9;
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .item.drag-handle {
+    padding-left: 45px;
+    position: relative;
+  }
+  
+  .item.drag-handle:active {
+    background-color: rgba(249, 115, 22, 0.1);
+  }
+  
+  .item.dragging {
+    transform: rotate(5deg) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--accent);
+  }
+  
+  .item.drag-over {
+    border-top: 3px solid var(--accent);
+    transform: translateY(-2px);
+    background-color: rgba(249, 115, 22, 0.05);
+  }
 }
 
 .favorites-reorder-hint {
@@ -366,19 +601,130 @@ audio{display:none}
   <div class="station-list"></div>
 </div>
 <div id="about-panel">
-  <div class="about-card">
-    <img src="/icons/icon-512x512.png" alt="Logo"/>
-    <h2>TC RADIOS</h2>
+  <!-- Hero Section -->
+  <div class="about-hero">
+    <img src="/icons/icon-512x512.png" alt="TC RADIOS Logo"/>
+    <h1>TC RADIOS</h1>
+    <p class="tagline">Uplifting Christian Music & Messages Worldwide</p>
   </div>
-  <div class="about-card">
-    <h2>About Us</h2>
-    <p>TC RADIOS brings uplifting Christian music and messages worldwide.</p>
-  </div>
-  <div class="about-card">
-    <h2>Contact Us</h2>
-    <p><strong>JayathaSoft</strong><br>
-       <i class="fas fa-envelope"></i> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a><br>
-       <i class="fas fa-map-marker-alt"></i> Antwerp, Belgium</p>
+
+  <!-- Main Content Grid -->
+  <div class="about-grid">
+    <!-- About Us Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-heart"></i> Our Mission</h2>
+      <p>TC RADIOS is dedicated to spreading the love of Christ through uplifting Christian music and inspirational messages. We believe in the power of music to touch hearts, heal souls, and bring people closer to God.</p>
+      
+      <div class="features-list">
+        <div class="feature-item">
+          <i class="fas fa-music"></i>
+          <span>Multi-language Support</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-mobile-alt"></i>
+          <span>Mobile Optimized</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-heart"></i>
+          <span>Favorites System</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-cloud"></i>
+          <span>Always Available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-star"></i> Features</h2>
+      <ul>
+        <li><i class="fas fa-globe"></i> <strong>Global Reach:</strong> Stations from around the world</li>
+        <li><i class="fas fa-language"></i> <strong>Multi-Language:</strong> Tamil, English, Malayalam, Hindi & Dutch</li>
+        <li><i class="fas fa-heart"></i> <strong>Favorites:</strong> Save and reorder your preferred stations</li>
+        <li><i class="fas fa-search"></i> <strong>Search:</strong> Find stations quickly</li>
+        <li><i class="fas fa-moon"></i> <strong>Themes:</strong> Dark and light mode support</li>
+        <li><i class="fas fa-clock"></i> <strong>Sleep Timer:</strong> Auto-stop after set time</li>
+        <li><i class="fas fa-download"></i> <strong>PWA:</strong> Install as native app</li>
+        <li><i class="fas fa-mobile-alt"></i> <strong>Responsive:</strong> Works on all devices</li>
+      </ul>
+    </div>
+
+    <!-- Statistics Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-chart-line"></i> Our Impact</h2>
+      <p>Since our launch, TC RADIOS has been connecting believers worldwide through the power of Christian music.</p>
+      
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">50+</span>
+          <span class="stat-label">Radio Stations</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">5</span>
+          <span class="stat-label">Languages</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">Availability</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">100%</span>
+          <span class="stat-label">Free</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-envelope"></i> Contact Us</h2>
+      <p>We'd love to hear from you! Reach out to us for feedback, suggestions, or partnership opportunities.</p>
+      
+      <ul>
+        <li><i class="fas fa-building"></i> <strong>Company:</strong> JayathaSoft</li>
+        <li><i class="fas fa-envelope"></i> <strong>Email:</strong> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></li>
+        <li><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> Antwerp, Belgium</li>
+        <li><i class="fas fa-globe"></i> <strong>Website:</strong> <a href="https://tcradios-new.vercel.app" target="_blank">tcradios-new.vercel.app</a></li>
+      </ul>
+    </div>
+
+    <!-- Technology Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-code"></i> Technology</h2>
+      <p>Built with modern web technologies for the best user experience across all devices.</p>
+      
+      <div class="features-list">
+        <div class="feature-item">
+          <i class="fas fa-mobile-alt"></i>
+          <span>Progressive Web App (PWA)</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-android"></i>
+          <span>Android App Support</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-cloud"></i>
+          <span>Cloud Infrastructure</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure & Reliable</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Card -->
+    <div class="about-card">
+      <h2><i class="fas fa-hands-helping"></i> Support</h2>
+      <p>Need help or have questions? We're here to assist you in your spiritual journey through music.</p>
+      
+      <ul>
+        <li><i class="fas fa-question-circle"></i> <strong>FAQ:</strong> Check our help section</li>
+        <li><i class="fas fa-bug"></i> <strong>Report Issues:</strong> Help us improve</li>
+        <li><i class="fas fa-lightbulb"></i> <strong>Suggestions:</strong> Share your ideas</li>
+        <li><i class="fas fa-pray"></i> <strong>Prayer Requests:</strong> We pray for you</li>
+      </ul>
+    </div>
   </div>
 </div>
 <div id="player">
@@ -568,7 +914,12 @@ function render(list) {
   if (currentTab === 'fav' && list.length > 1) {
     const hint = document.createElement('div');
     hint.className = 'favorites-reorder-hint';
-    hint.innerHTML = '<i class="fas fa-grip-vertical"></i>Hold and drag to reorder your favorites';
+    // Detect if it's a mobile device
+    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const hintText = isMobile 
+      ? '<i class="fas fa-hand-rock"></i>Touch and hold to reorder your favorites'
+      : '<i class="fas fa-grip-vertical"></i>Hold and drag to reorder your favorites';
+    hint.innerHTML = hintText;
     stationList.appendChild(hint);
   }
   
@@ -587,11 +938,16 @@ function render(list) {
       div.draggable = true;
       div.dataset.index = i;
       
-      // Drag and drop event listeners
+      // Drag and drop event listeners (Desktop)
       div.addEventListener('dragstart', handleDragStart);
       div.addEventListener('dragover', handleDragOver);
       div.addEventListener('drop', handleDrop);
       div.addEventListener('dragend', handleDragEnd);
+      
+      // Touch event listeners (Mobile)
+      div.addEventListener('touchstart', handleTouchStart, { passive: false });
+      div.addEventListener('touchmove', handleTouchMove, { passive: false });
+      div.addEventListener('touchend', handleTouchEnd, { passive: false });
     }
     
     div.innerHTML = `
@@ -948,8 +1304,12 @@ function reorderFavorites(fromIndex, toIndex) {
 // Drag and Drop Variables
 let draggedElement = null;
 let draggedIndex = null;
+let dragTouchStartY = 0;
+let dragTouchCurrentY = 0;
+let isDragging = false;
+let dragThreshold = 5; // Minimum distance to start drag (reduced for better responsiveness)
 
-// Drag and Drop Event Handlers
+// Drag and Drop Event Handlers (Desktop)
 function handleDragStart(e) {
   draggedElement = e.target;
   draggedIndex = parseInt(e.target.dataset.index);
@@ -994,6 +1354,117 @@ function handleDragEnd(e) {
   document.querySelectorAll('.item').forEach(item => {
     item.classList.remove('drag-over');
   });
+}
+
+// Touch Event Handlers (Mobile)
+function handleTouchStart(e) {
+  if (currentTab !== 'fav') return;
+  
+  const item = e.target.closest('.item');
+  if (!item) return;
+  
+  // Stop propagation to prevent conflicts with other touch handlers
+  e.stopPropagation();
+  
+  dragTouchStartY = e.touches[0].clientY;
+  draggedElement = item;
+  draggedIndex = parseInt(item.dataset.index);
+  isDragging = false;
+  
+  // Don't prevent default immediately - let the touch move determine if it's a drag
+  console.log('Touch start on item:', item.dataset.index);
+}
+
+function handleTouchMove(e) {
+  if (!draggedElement || currentTab !== 'fav') return;
+  
+  // Stop propagation to prevent conflicts
+  e.stopPropagation();
+  
+  dragTouchCurrentY = e.touches[0].clientY;
+  const deltaY = Math.abs(dragTouchCurrentY - dragTouchStartY);
+  
+  // Start dragging if moved enough distance
+  if (deltaY > dragThreshold && !isDragging) {
+    isDragging = true;
+    draggedElement.classList.add('dragging');
+    
+    // Add visual feedback
+    draggedElement.style.transform = 'rotate(5deg)';
+    draggedElement.style.opacity = '0.8';
+    draggedElement.style.zIndex = '1000';
+    
+    // Haptic feedback
+    hapticFeedback('light');
+    
+    console.log('Started dragging item:', draggedIndex);
+  }
+  
+  if (isDragging) {
+    e.preventDefault(); // Prevent scrolling only when actually dragging
+    
+    // Find the element after which to insert
+    const afterElement = getDragAfterElement(stationList, dragTouchCurrentY);
+    
+    if (afterElement == null) {
+      stationList.appendChild(draggedElement);
+    } else {
+      stationList.insertBefore(draggedElement, afterElement);
+    }
+    
+    // Add visual feedback to other items
+    document.querySelectorAll('.item:not(.dragging)').forEach(item => {
+      const rect = item.getBoundingClientRect();
+      const itemCenter = rect.top + rect.height / 2;
+      
+      if (Math.abs(dragTouchCurrentY - itemCenter) < rect.height / 2) {
+        item.classList.add('drag-over');
+      } else {
+        item.classList.remove('drag-over');
+      }
+    });
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!draggedElement || currentTab !== 'fav') return;
+  
+  // Stop propagation to prevent conflicts
+  e.stopPropagation();
+  
+  console.log('Touch end, was dragging:', isDragging);
+  
+  if (isDragging) {
+    // Calculate final position
+    const finalIndex = Array.from(stationList.children).indexOf(draggedElement);
+    
+    console.log('Final position:', finalIndex, 'Original position:', draggedIndex);
+    
+    // Only reorder if position changed
+    if (finalIndex !== draggedIndex && finalIndex >= 0) {
+      reorderFavorites(draggedIndex, finalIndex);
+      hapticFeedback('success');
+      console.log('Reordered favorites from', draggedIndex, 'to', finalIndex);
+    }
+    
+    // Clean up
+    draggedElement.classList.remove('dragging');
+    draggedElement.style.transform = '';
+    draggedElement.style.opacity = '';
+    draggedElement.style.zIndex = '';
+    
+    // Remove drag-over class from all items
+    document.querySelectorAll('.item').forEach(item => {
+      item.classList.remove('drag-over');
+    });
+  }
+  
+  // Reset variables
+  draggedElement = null;
+  draggedIndex = null;
+  isDragging = false;
+  dragTouchStartY = 0;
+  dragTouchCurrentY = 0;
 }
 
 function getDragAfterElement(container, y) {

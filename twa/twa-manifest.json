@@ -10,7 +10,7 @@
   "navigationColorDark": "#000000",
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
-  "backgroundColor": "#111827",
+  "backgroundColor": "#FFFFFF",
   "enableNotifications": true,
   "startUrl": "/index.html",
   "iconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
@@ -20,8 +20,8 @@
     "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "22",
-  "appVersionCode": 22,
+  "appVersionName": "24",
+  "appVersionCode": 24,
   "shortcuts": [
     {
       "name": "Play Last Station",
@@ -61,5 +61,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "22"
+  "appVersion": "24"
 }
