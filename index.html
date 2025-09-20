@@ -561,8 +561,18 @@ function showErrorMessage(message) {
     }
     
     console.log('Stations loaded successfully, populating UI...');
+    
+    // Force a test to see if we have any data
+    console.log('Final stationsPerLang:', stationsPerLang);
+    console.log('Current language:', currentLang);
+    console.log('Stations for current language:', stationsPerLang[currentLang]);
+    
     // Now that data is loaded, populate UI
     populateLangSelect();
+    
+    // Force render the current tab to test
+    console.log('Forcing render of current tab:', currentTab);
+    switchTab(currentTab);
   // Handle URL parameters for shortcuts
   const urlParams = new URLSearchParams(window.location.search);
   const action = urlParams.get('action');
@@ -664,6 +674,12 @@ function switchTab(tab) {
   localStorage.setItem('currentTab', tab);
   document.querySelectorAll('#tabs span').forEach(s => s.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
+  
+  console.log('Switching to tab:', tab);
+  console.log('Current language:', currentLang);
+  console.log('Available languages:', Object.keys(stationsPerLang));
+  console.log('Stations for current language:', stationsPerLang[currentLang]);
+  
   if (tab === 'about') {
     document.getElementById('content').style.display = 'none';
     document.getElementById('about-panel').style.display = 'flex';
@@ -672,15 +688,25 @@ function switchTab(tab) {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
     searchBar.style.display = '';
+    
     let base = tab === 'fav'
       ? getFavoritesInOrder()
       : stationsPerLang[currentLang] || [];
+    
+    console.log('Base stations for rendering:', base);
+    console.log('Search term:', searchTerm);
+    
     currentList = base.filter(s => !searchTerm || s.name.toLowerCase().includes(searchTerm));
+    console.log('Filtered stations to render:', currentList);
+    
     render(currentList);
   }
 }
 /* ---- RENDER ---- */
 function render(list) {
+  console.log('Render function called with list:', list);
+  console.log('List length:', list ? list.length : 'null/undefined');
+  
   stationList.innerHTML = '';
   
   // Add reorder hint for favorites tab
@@ -692,10 +718,12 @@ function render(list) {
   }
   
   if (!list || !list.length) {
+    console.log('No stations to render, showing empty message');
     stationList.innerHTML = '<div class="item">No stations found.</div>';
     return;
   }
   
+  console.log('Rendering', list.length, 'stations');
   list.forEach((st, i) => {
     const div = document.createElement('div');
     div.className = 'item';
