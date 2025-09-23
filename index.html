@@ -1329,6 +1329,16 @@ function render(list) {
     const div = document.createElement('div');
     div.className = 'item';
     
+    // Check if this station is currently playing
+    const isCurrentlyPlaying = lastPlayedStation && 
+                              lastPlayedStation.station.name === st.name && 
+                              lastPlayedStation.lang === currentLang &&
+                              !audio.paused;
+    
+    if (isCurrentlyPlaying) {
+      div.className += ' playing';
+    }
+    
     // Add drag handle class for favorites tab
     if (currentTab === 'fav') {
       div.className += ' drag-handle';
@@ -1379,6 +1389,8 @@ function play(st, i) {
   // Save last played station
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
+  // Refresh the display to show playing state
+  switchTab(currentTab);
   // Haptic feedback for mobile
   hapticFeedback('success');
   // Request notification permission on first play
@@ -1389,6 +1401,8 @@ audio.onplay  = () => {
   player.classList.add('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
+  // Refresh display to show playing state
+  switchTab(currentTab);
 };
 audio.onpause = () => { 
   pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
@@ -1397,6 +1411,8 @@ audio.onpause = () => {
   updateWidget('playStateUpdate', { playing: false });
   // Stop metadata fetching when paused
   stopMetadataFetching();
+  // Refresh display to remove playing state
+  switchTab(currentTab);
 };
 pPlay.onclick = () => {
   hapticFeedback('medium');
