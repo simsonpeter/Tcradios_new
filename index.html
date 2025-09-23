@@ -521,6 +521,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
               background:var(--gradient-primary);opacity:0;transition:var(--transition);
               border-radius:.75rem;z-index:-1}
 .item:hover::before{opacity:0.05}
+/* Remove the ::before overlay for favorite items to prevent light tint */
+.item.drag-handle::before{display:none}
 .item:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);
             border-color:var(--accent)}
 .item.playing{background:var(--gradient-primary);color:#fff;box-shadow:var(--shadow-lg);
@@ -856,7 +858,7 @@ audio{display:none}
   </div>
   <div id="langBox">
     <select id="langSelect"></select>
-    </div>
+  </div>
     <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
     <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
   </div>
@@ -942,8 +944,8 @@ audio{display:none}
           <span class="stat-number">100%</span>
           <span class="stat-label">Free</span>
         </div>
-      </div>
-    </div>
+  </div>
+</div>
 
     <!-- Contact Card -->
     <div class="about-card">
@@ -1005,8 +1007,8 @@ audio{display:none}
     <div id="p-metadata" class="metadata" style="display:none;">
       <div id="p-song" class="song-title"></div>
       <div id="p-artist" class="artist-name"></div>
-    </div>
   </div>
+</div>
   <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
   <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
   <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
@@ -1063,10 +1065,48 @@ async function loadAll() {
   await Promise.allSettled(promises);
   // Data is now loaded. The calling function will handle UI updates.
 }
+// Clear cache on every app launch
+function clearAllCacheOnLaunch() {
+  console.log('Clearing cache on app launch...');
+  
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then(cacheNames => {
+      cacheNames.forEach(cacheName => {
+        caches.delete(cacheName);
+        console.log('Cleared cache:', cacheName);
+      });
+    });
+  }
+  
+  // Clear session storage
+  sessionStorage.clear();
+  
+  // Clear localStorage except favorites and important settings
+  const fav = localStorage.getItem('tcr-fav');
+  const favOrder = localStorage.getItem('tcr-fav-order');
+  const lastPlayed = localStorage.getItem('tcr-last-played');
+  const theme = localStorage.getItem('currentTheme');
+  const lang = localStorage.getItem('currentLang');
+  const tab = localStorage.getItem('currentTab');
+  
+  localStorage.clear();
+  
+  // Restore important data
+  if (fav) localStorage.setItem('tcr-fav', fav);
+  if (favOrder) localStorage.setItem('tcr-fav-order', favOrder);
+  if (lastPlayed) localStorage.setItem('tcr-last-played', lastPlayed);
+  if (theme) localStorage.setItem('currentTheme', theme);
+  if (lang) localStorage.setItem('currentLang', lang);
+  if (tab) localStorage.setItem('currentTab', tab);
+  
+  console.log('Cache cleared successfully');
+}
+
 // Make the main initialization async
 (async function initApp() {
-  // Initialize cache clearing first
-  initCacheClearing();
+  // Clear cache on every app launch
+  clearAllCacheOnLaunch();
   
   await loadAll(); // <-- AWAIT the loading to finish
   // Now that data is loaded, populate UI
@@ -1896,14 +1936,8 @@ function getDragAfterElement(container, y) {
 }
 
 /* ---- THEME ---- */
-const themeToggle = document.getElementById('themeToggle');
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.theme = t;
-  themeToggle.innerHTML = t === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-}
-applyTheme(localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-themeToggle.onclick = () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+// Theme system is handled by the theme select dropdown in the header
+// No additional theme toggle needed as we have the dropdown
 /* ---- SLEEP TIMER ---- */
 const sleepModal = document.getElementById('sleepModal');
 const sleepBtn   = document.getElementById('sleepBtn');
@@ -2005,7 +2039,7 @@ window.addEventListener('message', (event) => {
         prevNext(1);
         break;
       case 'theme':
-        toggleTheme();
+        // Theme is handled by dropdown in header
         break;
       case 'timer':
         document.getElementById('sleepBtn').click();
