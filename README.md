@@ -245,6 +245,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for the Christian community worldwide**
+**Made with ❤️ for the Christian community worldwide.**
 
 *"Let everything that has breath praise the Lord. Praise the Lord!" - Psalm 150:6*
