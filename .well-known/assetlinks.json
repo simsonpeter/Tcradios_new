@@ -3,6 +3,9 @@
       "target": {
         "namespace": "android_app",
           "package_name": "com.jayathasoft.tcradios.app",
-        "sha256_cert_fingerprints": ["92:EE:EA:62:F5:73:BC:4C:23:20:A5:A4:6A:FE:FD:A3:87:BD:25:FE:85:A0:FD:18:58:1E:24:9F:95:3E:5D:FD"]
+        "sha256_cert_fingerprints": [
+          "92:EE:EA:62:F5:73:BC:4C:23:20:A5:A4:6A:FE:FD:A3:87:BD:25:FE:85:A0:FD:18:58:1E:24:9F:95:3E:5D:FD",
+          "C3:CB:F2:E1:9A:78:0A:B8:DE:1E:0D:D5:53:C2:B2:91:9E:3F:61:F0:68:89:10:90:F2:FD:0C:82:25:54:5E:B4"
+        ]
       }
     }]
