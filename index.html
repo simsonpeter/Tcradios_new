@@ -859,7 +859,6 @@ audio{display:none}
     </div>
     <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
     <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
-    <button id="themeToggle" title="Dark / Light"><i class="fas fa-moon"></i></button>
   </div>
 </header>
 <div id="tabs">
@@ -1179,21 +1178,6 @@ function applyTheme(theme) {
     body.removeAttribute('data-theme');
   }
   
-  // Update theme toggle button icon
-  const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) {
-    const icon = themeToggle.querySelector('i');
-    if (icon) {
-      if (theme === 'light' || theme === 'minimal') {
-        icon.className = 'fas fa-moon';
-        themeToggle.title = 'Switch to Dark';
-      } else {
-        icon.className = 'fas fa-sun';
-        themeToggle.title = 'Switch to Light';
-      }
-    }
-  }
-  
   // Add theme-specific animations
   addThemeAnimations(theme);
 }
@@ -1212,38 +1196,9 @@ function addThemeAnimations(theme) {
   }
 }
 
-// Enhanced theme toggle functionality
-function setupThemeToggle() {
-  const themeToggle = document.getElementById('themeToggle');
-  if (!themeToggle) return;
-  
-  themeToggle.onclick = () => {
-    // Cycle through popular themes
-    const popularThemes = ['dark', 'light', 'ocean', 'forest', 'sunset', 'rose'];
-    const currentIndex = popularThemes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % popularThemes.length;
-    const nextTheme = popularThemes[nextIndex];
-    
-    currentTheme = nextTheme;
-    localStorage.setItem('currentTheme', currentTheme);
-    
-    // Update theme select
-    const themeSelect = document.getElementById('themeSelect');
-    if (themeSelect) {
-      themeSelect.value = currentTheme;
-    }
-    
-    applyTheme(currentTheme);
-    
-    // Add haptic feedback
-    hapticFeedback('success');
-  };
-}
-
 // Initialize theme system
 function initThemeSystem() {
   populateThemeSelect();
-  setupThemeToggle();
   applyTheme(currentTheme);
 }
 /* ---- TABS + SEARCH ---- */
