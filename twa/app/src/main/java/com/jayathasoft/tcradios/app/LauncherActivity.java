@@ -47,7 +47,15 @@ public class LauncherActivity
         // Get the original launch Url.
         Uri uri = super.getLaunchingUrl();
 
-        
+        // Add cache-busting parameter to ensure fresh content on every startup
+        if (uri != null) {
+            String url = uri.toString();
+            if (!url.contains("cache_bust=")) {
+                String separator = url.contains("?") ? "&" : "?";
+                url += separator + "cache_bust=" + System.currentTimeMillis();
+                uri = Uri.parse(url);
+            }
+        }
 
         return uri;
     }

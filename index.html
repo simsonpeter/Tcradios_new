@@ -1065,6 +1065,9 @@ async function loadAll() {
 }
 // Make the main initialization async
 (async function initApp() {
+  // Initialize cache clearing first
+  initCacheClearing();
+  
   await loadAll(); // <-- AWAIT the loading to finish
   // Now that data is loaded, populate UI
   populateLangSelect();
@@ -1200,6 +1203,66 @@ function addThemeAnimations(theme) {
 function initThemeSystem() {
   populateThemeSelect();
   applyTheme(currentTheme);
+}
+
+// Cache Management System
+function clearCachePreservingFavorites() {
+  try {
+    // Clear browser cache but preserve localStorage (favorites)
+    if ('caches' in window) {
+      caches.keys().then(function(cacheNames) {
+        cacheNames.forEach(function(cacheName) {
+          caches.delete(cacheName);
+        });
+        console.log('Browser cache cleared successfully');
+      }).catch(function(error) {
+        console.log('Error clearing browser cache:', error);
+      });
+    }
+
+    // Clear session storage (temporary data)
+    if ('sessionStorage' in window) {
+      sessionStorage.clear();
+      console.log('Session storage cleared');
+    }
+
+    // Clear IndexedDB if it exists
+    if ('indexedDB' in window) {
+      indexedDB.databases().then(databases => {
+        databases.forEach(db => {
+          indexedDB.deleteDatabase(db.name);
+        });
+        console.log('IndexedDB cleared');
+      }).catch(error => {
+        console.log('Error clearing IndexedDB:', error);
+      });
+    }
+
+    // Force reload of images and other resources
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+      if (img.src) {
+        const url = new URL(img.src);
+        url.searchParams.set('cache_bust', Date.now());
+        img.src = url.toString();
+      }
+    });
+
+    console.log('Cache cleared while preserving favorites');
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+  }
+}
+
+// Clear cache on app startup
+function initCacheClearing() {
+  // Check if this is a fresh app start (not a page refresh)
+  const isFreshStart = !sessionStorage.getItem('app_initialized');
+  
+  if (isFreshStart) {
+    clearCachePreservingFavorites();
+    sessionStorage.setItem('app_initialized', 'true');
+  }
 }
 /* ---- TABS + SEARCH ---- */
 document.getElementById('tab-all').onclick   = () => switchTab('all');
