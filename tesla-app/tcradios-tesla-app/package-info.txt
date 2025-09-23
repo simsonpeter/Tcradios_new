@@ -1,0 +1,31 @@
+TC RADIOS - Tesla App
+====================
+
+Version: 1.0.0
+Platform: Tesla Infotainment System
+Compatibility: Tesla Model 3, Y, S, X (2023.44+)
+
+Features:
+- Multi-language Christian radio stations
+- Voice control integration
+- Tesla audio system integration
+- Driving mode optimization
+- Favorites system
+- Safety features
+
+Installation:
+1. Enable Developer Mode on Tesla
+2. Install via USB or network
+3. Launch from Tesla app menu
+
+Voice Commands:
+- "Play Christian Music"
+- "Play Tamil Music"
+- "Play English Music"
+- "Next Station"
+- "Previous Station"
+- "Volume Up/Down"
+- "Stop Music"
+
+Contact: simsonpeter@gmail.com
+Website: https://tcradios-new.vercel.app

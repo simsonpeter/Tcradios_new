@@ -1,0 +1,84 @@
+{
+  "name": "TC RADIOS",
+  "version": "1.0.0",
+  "description": "Uplifting Christian Music & Messages for Wear OS",
+  "author": "JayathaSoft",
+  "email": "simsonpeter@gmail.com",
+  "website": "https://tcradios-new.vercel.app",
+  "icon": "icon.png",
+  "splash": "splash.png",
+  "orientation": "portrait",
+  "fullscreen": true,
+  "resizable": false,
+  "minWidth": 240,
+  "minHeight": 240,
+  "maxWidth": 400,
+  "maxHeight": 400,
+  "permissions": [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.BLUETOOTH",
+    "android.permission.BLUETOOTH_ADMIN",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.WAKE_LOCK",
+    "android.permission.VIBRATE"
+  ],
+  "features": [
+    "multi-language",
+    "favorites",
+    "voice-control",
+    "offline-mode",
+    "bluetooth-audio",
+    "gesture-control",
+    "complications",
+    "always-on-display",
+    "ambient-mode"
+  ],
+  "wearos": {
+    "apiVersion": "30",
+    "minSdkVersion": "25",
+    "targetSdkVersion": "30",
+    "screenSizes": ["240x240", "320x320", "360x360", "400x400"],
+    "formFactors": ["round", "square", "rectangular"],
+    "voiceCommands": [
+      "play christian music",
+      "play tamil music",
+      "play english music",
+      "play favorites",
+      "next station",
+      "previous station",
+      "volume up",
+      "volume down",
+      "stop music"
+    ],
+    "gestures": [
+      "swipe-up",
+      "swipe-down",
+      "swipe-left",
+      "swipe-right",
+      "tap",
+      "long-press",
+      "double-tap"
+    ],
+    "complications": {
+      "supported": true,
+      "types": ["SHORT_TEXT", "LONG_TEXT", "RANGED_VALUE", "ICON", "SMALL_IMAGE"],
+      "updateInterval": 30000
+    },
+    "alwaysOnDisplay": {
+      "supported": true,
+      "updateInterval": 60000
+    },
+    "ambientMode": {
+      "supported": true,
+      "updateInterval": 30000
+    }
+  },
+  "build": {
+    "target": "wearos",
+    "platform": "android",
+    "architecture": "arm64",
+    "optimization": "battery"
+  }
+}

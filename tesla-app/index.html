@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC RADIOS - Tesla</title>
+    <link rel="stylesheet" href="css/tesla-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Tesla Header -->
+    <header class="tesla-header">
+        <div class="header-left">
+            <div class="logo">
+                <img src="images/logo.png" alt="TC RADIOS" />
+                <h1>TC RADIOS</h1>
+            </div>
+            <div class="connection-status">
+                <div class="status-indicator" id="connectionStatus"></div>
+                <span class="status-text">Connected</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="time-display" id="timeDisplay"></div>
+            <div class="battery-indicator" id="batteryIndicator">
+                <span class="battery-icon">🔋</span>
+                <span class="battery-level">85%</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="tesla-dashboard">
+        <!-- Left Panel - Controls -->
+        <aside class="control-panel">
+            <!-- Language Selection -->
+            <section class="language-section">
+                <h2>Language</h2>
+                <div class="language-buttons">
+                    <button class="lang-btn active" data-lang="tamil">
+                        <span class="flag">🇮🇳</span>
+                        <span class="name">Tamil</span>
+                    </button>
+                    <button class="lang-btn" data-lang="english">
+                        <span class="flag">🇺🇸</span>
+                        <span class="name">English</span>
+                    </button>
+                    <button class="lang-btn" data-lang="malayalam">
+                        <span class="flag">🇮🇳</span>
+                        <span class="name">Malayalam</span>
+                    </button>
+                    <button class="lang-btn" data-lang="hindi">
+                        <span class="flag">🇮🇳</span>
+                        <span class="name">Hindi</span>
+                    </button>
+                    <button class="lang-btn" data-lang="dutch">
+                        <span class="flag">🇳🇱</span>
+                        <span class="name">Dutch</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Quick Controls -->
+            <section class="quick-controls">
+                <h2>Quick Controls</h2>
+                <div class="control-grid">
+                    <button class="control-btn" id="playPauseBtn">
+                        <span class="icon">▶</span>
+                        <span class="label">Play/Pause</span>
+                    </button>
+                    <button class="control-btn" id="stopBtn">
+                        <span class="icon">⏹</span>
+                        <span class="label">Stop</span>
+                    </button>
+                    <button class="control-btn" id="nextBtn">
+                        <span class="icon">⏭</span>
+                        <span class="label">Next</span>
+                    </button>
+                    <button class="control-btn" id="prevBtn">
+                        <span class="icon">⏮</span>
+                        <span class="label">Previous</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Volume Control -->
+            <section class="volume-section">
+                <h2>Volume</h2>
+                <div class="volume-control">
+                    <button class="volume-btn" id="volumeDown">-</button>
+                    <div class="volume-slider">
+                        <div class="volume-track">
+                            <div class="volume-fill" id="volumeFill"></div>
+                        </div>
+                        <span class="volume-value" id="volumeValue">50</span>
+                    </div>
+                    <button class="volume-btn" id="volumeUp">+</button>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Center Panel - Now Playing -->
+        <section class="now-playing-panel">
+            <div class="now-playing-card">
+                <div class="station-artwork">
+                    <img id="currentStationLogo" src="images/default-station.png" alt="Station Logo" />
+                    <div class="playback-indicator" id="playbackIndicator"></div>
+                </div>
+                <div class="station-info">
+                    <h3 id="currentStationName">Select a Station</h3>
+                    <p id="currentStationGenre">Christian Music</p>
+                    <div class="now-playing-details">
+                        <div class="song-info">
+                            <span class="song-title" id="songTitle">-</span>
+                            <span class="artist-name" id="artistName">-</span>
+                        </div>
+                        <div class="playback-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="time-display">
+                                <span id="currentTime">0:00</span>
+                                <span id="totalTime">∞</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="favorite-control">
+                    <button class="favorite-btn" id="favoriteBtn">
+                        <span class="heart-icon">♡</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel - Station List -->
+        <aside class="stations-panel">
+            <div class="panel-header">
+                <h2>Stations</h2>
+                <div class="search-box">
+                    <input type="text" id="stationSearch" placeholder="Search stations..." />
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+            <div class="stations-list" id="stationsList">
+                <!-- Stations will be loaded here -->
+            </div>
+        </aside>
+    </main>
+
+    <!-- Favorites Panel -->
+    <section class="favorites-panel" id="favoritesPanel">
+        <div class="panel-header">
+            <h2>Favorites</h2>
+            <button class="close-btn" id="closeFavoritesBtn">×</button>
+        </div>
+        <div class="favorites-grid" id="favoritesGrid">
+            <!-- Favorites will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Voice Control Interface -->
+    <div class="voice-control" id="voiceControl">
+        <div class="voice-animation">
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+        </div>
+        <h3>Listening...</h3>
+        <p id="voiceCommand">Say "Play Christian Music" or "Next Station"</p>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="tesla-logo">
+                <img src="images/tesla-logo.png" alt="Tesla" />
+            </div>
+            <div class="loading-spinner"></div>
+            <h2>Loading TC RADIOS...</h2>
+            <p>Connecting to Christian radio stations worldwide</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div class="error-screen" id="errorScreen" style="display: none;">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2>Connection Error</h2>
+            <p>Unable to connect to radio stations. Please check your internet connection.</p>
+            <button class="retry-btn" id="retryBtn">Retry Connection</button>
+        </div>
+    </div>
+
+    <!-- Tesla Integration Scripts -->
+    <script src="js/tesla-api.js"></script>
+    <script src="js/tesla-app.js"></script>
+</body>
+</html>
+

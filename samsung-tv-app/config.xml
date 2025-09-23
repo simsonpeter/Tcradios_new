@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="http://yourdomain.com/tcradios" version="1.0.0" viewmodes="maximized">
+  <name>TC RADIOS</name>
+  <description>Uplifting Christian Music & Messages Worldwide</description>
+  <author email="simsonpeter@gmail.com" href="https://tcradios-new.vercel.app">JayathaSoft</author>
+  <license href="https://opensource.org/licenses/MIT">MIT</license>
+  <tizen:application id="com.jayathasoft.tcradios.tv" package="com.jayathasoft.tcradios.tv" required_version="6.0"/>
+  <tizen:privilege name="http://tizen.org/privilege/tv"/>
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:privilege name="http://tizen.org/privilege/network.get"/>
+  <tizen:privilege name="http://tizen.org/privilege/application.info"/>
+  <tizen:setting screen-orientation="landscape" context-menu="true" background-support="disable" encryption="false" install-location="auto" hwkey-event="enable"/>
+  <tizen:category name="http://tizen.org/category/tv"/>
+  <tizen:content src="index.html"/>
+  <tizen:feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+  <tizen:feature name="http://tizen.org/feature/screen.size.normal.720.1280"/>
+  <icon src="icon.png"/>
+  <content src="index.html"/>
+  <access origin="*" subdomains="true"/>
+  <allow-navigation href="*"/>
+</widget>
+

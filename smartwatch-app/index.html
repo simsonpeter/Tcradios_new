@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC RADIOS - Smartwatch</title>
+    <link rel="stylesheet" href="css/smartwatch-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Smartwatch Header -->
+    <header class="watch-header">
+        <div class="status-bar">
+            <div class="time-display" id="timeDisplay">12:34</div>
+            <div class="battery-indicator" id="batteryIndicator">
+                <span class="battery-icon">🔋</span>
+                <span class="battery-level">85%</span>
+            </div>
+        </div>
+        <div class="app-title">
+            <img src="images/logo.png" alt="TC RADIOS" class="app-logo" />
+            <h1>TC RADIOS</h1>
+        </div>
+    </header>
+
+    <!-- Main Watch Face -->
+    <main class="watch-main">
+        <!-- Now Playing Screen -->
+        <section class="now-playing-screen active" id="nowPlayingScreen">
+            <div class="station-artwork">
+                <img id="currentStationLogo" src="images/default-station.png" alt="Station Logo" />
+                <div class="playback-indicator" id="playbackIndicator"></div>
+            </div>
+            <div class="station-info">
+                <h2 id="currentStationName">Select Station</h2>
+                <p id="currentStationGenre">Christian Music</p>
+                <div class="now-playing-details">
+                    <span class="song-title" id="songTitle">-</span>
+                    <span class="artist-name" id="artistName">-</span>
+                </div>
+            </div>
+            <div class="playback-controls">
+                <button class="control-btn" id="prevBtn">
+                    <span class="icon">⏮</span>
+                </button>
+                <button class="control-btn main-btn" id="playPauseBtn">
+                    <span class="icon">▶</span>
+                </button>
+                <button class="control-btn" id="nextBtn">
+                    <span class="icon">⏭</span>
+                </button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="volume-control">
+                <button class="volume-btn" id="volumeDown">-</button>
+                <div class="volume-slider">
+                    <div class="volume-fill" id="volumeFill"></div>
+                </div>
+                <button class="volume-btn" id="volumeUp">+</button>
+            </div>
+        </section>
+
+        <!-- Language Selection Screen -->
+        <section class="language-screen" id="languageScreen">
+            <h2>Language</h2>
+            <div class="language-grid">
+                <button class="lang-btn active" data-lang="tamil">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Tamil</span>
+                </button>
+                <button class="lang-btn" data-lang="english">
+                    <span class="flag">🇺🇸</span>
+                    <span class="name">English</span>
+                </button>
+                <button class="lang-btn" data-lang="malayalam">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Malayalam</span>
+                </button>
+                <button class="lang-btn" data-lang="hindi">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Hindi</span>
+                </button>
+                <button class="lang-btn" data-lang="dutch">
+                    <span class="flag">🇳🇱</span>
+                    <span class="name">Dutch</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Stations List Screen -->
+        <section class="stations-screen" id="stationsScreen">
+            <div class="screen-header">
+                <h2>Stations</h2>
+                <button class="back-btn" id="backToNowPlaying">←</button>
+            </div>
+            <div class="stations-list" id="stationsList">
+                <!-- Stations will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Favorites Screen -->
+        <section class="favorites-screen" id="favoritesScreen">
+            <div class="screen-header">
+                <h2>Favorites</h2>
+                <button class="back-btn" id="backToNowPlayingFromFav">←</button>
+            </div>
+            <div class="favorites-list" id="favoritesList">
+                <!-- Favorites will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Settings Screen -->
+        <section class="settings-screen" id="settingsScreen">
+            <div class="screen-header">
+                <h2>Settings</h2>
+                <button class="back-btn" id="backToNowPlayingFromSettings">←</button>
+            </div>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <span class="setting-label">Bluetooth Audio</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="bluetoothToggle" checked>
+                        <label for="bluetoothToggle"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Voice Control</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="voiceToggle" checked>
+                        <label for="voiceToggle"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Always On Display</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="alwaysOnToggle" checked>
+                        <label for="alwaysOnToggle"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Ambient Mode</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="ambientToggle" checked>
+                        <label for="ambientToggle"></label>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Watch Navigation -->
+    <nav class="watch-nav">
+        <button class="nav-btn active" data-screen="nowPlaying">
+            <span class="nav-icon">🎵</span>
+            <span class="nav-label">Now Playing</span>
+        </button>
+        <button class="nav-btn" data-screen="language">
+            <span class="nav-icon">🌍</span>
+            <span class="nav-label">Language</span>
+        </button>
+        <button class="nav-btn" data-screen="stations">
+            <span class="nav-icon">📻</span>
+            <span class="nav-label">Stations</span>
+        </button>
+        <button class="nav-btn" data-screen="favorites">
+            <span class="nav-icon">❤️</span>
+            <span class="nav-label">Favorites</span>
+        </button>
+        <button class="nav-btn" data-screen="settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Voice Control Interface -->
+    <div class="voice-control" id="voiceControl">
+        <div class="voice-animation">
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+        </div>
+        <h3>Listening...</h3>
+        <p id="voiceCommand">Say "Play Christian Music"</p>
+    </div>
+
+    <!-- Gesture Hints -->
+    <div class="gesture-hints" id="gestureHints">
+        <div class="hint-item">
+            <span class="gesture">👆</span>
+            <span class="action">Tap to select</span>
+        </div>
+        <div class="hint-item">
+            <span class="gesture">👆👆</span>
+            <span class="action">Double tap for favorites</span>
+        </div>
+        <div class="hint-item">
+            <span class="gesture">👆⏱️</span>
+            <span class="action">Long press for menu</span>
+        </div>
+        <div class="hint-item">
+            <span class="gesture">👈👉</span>
+            <span class="action">Swipe to navigate</span>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading TC RADIOS...</h2>
+            <p>Connecting to Christian radio stations</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div class="error-screen" id="errorScreen" style="display: none;">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2>Connection Error</h2>
+            <p>Unable to connect to radio stations</p>
+            <button class="retry-btn" id="retryBtn">Retry</button>
+        </div>
+    </div>
+
+    <!-- Smartwatch Integration Scripts -->
+    <script src="js/smartwatch-api.js"></script>
+    <script src="js/smartwatch-app.js"></script>
+</body>
+</html>
+

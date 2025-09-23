@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC RADIOS - Samsung TV</title>
+    <link rel="stylesheet" href="css/tv-style.css">
+    <script src="js/tizen.js"></script>
+</head>
+<body>
+    <!-- TV Header -->
+    <header class="tv-header">
+        <div class="logo">
+            <img src="images/logo.png" alt="TC RADIOS" />
+            <h1>TC RADIOS</h1>
+        </div>
+        <div class="tv-controls">
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-indicator"></span>
+                <span class="status-text">Connected</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="tv-main">
+        <!-- Language Selection -->
+        <section class="language-section">
+            <h2>Select Language</h2>
+            <div class="language-grid">
+                <button class="language-btn active" data-lang="tamil">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Tamil</span>
+                </button>
+                <button class="language-btn" data-lang="english">
+                    <span class="flag">🇺🇸</span>
+                    <span class="name">English</span>
+                </button>
+                <button class="language-btn" data-lang="malayalam">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Malayalam</span>
+                </button>
+                <button class="language-btn" data-lang="hindi">
+                    <span class="flag">🇮🇳</span>
+                    <span class="name">Hindi</span>
+                </button>
+                <button class="language-btn" data-lang="dutch">
+                    <span class="flag">🇳🇱</span>
+                    <span class="name">Dutch</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Station List -->
+        <section class="stations-section">
+            <h2>Radio Stations</h2>
+            <div class="stations-grid" id="stationsGrid">
+                <!-- Stations will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Favorites Section -->
+        <section class="favorites-section">
+            <h2>Favorites</h2>
+            <div class="favorites-grid" id="favoritesGrid">
+                <!-- Favorites will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- TV Player -->
+    <div class="tv-player" id="tvPlayer">
+        <div class="player-content">
+            <div class="station-info">
+                <img id="currentStationLogo" src="images/default-station.png" alt="Station Logo" />
+                <div class="station-details">
+                    <h3 id="currentStationName">Select a Station</h3>
+                    <p id="currentStationGenre">Christian Music</p>
+                    <div class="now-playing" id="nowPlaying">
+                        <span class="song-title" id="songTitle">-</span>
+                        <span class="artist-name" id="artistName">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="player-controls">
+                <button class="control-btn" id="playPauseBtn">
+                    <span class="play-icon">▶</span>
+                </button>
+                <button class="control-btn" id="stopBtn">
+                    <span class="stop-icon">⏹</span>
+                </button>
+                <button class="control-btn" id="favoriteBtn">
+                    <span class="heart-icon">♡</span>
+                </button>
+            </div>
+            <div class="volume-control">
+                <span class="volume-label">Volume</span>
+                <div class="volume-slider">
+                    <div class="volume-bar">
+                        <div class="volume-fill" id="volumeFill"></div>
+                    </div>
+                    <span class="volume-value" id="volumeValue">50</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TV Remote Instructions -->
+    <div class="tv-instructions">
+        <div class="instructions-content">
+            <h3>TV Remote Controls</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <span class="key">↑↓←→</span>
+                    <span class="action">Navigate</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">OK</span>
+                    <span class="action">Select</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">Back</span>
+                    <span class="action">Go Back</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">Red</span>
+                    <span class="action">Play/Pause</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">Green</span>
+                    <span class="action">Stop</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key">Blue</span>
+                    <span class="action">Toggle Favorite</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading TC RADIOS...</h2>
+            <p>Connecting to Christian radio stations worldwide</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div class="error-screen" id="errorScreen" style="display: none;">
+        <div class="error-content">
+            <h2>Connection Error</h2>
+            <p>Unable to connect to radio stations. Please check your internet connection.</p>
+            <button class="retry-btn" id="retryBtn">Retry</button>
+        </div>
+    </div>
+
+    <script src="js/tv-app.js"></script>
+</body>
+</html>

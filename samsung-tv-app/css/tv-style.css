@@ -1,0 +1,633 @@
+/* Samsung TV App Styles for TC RADIOS */
+
+:root {
+    --primary-color: #f97316;
+    --secondary-color: #111827;
+    --accent-color: #ff6b35;
+    --text-color: #ffffff;
+    --bg-color: #000000;
+    --card-bg: #1a1a1a;
+    --border-color: #333333;
+    --focus-color: #f97316;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Samsung Sharp Sans', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--bg-color) 0%, #1a1a1a 100%);
+    color: var(--text-color);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* TV Header */
+.tv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid var(--primary-color);
+    backdrop-filter: blur(10px);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+}
+
+.logo h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(16, 185, 129, 0.2);
+    border-radius: 25px;
+    border: 1px solid var(--success-color);
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.status-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--success-color);
+}
+
+/* Main Content */
+.tv-main {
+    padding: 40px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+}
+
+/* Language Section */
+.language-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+    height: fit-content;
+}
+
+.language-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.language-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.language-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.language-btn:hover,
+.language-btn:focus {
+    border-color: var(--primary-color);
+    background: rgba(249, 115, 22, 0.1);
+    transform: scale(1.02);
+}
+
+.language-btn.active {
+    border-color: var(--primary-color);
+    background: rgba(249, 115, 22, 0.2);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.flag {
+    font-size: 1.5rem;
+}
+
+.name {
+    font-weight: 600;
+}
+
+/* Stations Section */
+.stations-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+}
+
+.stations-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+}
+
+.stations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.station-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.station-card:hover,
+.station-card:focus {
+    border-color: var(--primary-color);
+    background: rgba(249, 115, 22, 0.1);
+    transform: scale(1.02);
+}
+
+.station-card.playing {
+    border-color: var(--success-color);
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.station-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+
+.station-info {
+    flex: 1;
+}
+
+.station-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.station-genre {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.favorite-btn:hover {
+    background: rgba(249, 115, 22, 0.2);
+    color: var(--primary-color);
+}
+
+.favorite-btn.active {
+    color: var(--primary-color);
+}
+
+/* Favorites Section */
+.favorites-section {
+    grid-column: 1 / -1;
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+    margin-top: 20px;
+}
+
+.favorites-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+/* TV Player */
+.tv-player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 3px solid var(--primary-color);
+    padding: 30px 40px;
+    transform: translateY(100%);
+    transition: transform 0.5s ease;
+    z-index: 1000;
+}
+
+.tv-player.active {
+    transform: translateY(0);
+}
+
+.player-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.station-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+#currentStationLogo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    object-fit: cover;
+}
+
+.station-details h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.station-details p {
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.now-playing {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.song-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.artist-name {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+
+.player-controls {
+    display: flex;
+    gap: 20px;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    background: rgba(249, 115, 22, 0.2);
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.control-btn:hover,
+.control-btn:focus {
+    background: var(--primary-color);
+    color: var(--bg-color);
+    transform: scale(1.1);
+}
+
+.control-btn.active {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--bg-color);
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 200px;
+}
+
+.volume-label {
+    font-size: 1rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.volume-slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.volume-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+
+.volume-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 4px;
+    width: 50%;
+    transition: width 0.3s ease;
+}
+
+.volume-value {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* TV Instructions */
+.tv-instructions {
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    border: 2px solid var(--primary-color);
+    backdrop-filter: blur(10px);
+    max-width: 300px;
+}
+
+.instructions-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.instruction-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.instruction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.instruction-item:last-child {
+    border-bottom: none;
+}
+
+.key {
+    background: var(--primary-color);
+    color: var(--bg-color);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+
+.action {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 80px;
+    height: 80px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 30px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-content h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.loading-content p {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+/* Error Screen */
+.error-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.error-content {
+    text-align: center;
+    max-width: 500px;
+    padding: 40px;
+}
+
+.error-content h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--error-color);
+}
+
+.error-content p {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+.retry-btn {
+    background: var(--primary-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+    background: var(--accent-color);
+    transform: scale(1.05);
+}
+
+/* Focus Styles for TV Navigation */
+*:focus {
+    outline: 3px solid var(--focus-color);
+    outline-offset: 2px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+
+/* Responsive Design for Different TV Sizes */
+@media (max-width: 1920px) {
+    .tv-main {
+        grid-template-columns: 1fr 1.5fr;
+    }
+}
+
+@media (max-width: 1280px) {
+    .tv-main {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .stations-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .tv-header {
+        padding: 15px 20px;
+    }
+    
+    .logo h1 {
+        font-size: 2rem;
+    }
+    
+    .tv-main {
+        padding: 20px;
+    }
+    
+    .player-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+

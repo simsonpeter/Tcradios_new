@@ -1,0 +1,55 @@
+{
+  "name": "TC RADIOS",
+  "version": "1.0.0",
+  "description": "Uplifting Christian Music & Messages for Tesla",
+  "author": "JayathaSoft",
+  "email": "simsonpeter@gmail.com",
+  "website": "https://tcradios-new.vercel.app",
+  "icon": "icon.png",
+  "splash": "splash.png",
+  "orientation": "landscape",
+  "fullscreen": true,
+  "resizable": false,
+  "minWidth": 1920,
+  "minHeight": 1080,
+  "maxWidth": 1920,
+  "maxHeight": 1080,
+  "permissions": [
+    "audio",
+    "network",
+    "storage",
+    "notifications"
+  ],
+  "features": [
+    "multi-language",
+    "favorites",
+    "voice-control",
+    "auto-play",
+    "offline-mode"
+  ],
+  "tesla": {
+    "compatibility": "2023.44+",
+    "apiVersion": "1.0",
+    "vehicleIntegration": true,
+    "voiceCommands": [
+      "play christian music",
+      "play tamil music",
+      "play english music",
+      "play favorites",
+      "next station",
+      "previous station",
+      "volume up",
+      "volume down",
+      "stop music"
+    ],
+    "dashboardWidget": true,
+    "climateIntegration": false,
+    "navigationIntegration": false
+  },
+  "build": {
+    "target": "tesla",
+    "platform": "tesla-os",
+    "architecture": "arm64",
+    "optimization": "production"
+  }
+}
