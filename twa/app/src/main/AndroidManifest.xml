@@ -24,6 +24,14 @@
 
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+        <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+        <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+        <uses-permission android:name="android.permission.WAKE_LOCK"/>
+        
+        <!-- Android Auto support -->
+        <uses-feature android:name="android.hardware.type.automotive" android:required="false"/>
+        <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
+        
     
 
     
@@ -56,6 +64,11 @@
         <meta-data
             android:name="twa_generator"
             android:value="@string/generatorApp" />
+            
+        <!-- Android Auto metadata -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
 
         
 
@@ -181,6 +194,7 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </service>
+
 
         
             <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />

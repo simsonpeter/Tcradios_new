@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that the app supports Android Auto -->
+    <string name="android_auto_app_name">TC RADIOS</string>
+    <string name="android_auto_app_description">Christian Radio Stations for Android Auto</string>
+    
+    <!-- Android Auto metadata -->
+    <string name="car_app_library_version">1.4.0</string>
+    
+    <!-- Media categories for Android Auto -->
+    <string-array name="media_categories">
+        <item>Christian Radio</item>
+        <item>Tamil</item>
+        <item>English</item>
+        <item>Malayalam</item>
+        <item>Hindi</item>
+        <item>Dutch</item>
+        <item>Sinhala</item>
+    </string-array>
+    
+    <!-- Voice command examples -->
+    <string-array name="voice_commands">
+        <item>Play TC RADIOS</item>
+        <item>Play Tamil radio</item>
+        <item>Play English radio</item>
+        <item>Pause radio</item>
+        <item>Next station</item>
+        <item>Previous station</item>
+        <item>Show favorites</item>
+    </string-array>
+</resources>

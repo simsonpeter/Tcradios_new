@@ -20,8 +20,8 @@
     "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "cool",
-  "appVersionCode": 28,
+  "appVersionName": "Android Auto",
+  "appVersionCode": 29,
   "shortcuts": [
     {
       "name": "Play Last Station",

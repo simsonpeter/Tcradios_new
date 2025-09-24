@@ -1144,6 +1144,11 @@ function clearAllCacheOnLaunch() {
     }
     autoPlayLastOrFirst();
   }, 500); // Small delay to ensure UI is ready
+  
+  // Initialize Android Auto integration
+  initAndroidAutoIntegration();
+  
+  console.log('TC RADIOS app initialized with Android Auto support');
 })();
 function autoPlayLastOrFirst() {
   // Check if there's a last played station
@@ -2013,6 +2018,133 @@ function updateMediaSession(st) {
     updateWidget('stationUpdate', { station: st });
   }
 }
+/* ---- ANDROID AUTO VOICE COMMANDS ---- */
+function initAndroidAutoVoiceCommands() {
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = function(event) {
+      const command = event.results[0][0].transcript.toLowerCase();
+      console.log('Voice command:', command);
+      
+      // Parse voice commands
+      if (command.includes('play') || command.includes('start')) {
+        if (command.includes('next') || command.includes('next station')) {
+          prevNext(1);
+          showNotification('Next station');
+        } else if (command.includes('previous') || command.includes('last')) {
+          prevNext(-1);
+          showNotification('Previous station');
+        } else if (command.includes('favorite') || command.includes('favourite')) {
+          switchTab('favorites');
+          showNotification('Showing favorites');
+        } else {
+          audio.play();
+          showNotification('Playing');
+        }
+      } else if (command.includes('pause') || command.includes('stop')) {
+        audio.pause();
+        showNotification('Paused');
+      } else if (command.includes('favorite') || command.includes('favourite')) {
+        if (lastPlayedStation) {
+          toggleFav(lastPlayedStation.station);
+        }
+      } else if (command.includes('language') || command.includes('lang')) {
+        if (command.includes('tamil')) {
+          switchLanguage('tamil');
+        } else if (command.includes('english')) {
+          switchLanguage('english');
+        } else if (command.includes('malayalam')) {
+          switchLanguage('malayalam');
+        } else if (command.includes('hindi')) {
+          switchLanguage('hindi');
+        } else if (command.includes('dutch')) {
+          switchLanguage('dutch');
+        } else if (command.includes('sinhala')) {
+          switchLanguage('sinhala');
+        }
+      }
+    };
+    
+    recognition.onerror = function(event) {
+      console.log('Voice recognition error:', event.error);
+    };
+    
+    // Expose recognition for Android Auto
+    window.androidAutoRecognition = recognition;
+  }
+}
+
+/* ---- ANDROID AUTO INTEGRATION ---- */
+function initAndroidAutoIntegration() {
+  // Initialize voice commands
+  initAndroidAutoVoiceCommands();
+  
+  // Enhanced media session for Android Auto
+  if ('mediaSession' in navigator) {
+    // Set up additional Android Auto specific handlers
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      console.log('Seek to:', details.seekTime);
+      showNotification('Seek to ' + Math.round(details.seekTime) + 's');
+    });
+    
+    // Update playback state
+    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+  }
+  
+  // Listen for Android Auto events
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // App is in background - optimize for Android Auto
+      console.log('App in background - Android Auto mode');
+    } else {
+      // App is in foreground
+      console.log('App in foreground');
+    }
+  });
+  
+  // Handle Android Auto specific events
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'android-auto') {
+      handleAndroidAutoMessage(event.data);
+    }
+  });
+}
+
+function handleAndroidAutoMessage(data) {
+  console.log('Android Auto message:', data);
+  
+  switch (data.action) {
+    case 'play':
+      audio.play();
+      break;
+    case 'pause':
+      audio.pause();
+      break;
+    case 'next':
+      prevNext(1);
+      break;
+    case 'previous':
+      prevNext(-1);
+      break;
+    case 'toggle-favorite':
+      if (lastPlayedStation) {
+        toggleFav(lastPlayedStation.station);
+      }
+      break;
+    case 'switch-language':
+      if (data.language) {
+        switchLanguage(data.language);
+      }
+      break;
+  }
+}
+
 /* ---- WIDGET COMMUNICATION ---- */
 function updateWidget(type, data) {
   // Send message to widget iframe

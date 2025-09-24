@@ -209,5 +209,8 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     
         implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+        
+        // Basic media support for Android Auto compatibility
+        implementation 'androidx.media:media:1.7.0'
     
 }
