@@ -608,8 +608,17 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fs-prev:hover,#fs-next:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
 #fs-play:hover{transform:scale(1.1);box-shadow:0 8px 25px rgba(249,115,22,0.5)}
 #fs-prev:active,#fs-play:active,#fs-next:active{transform:scale(0.95)}
-#fs-prev i,#fs-play i,#fs-next i{font-size:1.5rem}
+#fs-prev i,#fs-play i,#fs-next i,#fs-cast i{font-size:1.5rem}
 #fs-play i{font-size:2rem}
+#fs-cast{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+         font-size:2rem;cursor:pointer;padding:1rem;border-radius:50%;
+         transition:var(--transition);min-width:60px;min-height:60px;
+         display:flex;align-items:center;justify-content:center;
+         box-shadow:0 4px 12px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
+#fs-cast:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-cast:active{transform:scale(0.95)}
+#fs-cast.casting{background:var(--gradient-primary);color:#fff;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
 /* Fullscreen Volume Control */
 #fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
                    margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
@@ -636,6 +645,40 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                                    transition:var(--transition)}
 #fs-volume-slider::-moz-range-thumb:hover{transform:scale(1.2);background:#ff6b35}
 #fs-volume-slider::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
+/* Fullscreen Equalizer */
+#fullscreen-equalizer{display:flex;flex-direction:column;align-items:center;justify-content:center;
+                      margin-top:1.5rem;width:100%;max-width:400px;padding:0 2rem}
+#fs-eq-toggle{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+              font-size:1.2rem;cursor:pointer;padding:0.6rem;border-radius:50%;
+              transition:var(--transition);min-width:44px;min-height:44px;
+              display:flex;align-items:center;justify-content:center;
+              box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
+#fs-eq-toggle:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-eq-toggle:active{transform:scale(0.95)}
+#fs-eq-toggle.active{background:var(--gradient-primary);color:#fff}
+#fs-eq-toggle i{font-size:1rem}
+#eq-panel{width:100%;background:rgba(0,0,0,0.3);border-radius:1rem;padding:1.5rem;
+          margin-top:1rem;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1)}
+#eq-presets{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center}
+.eq-preset{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+           color:var(--text);padding:0.5rem 1rem;border-radius:0.5rem;cursor:pointer;
+           transition:var(--transition);font-size:0.85rem;font-weight:500}
+.eq-preset:hover{background:rgba(249,115,22,0.2);border-color:var(--accent)}
+.eq-preset.active{background:var(--gradient-primary);color:#fff;border-color:var(--accent)}
+#eq-controls{display:flex;flex-direction:column;gap:1rem}
+.eq-control{display:flex;align-items:center;gap:1rem}
+.eq-control label{min-width:60px;color:var(--text);font-weight:500;font-size:0.9rem}
+.eq-control input[type="range"]{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);
+                                 outline:none;cursor:pointer;appearance:none;-webkit-appearance:none}
+.eq-control input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;
+                                                      width:18px;height:18px;border-radius:50%;
+                                                      background:var(--accent);cursor:pointer;
+                                                      box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+.eq-control input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
+                                                  background:var(--accent);cursor:pointer;
+                                                  border:none;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+.eq-control input[type="range"]::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
+.eq-control span{min-width:30px;text-align:right;color:var(--accent);font-weight:600;font-size:0.85rem}
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -670,6 +713,18 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #fs-volume-slider{height:5px}
   #fs-volume-slider::-webkit-slider-thumb{width:16px;height:16px}
   #fs-volume-slider::-moz-range-thumb{width:16px;height:16px}
+  #fullscreen-equalizer{margin-top:1rem;padding:0 1rem;max-width:100%}
+  #fs-eq-toggle{min-width:44px;min-height:44px;padding:0.6rem;font-size:1.1rem}
+  #fs-eq-toggle i{font-size:0.9rem}
+  #eq-panel{padding:1rem;margin-top:0.8rem}
+  #eq-presets{gap:0.4rem;margin-bottom:1rem}
+  .eq-preset{padding:0.4rem 0.8rem;font-size:0.75rem}
+  .eq-control{gap:0.8rem}
+  .eq-control label{min-width:50px;font-size:0.85rem}
+  .eq-control input[type="range"]{height:5px}
+  .eq-control input[type="range"]::-webkit-slider-thumb{width:16px;height:16px}
+  .eq-control input[type="range"]::-moz-range-thumb{width:16px;height:16px}
+  .eq-control span{min-width:25px;font-size:0.8rem}
 }
 /* Mobile Landscape */
 @media (max-width: 896px) and (orientation: landscape) {
@@ -835,6 +890,17 @@ audio{display:none}
 #sleepModal button{margin:.3rem;padding:.4rem .8rem;border:1px solid var(--border);
                    border-radius:.3rem;background:var(--bg);color:var(--text)}
 #sleepModal button:hover{background:var(--accent);color:#fff}
+#alarmModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
+            display:none;align-items:center;justify-content:center;z-index:999}
+#alarmModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;
+                 text-align:left;color:var(--text);max-width:400px;width:90%}
+#alarmModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
+#alarmModal button{margin:.3rem;padding:.5rem 1rem;border:1px solid var(--border);
+                   border-radius:.3rem;background:var(--bg);color:var(--text);
+                   cursor:pointer;transition:var(--transition);font-size:0.9rem}
+#alarmModal button:hover{background:var(--accent);color:#fff}
+#alarmModal #cancelAlarm{background:rgba(220,38,38,0.2);border-color:rgba(220,38,38,0.5)}
+#alarmModal #cancelAlarm:hover{background:rgba(220,38,38,0.8);color:#fff}
 
 /* Drag and Drop Styles */
 .item.dragging {
@@ -922,7 +988,51 @@ audio{display:none}
   color: var(--accent);
   margin-right: 8px;
 }
+/* Floating Mini Player Widget */
+#floating-widget{position:fixed;bottom:90px;right:20px;z-index:1000;
+                 background:var(--card);border-radius:1rem;padding:0.8rem;
+                 box-shadow:0 8px 24px rgba(0,0,0,0.4);backdrop-filter:blur(20px);
+                 border:1px solid var(--border);min-width:280px;max-width:320px;
+                 animation:slideInUp 0.3s ease;display:none}
+#floating-widget.active{display:block}
+@keyframes slideInUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+#widget-content{display:flex;align-items:center;gap:0.8rem}
+#widget-img{width:50px;height:50px;border-radius:50%;object-fit:cover;
+           box-shadow:0 2px 8px rgba(0,0,0,0.2);animation:spin 3s linear infinite paused}
+#floating-widget.playing #widget-img{animation-play-state:running}
+#widget-info{flex:1;min-width:0}
+#widget-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;
+            text-overflow:ellipsis;margin-bottom:0.2rem}
+#widget-status{font-size:0.75rem;color:var(--accent);white-space:nowrap}
+#widget-controls-mini{display:flex;gap:0.4rem;align-items:center}
+#widget-prev-mini,#widget-play-mini,#widget-next-mini{background:rgba(249,115,22,0.2);
+                                                      border:none;color:var(--accent);
+                                                      font-size:1rem;cursor:pointer;
+                                                      padding:0.5rem;border-radius:50%;
+                                                      transition:var(--transition);
+                                                      min-width:36px;min-height:36px;
+                                                      display:flex;align-items:center;
+                                                      justify-content:center}
+#widget-play-mini{background:var(--gradient-primary);color:#fff;min-width:40px;min-height:40px}
+#widget-prev-mini:hover,#widget-next-mini:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#widget-play-mini:hover{transform:scale(1.1)}
+#widget-close{background:rgba(0,0,0,0.2);border:none;color:var(--text);
+             font-size:0.9rem;cursor:pointer;padding:0.4rem;border-radius:50%;
+             width:28px;height:28px;display:flex;align-items:center;
+             justify-content:center;transition:var(--transition);margin-left:0.4rem}
+#widget-close:hover{background:rgba(0,0,0,0.4);transform:scale(1.1)}
+/* Mobile widget adjustments */
+@media (max-width: 480px) {
+  #floating-widget{bottom:100px;right:10px;left:10px;max-width:none;min-width:auto}
+  #widget-img{width:40px;height:40px}
+  #widget-name{font-size:0.85rem}
+  #widget-status{font-size:0.7rem}
+  #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:32px;min-height:32px;padding:0.4rem;font-size:0.9rem}
+  #widget-play-mini{min-width:36px;min-height:36px}
+}
 </style>
+<!-- Chromecast SDK -->
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </head>
 <body>
 <header>
@@ -948,6 +1058,9 @@ audio{display:none}
     <select id="langSelect"></select>
   </div>
     <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
+    <button id="alarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i></button>
+    <button id="castBtn" title="Cast to Device" style="display:none"><i class="fas fa-cast"></i></button>
+    <button id="widgetBtn" title="Open Widget"><i class="fas fa-th"></i></button>
     <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
   </div>
 </header>
@@ -1116,10 +1229,56 @@ audio{display:none}
     <button id="fs-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
     <button id="fs-play" title="Play/Pause"><i class="fas fa-play"></i></button>
     <button id="fs-next" title="Next"><i class="fas fa-step-forward"></i></button>
+    <button id="fs-cast" title="Cast to Device"><i class="fas fa-cast"></i></button>
   </div>
   <div id="fullscreen-volume">
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
     <input type="range" id="fs-volume-slider" min="0" max="100" value="100" title="Volume">
+  </div>
+  <div id="fullscreen-equalizer">
+    <button id="fs-eq-toggle" title="Equalizer"><i class="fas fa-sliders-h"></i></button>
+    <div id="eq-panel" style="display:none;">
+      <div id="eq-presets">
+        <button class="eq-preset active" data-preset="normal">Normal</button>
+        <button class="eq-preset" data-preset="bass">Bass Boost</button>
+        <button class="eq-preset" data-preset="vocal">Vocal</button>
+        <button class="eq-preset" data-preset="treble">Treble</button>
+        <button class="eq-preset" data-preset="flat">Flat</button>
+      </div>
+      <div id="eq-controls">
+        <div class="eq-control">
+          <label>Bass</label>
+          <input type="range" id="eq-bass" min="-12" max="12" value="0" step="1">
+          <span id="eq-bass-value">0</span>
+        </div>
+        <div class="eq-control">
+          <label>Treble</label>
+          <input type="range" id="eq-treble" min="-12" max="12" value="0" step="1">
+          <span id="eq-treble-value">0</span>
+        </div>
+        <div class="eq-control">
+          <label>Balance</label>
+          <input type="range" id="eq-balance" min="-1" max="1" value="0" step="0.1">
+          <span id="eq-balance-value">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Floating Mini Player Widget -->
+<div id="floating-widget" style="display:none;">
+  <div id="widget-content">
+    <img id="widget-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
+    <div id="widget-info">
+      <div id="widget-name"></div>
+      <div id="widget-status">Live</div>
+    </div>
+    <div id="widget-controls-mini">
+      <button id="widget-prev-mini" title="Previous"><i class="fas fa-step-backward"></i></button>
+      <button id="widget-play-mini" title="Play/Pause"><i class="fas fa-play"></i></button>
+      <button id="widget-next-mini" title="Next"><i class="fas fa-step-forward"></i></button>
+    </div>
+    <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
   </div>
 </div>
 <div id="sleepModal">
@@ -1130,6 +1289,33 @@ audio{display:none}
     <input type="number" id="customMin" placeholder="min" style="width:70px"/>
     <button id="setCustom">Set</button><br>
     <button id="cancelSleep">Cancel</button>
+  </div>
+</div>
+<div id="alarmModal">
+  <div>
+    <h3>Alarm Clock</h3>
+    <div style="margin:1rem 0">
+      <label style="display:block;margin-bottom:0.5rem">Time:</label>
+      <input type="time" id="alarmTime" style="padding:0.5rem;border-radius:0.3rem;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;width:100%"/>
+    </div>
+    <div style="margin:1rem 0">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input type="checkbox" id="alarmGradual" checked/>
+        <span>Gradual volume increase</span>
+      </label>
+    </div>
+    <div style="margin:1rem 0">
+      <label style="display:block;margin-bottom:0.5rem">Station:</label>
+      <select id="alarmStation" style="padding:0.5rem;border-radius:0.3rem;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;width:100%">
+        <option value="last">Last Played Station</option>
+      </select>
+    </div>
+    <div id="alarmStatus" style="margin:1rem 0;padding:0.5rem;background:rgba(249,115,22,0.1);border-radius:0.3rem;display:none"></div>
+    <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
+      <button id="setAlarm">Set Alarm</button>
+      <button id="cancelAlarm">Cancel Alarm</button>
+      <button id="closeAlarmModal">Close</button>
+    </div>
   </div>
 </div>
 <audio id="audio"></audio>
@@ -1178,6 +1364,14 @@ const fsPrev = document.getElementById('fs-prev');
 const fsNext = document.getElementById('fs-next');
 const fsVolumeBtn = document.getElementById('fs-volume-btn');
 const fsVolumeSlider = document.getElementById('fs-volume-slider');
+const fsEqToggle = document.getElementById('fs-eq-toggle');
+const eqPanel = document.getElementById('eq-panel');
+const eqBass = document.getElementById('eq-bass');
+const eqTreble = document.getElementById('eq-treble');
+const eqBalance = document.getElementById('eq-balance');
+const eqBassValue = document.getElementById('eq-bass-value');
+const eqTrebleValue = document.getElementById('eq-treble-value');
+const eqBalanceValue = document.getElementById('eq-balance-value');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -1560,6 +1754,14 @@ function play(st, i) {
   if (fullscreenPlayer.classList.contains('active')) {
     updateFullscreenPlayer();
   }
+  // Update floating widget if visible
+  if (floatingWidget && floatingWidget.classList.contains('active')) {
+    updateFloatingWidget();
+  }
+  // Update cast if active
+  if (typeof updateCastOnStationChange === 'function') {
+    updateCastOnStationChange();
+  }
   // Refresh the display to show playing state
   switchTab(currentTab);
   // Haptic feedback for mobile
@@ -1728,6 +1930,193 @@ if (savedVolume !== null) {
     updateVolumeIcon(parseInt(savedVolume));
   }
 }
+/* ---- EQUALIZER FUNCTIONALITY ---- */
+let audioContext = null;
+let sourceNode = null;
+let gainNode = null;
+let bassFilter = null;
+let trebleFilter = null;
+let pannerNode = null;
+let isEqualizerActive = false;
+
+// Initialize Web Audio API
+function initEqualizer() {
+  if (!audioContext && audio.src) {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      sourceNode = audioContext.createMediaElementSource(audio);
+      
+      // Create gain node for volume
+      gainNode = audioContext.createGain();
+      
+      // Create bass filter (low shelf)
+      bassFilter = audioContext.createBiquadFilter();
+      bassFilter.type = 'lowshelf';
+      bassFilter.frequency.value = 200;
+      
+      // Create treble filter (high shelf)
+      trebleFilter = audioContext.createBiquadFilter();
+      trebleFilter.type = 'highshelf';
+      trebleFilter.frequency.value = 3000;
+      
+      // Create panner for balance
+      pannerNode = audioContext.createStereoPanner();
+      
+      // Connect nodes: source -> bass -> treble -> panner -> gain -> destination
+      sourceNode.connect(bassFilter);
+      bassFilter.connect(trebleFilter);
+      trebleFilter.connect(pannerNode);
+      pannerNode.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      isEqualizerActive = true;
+    } catch (e) {
+      console.log('Web Audio API not supported or already initialized:', e);
+      isEqualizerActive = false;
+    }
+  }
+}
+
+// Equalizer presets
+const eqPresets = {
+  normal: { bass: 0, treble: 0, balance: 0 },
+  bass: { bass: 8, treble: -2, balance: 0 },
+  vocal: { bass: -3, treble: 6, balance: 0 },
+  treble: { bass: -4, treble: 8, balance: 0 },
+  flat: { bass: 0, treble: 0, balance: 0 }
+};
+
+// Apply equalizer settings
+function applyEqualizer(bass, treble, balance) {
+  if (!isEqualizerActive) {
+    initEqualizer();
+  }
+  
+  if (bassFilter && trebleFilter && pannerNode) {
+    // Bass: -12 to +12 dB
+    bassFilter.gain.value = bass;
+    
+    // Treble: -12 to +12 dB
+    trebleFilter.gain.value = treble;
+    
+    // Balance: -1 (left) to +1 (right)
+    pannerNode.pan.value = balance;
+  }
+  
+  // Update display values
+  if (eqBassValue) eqBassValue.textContent = bass > 0 ? `+${bass}` : bass;
+  if (eqTrebleValue) eqTrebleValue.textContent = treble > 0 ? `+${treble}` : treble;
+  if (eqBalanceValue) eqBalanceValue.textContent = balance.toFixed(1);
+  
+  // Save to localStorage
+  localStorage.setItem('tcr-eq-bass', bass);
+  localStorage.setItem('tcr-eq-treble', treble);
+  localStorage.setItem('tcr-eq-balance', balance);
+}
+
+// Apply preset
+function applyEqPreset(presetName) {
+  const preset = eqPresets[presetName];
+  if (preset) {
+    applyEqualizer(preset.bass, preset.treble, preset.balance);
+    if (eqBass) eqBass.value = preset.bass;
+    if (eqTreble) eqTreble.value = preset.treble;
+    if (eqBalance) eqBalance.value = preset.balance;
+    
+    // Update active preset button
+    document.querySelectorAll('.eq-preset').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.preset === presetName) {
+        btn.classList.add('active');
+      }
+    });
+    
+    localStorage.setItem('tcr-eq-preset', presetName);
+    hapticFeedback('light');
+  }
+}
+
+// Toggle equalizer panel
+if (fsEqToggle) {
+  fsEqToggle.onclick = () => {
+    if (eqPanel) {
+      const isVisible = eqPanel.style.display !== 'none';
+      eqPanel.style.display = isVisible ? 'none' : 'block';
+      fsEqToggle.classList.toggle('active', !isVisible);
+      hapticFeedback('light');
+      
+      // Initialize equalizer when opening
+      if (!isVisible && audio.src) {
+        initEqualizer();
+      }
+    }
+  };
+}
+
+// Preset buttons
+document.querySelectorAll('.eq-preset').forEach(btn => {
+  btn.onclick = () => {
+    applyEqPreset(btn.dataset.preset);
+  };
+});
+
+// Manual controls
+if (eqBass) {
+  eqBass.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    applyEqualizer(value, eqTreble ? parseInt(eqTreble.value) : 0, eqBalance ? parseFloat(eqBalance.value) : 0);
+    // Remove active preset when manually adjusting
+    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
+    localStorage.removeItem('tcr-eq-preset');
+    hapticFeedback('light');
+  });
+}
+
+if (eqTreble) {
+  eqTreble.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    applyEqualizer(eqBass ? parseInt(eqBass.value) : 0, value, eqBalance ? parseFloat(eqBalance.value) : 0);
+    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
+    localStorage.removeItem('tcr-eq-preset');
+    hapticFeedback('light');
+  });
+}
+
+if (eqBalance) {
+  eqBalance.addEventListener('input', (e) => {
+    const value = parseFloat(e.target.value);
+    applyEqualizer(eqBass ? parseInt(eqBass.value) : 0, eqTreble ? parseInt(eqTreble.value) : 0, value);
+    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
+    localStorage.removeItem('tcr-eq-preset');
+    hapticFeedback('light');
+  });
+}
+
+// Load saved equalizer settings
+const savedBass = localStorage.getItem('tcr-eq-bass');
+const savedTreble = localStorage.getItem('tcr-eq-treble');
+const savedBalance = localStorage.getItem('tcr-eq-balance');
+const savedPreset = localStorage.getItem('tcr-eq-preset');
+
+if (savedPreset && eqPresets[savedPreset]) {
+  applyEqPreset(savedPreset);
+} else if (savedBass !== null || savedTreble !== null || savedBalance !== null) {
+  applyEqualizer(
+    savedBass ? parseInt(savedBass) : 0,
+    savedTreble ? parseInt(savedTreble) : 0,
+    savedBalance ? parseFloat(savedBalance) : 0
+  );
+  if (eqBass) eqBass.value = savedBass || 0;
+  if (eqTreble) eqTreble.value = savedTreble || 0;
+  if (eqBalance) eqBalance.value = savedBalance || 0;
+}
+
+// Initialize equalizer when audio starts playing
+audio.addEventListener('play', () => {
+  if (!isEqualizerActive && audio.src) {
+    initEqualizer();
+  }
+});
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
@@ -1738,6 +2127,11 @@ audio.onplay = () => {
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.add('playing');
     fsPlay.innerHTML = '<i class="fas fa-pause"></i>';
+  }
+  // Update floating widget if visible
+  if (floatingWidget && floatingWidget.classList.contains('active')) {
+    floatingWidget.classList.add('playing');
+    widgetPlayMini.innerHTML = '<i class="fas fa-pause"></i>';
   }
   // Refresh display to show playing state
   switchTab(currentTab);
@@ -1751,6 +2145,11 @@ audio.onpause = () => {
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
     fsPlay.innerHTML = '<i class="fas fa-play"></i>';
+  }
+  // Update floating widget if visible
+  if (floatingWidget && floatingWidget.classList.contains('active')) {
+    floatingWidget.classList.remove('playing');
+    widgetPlayMini.innerHTML = '<i class="fas fa-play"></i>';
   }
   // Stop metadata fetching when paused
   stopMetadataFetching();
@@ -2261,6 +2660,552 @@ function setSleep(min) {
     sleepModal.style.display = 'none';
   }, min * 60000);
   sleepModal.style.display = 'none';
+}
+/* ---- ALARM CLOCK ---- */
+let alarmTimer = null;
+let alarmInterval = null;
+const alarmModal = document.getElementById('alarmModal');
+const alarmBtn = document.getElementById('alarmBtn');
+const alarmTime = document.getElementById('alarmTime');
+const alarmStation = document.getElementById('alarmStation');
+const alarmGradual = document.getElementById('alarmGradual');
+const alarmStatus = document.getElementById('alarmStatus');
+
+// Populate alarm station dropdown
+function populateAlarmStations() {
+  if (!alarmStation) return;
+  
+  // Clear existing options except "Last Played"
+  alarmStation.innerHTML = '<option value="last">Last Played Station</option>';
+  
+  // Add favorites
+  if (favorites.length > 0) {
+    const favOption = document.createElement('option');
+    favOption.value = '';
+    favOption.textContent = '--- Favorites ---';
+    favOption.disabled = true;
+    alarmStation.appendChild(favOption);
+    
+    favorites.forEach(favName => {
+      const allStations = Object.values(stationsPerLang).flat();
+      const station = allStations.find(s => s.name === favName);
+      if (station) {
+        const option = document.createElement('option');
+        option.value = station.name;
+        option.textContent = station.name;
+        alarmStation.appendChild(option);
+      }
+    });
+  }
+  
+  // Add all stations
+  const allOption = document.createElement('option');
+  allOption.value = '';
+  allOption.textContent = '--- All Stations ---';
+  allOption.disabled = true;
+  alarmStation.appendChild(allOption);
+  
+  Object.values(stationsPerLang).flat().forEach(station => {
+    if (!favorites.includes(station.name)) {
+      const option = document.createElement('option');
+      option.value = station.name;
+      option.textContent = `${station.name} (${station.genre || 'Radio'})`;
+      alarmStation.appendChild(option);
+    }
+  });
+}
+
+// Set alarm
+function setAlarm() {
+  const timeValue = alarmTime.value;
+  if (!timeValue) {
+    alert('Please select a time');
+    return;
+  }
+  
+  const [hours, minutes] = timeValue.split(':').map(Number);
+  const now = new Date();
+  const alarmDate = new Date();
+  alarmDate.setHours(hours, minutes, 0, 0);
+  
+  // If alarm time has passed today, set for tomorrow
+  if (alarmDate <= now) {
+    alarmDate.setDate(alarmDate.getDate() + 1);
+  }
+  
+  const timeUntilAlarm = alarmDate.getTime() - now.getTime();
+  
+  // Clear existing alarm
+  if (alarmTimer) {
+    clearTimeout(alarmTimer);
+  }
+  if (alarmInterval) {
+    clearInterval(alarmInterval);
+  }
+  
+  // Set alarm
+  alarmTimer = setTimeout(() => {
+    triggerAlarm();
+  }, timeUntilAlarm);
+  
+  // Save alarm settings
+  const alarmSettings = {
+    time: timeValue,
+    station: alarmStation.value,
+    gradual: alarmGradual.checked,
+    nextAlarm: alarmDate.toISOString()
+  };
+  localStorage.setItem('tcr-alarm', JSON.stringify(alarmSettings));
+  
+  // Update status
+  alarmStatus.style.display = 'block';
+  alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+  alarmStatus.style.background = 'rgba(34, 197, 94, 0.2)';
+  alarmStatus.style.color = '#22c55e';
+  
+  // Update alarm button
+  if (alarmBtn) {
+    alarmBtn.style.color = 'var(--accent)';
+    alarmBtn.title = `Alarm: ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+  }
+  
+  hapticFeedback('success');
+  
+  // Check alarm every minute
+  alarmInterval = setInterval(() => {
+    checkAlarm();
+  }, 60000);
+}
+
+// Trigger alarm
+function triggerAlarm() {
+  const alarmSettings = JSON.parse(localStorage.getItem('tcr-alarm') || '{}');
+  let stationToPlay = null;
+  
+  // Find station to play
+  if (alarmSettings.station === 'last' && lastPlayedStation) {
+    const allStations = Object.values(stationsPerLang).flat();
+    stationToPlay = allStations.find(s => s.name === lastPlayedStation.station.name);
+  } else if (alarmSettings.station) {
+    const allStations = Object.values(stationsPerLang).flat();
+    stationToPlay = allStations.find(s => s.name === alarmSettings.station);
+  }
+  
+  if (!stationToPlay) {
+    // Play first favorite or first station
+    if (favorites.length > 0) {
+      const allStations = Object.values(stationsPerLang).flat();
+      stationToPlay = allStations.find(s => s.name === favorites[0]);
+    }
+    if (!stationToPlay) {
+      const stations = stationsPerLang[currentLang] || [];
+      if (stations.length > 0) {
+        stationToPlay = stations[0];
+      }
+    }
+  }
+  
+  if (stationToPlay) {
+    const allStations = Object.values(stationsPerLang).flat();
+    const index = allStations.indexOf(stationToPlay);
+    if (index >= 0) {
+      // Gradual volume increase
+      if (alarmSettings.gradual) {
+        audio.volume = 0;
+        play(stationToPlay, index);
+        let vol = 0;
+        const volumeInterval = setInterval(() => {
+          vol += 0.05;
+          if (vol >= 1) {
+            vol = 1;
+            clearInterval(volumeInterval);
+          }
+          audio.volume = vol;
+        }, 500);
+      } else {
+        audio.volume = 1;
+        play(stationToPlay, index);
+      }
+      
+      // Show notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('TC RADIOS Alarm', {
+          body: `Alarm: ${stationToPlay.name}`,
+          icon: stationToPlay.logo || '/icons/icon-192x192.png'
+        });
+      }
+    }
+  }
+  
+  // Clear alarm
+  cancelAlarm();
+}
+
+// Check if alarm time is reached
+function checkAlarm() {
+  const alarmSettings = JSON.parse(localStorage.getItem('tcr-alarm') || '{}');
+  if (!alarmSettings.nextAlarm) return;
+  
+  const now = new Date();
+  const alarmDate = new Date(alarmSettings.nextAlarm);
+  
+  if (now >= alarmDate) {
+    triggerAlarm();
+  }
+}
+
+// Cancel alarm
+function cancelAlarm() {
+  if (alarmTimer) {
+    clearTimeout(alarmTimer);
+    alarmTimer = null;
+  }
+  if (alarmInterval) {
+    clearInterval(alarmInterval);
+    alarmInterval = null;
+  }
+  localStorage.removeItem('tcr-alarm');
+  alarmStatus.style.display = 'none';
+  
+  if (alarmBtn) {
+    alarmBtn.style.color = '';
+    alarmBtn.title = 'Alarm Clock';
+  }
+  
+  hapticFeedback('light');
+}
+
+// Alarm button handlers
+if (alarmBtn) {
+  alarmBtn.onclick = () => {
+    populateAlarmStations();
+    alarmModal.style.display = 'flex';
+    hapticFeedback('light');
+    
+    // Load saved alarm
+    const savedAlarm = JSON.parse(localStorage.getItem('tcr-alarm') || '{}');
+    if (savedAlarm.time) {
+      alarmTime.value = savedAlarm.time;
+      if (savedAlarm.station) {
+        alarmStation.value = savedAlarm.station;
+      }
+      alarmGradual.checked = savedAlarm.gradual !== false;
+      
+      if (savedAlarm.nextAlarm) {
+        const alarmDate = new Date(savedAlarm.nextAlarm);
+        alarmStatus.style.display = 'block';
+        alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        alarmStatus.style.background = 'rgba(34, 197, 94, 0.2)';
+        alarmStatus.style.color = '#22c55e';
+      }
+    }
+  };
+}
+
+if (document.getElementById('setAlarm')) {
+  document.getElementById('setAlarm').onclick = () => {
+    setAlarm();
+  };
+}
+
+if (document.getElementById('cancelAlarm')) {
+  document.getElementById('cancelAlarm').onclick = () => {
+    cancelAlarm();
+    alarmModal.style.display = 'none';
+  };
+}
+
+if (document.getElementById('closeAlarmModal')) {
+  document.getElementById('closeAlarmModal').onclick = () => {
+    alarmModal.style.display = 'none';
+  };
+}
+
+// Restore alarm on page load
+window.addEventListener('load', () => {
+  const savedAlarm = JSON.parse(localStorage.getItem('tcr-alarm') || '{}');
+  if (savedAlarm.nextAlarm) {
+    const alarmDate = new Date(savedAlarm.nextAlarm);
+    const now = new Date();
+    
+    if (alarmDate > now) {
+      const timeUntilAlarm = alarmDate.getTime() - now.getTime();
+      alarmTimer = setTimeout(() => {
+        triggerAlarm();
+      }, timeUntilAlarm);
+      
+      // Update button
+      if (alarmBtn) {
+        alarmBtn.style.color = 'var(--accent)';
+        alarmBtn.title = `Alarm: ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      }
+      
+      // Check every minute
+      alarmInterval = setInterval(() => {
+        checkAlarm();
+      }, 60000);
+    } else {
+      // Alarm time has passed, clear it
+      cancelAlarm();
+    }
+  }
+  
+  // Populate stations when data is loaded
+  if (Object.keys(stationsPerLang).length > 0) {
+    populateAlarmStations();
+  }
+});
+/* ---- FLOATING WIDGET ---- */
+const floatingWidget = document.getElementById('floating-widget');
+const widgetBtn = document.getElementById('widgetBtn');
+const widgetClose = document.getElementById('widget-close');
+const widgetImg = document.getElementById('widget-img');
+const widgetName = document.getElementById('widget-name');
+const widgetStatus = document.getElementById('widget-status');
+const widgetPlayMini = document.getElementById('widget-play-mini');
+const widgetPrevMini = document.getElementById('widget-prev-mini');
+const widgetNextMini = document.getElementById('widget-next-mini');
+
+function updateFloatingWidget() {
+  if (!floatingWidget || !floatingWidget.classList.contains('active')) return;
+  
+  widgetImg.src = pImg.src;
+  widgetName.textContent = pName.textContent.trim() || 'TC RADIOS';
+  widgetStatus.textContent = document.getElementById('p-now').textContent;
+  
+  // Update playing state
+  if (player.classList.contains('playing')) {
+    floatingWidget.classList.add('playing');
+    widgetPlayMini.innerHTML = '<i class="fas fa-pause"></i>';
+  } else {
+    floatingWidget.classList.remove('playing');
+    widgetPlayMini.innerHTML = '<i class="fas fa-play"></i>';
+  }
+}
+
+function toggleFloatingWidget() {
+  if (floatingWidget) {
+    const isActive = floatingWidget.classList.contains('active');
+    if (isActive) {
+      floatingWidget.classList.remove('active');
+      localStorage.setItem('tcr-widget-visible', 'false');
+    } else {
+      floatingWidget.classList.add('active');
+      updateFloatingWidget();
+      localStorage.setItem('tcr-widget-visible', 'true');
+    }
+    hapticFeedback('light');
+  }
+}
+
+// Widget button handler
+if (widgetBtn) {
+  widgetBtn.onclick = () => {
+    toggleFloatingWidget();
+  };
+}
+
+// Widget close button
+if (widgetClose) {
+  widgetClose.onclick = () => {
+    toggleFloatingWidget();
+  };
+}
+
+// Widget controls
+if (widgetPlayMini) {
+  widgetPlayMini.onclick = () => {
+    audio.paused ? audio.play() : audio.pause();
+    hapticFeedback('medium');
+  };
+}
+
+if (widgetPrevMini) {
+  widgetPrevMini.onclick = () => {
+    prevNext(-1);
+    hapticFeedback('light');
+  };
+}
+
+if (widgetNextMini) {
+  widgetNextMini.onclick = () => {
+    prevNext(1);
+    hapticFeedback('light');
+  };
+}
+
+// Update widget when playing state changes
+const originalAudioOnPlay = audio.onplay;
+const originalAudioOnPause = audio.onpause;
+
+// Restore widget visibility on page load
+const widgetVisible = localStorage.getItem('tcr-widget-visible');
+if (widgetVisible === 'true' && floatingWidget) {
+  floatingWidget.classList.add('active');
+  // Update after a short delay to ensure elements are ready
+  setTimeout(updateFloatingWidget, 100);
+}
+/* ---- CHROMECAST/AIRPLAY SUPPORT ---- */
+let castSession = null;
+let castContext = null;
+const castBtn = document.getElementById('castBtn');
+const fsCastBtn = document.getElementById('fs-cast');
+
+// Initialize Chromecast
+function initChromecast() {
+  if (window.cast && window.cast.framework) {
+    const castContext = window.cast.framework.CastContext.getInstance();
+    castContext.setOptions({
+      receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
+    
+    // Listen for cast state changes
+    castContext.addEventListener(
+      window.cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+      (event) => {
+        const castState = event.castState;
+        if (castState === window.cast.framework.CastState.NO_DEVICES_AVAILABLE) {
+          if (castBtn) castBtn.style.display = 'none';
+          if (fsCastBtn) fsCastBtn.style.display = 'none';
+        } else {
+          if (castBtn) castBtn.style.display = 'block';
+          if (fsCastBtn) fsCastBtn.style.display = 'block';
+        }
+      }
+    );
+    
+    // Listen for session state changes
+    castContext.addEventListener(
+      window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+      (event) => {
+        const sessionState = event.sessionState;
+        if (sessionState === window.cast.framework.SessionState.SESSION_STARTED) {
+          castSession = castContext.getCurrentSession();
+          if (castBtn) castBtn.classList.add('casting');
+          if (fsCastBtn) fsCastBtn.classList.add('casting');
+          startCasting();
+        } else if (sessionState === window.cast.framework.SessionState.SESSION_ENDED) {
+          castSession = null;
+          if (castBtn) castBtn.classList.remove('casting');
+          if (fsCastBtn) fsCastBtn.classList.remove('casting');
+        }
+      }
+    );
+  }
+}
+
+// Start casting current audio
+function startCasting() {
+  if (!castSession || !audio.src) return;
+  
+  const mediaInfo = new window.chrome.cast.media.MediaInfo(audio.src, 'audio/mpeg');
+  mediaInfo.metadata = new window.chrome.cast.media.GenericMediaMetadata();
+  mediaInfo.metadata.title = pName.textContent.trim() || 'TC RADIOS';
+  mediaInfo.metadata.images = [new window.chrome.cast.Image(pImg.src)];
+  
+  const request = new window.chrome.cast.media.LoadRequest(mediaInfo);
+  castSession.loadMedia(request).then(
+    () => {
+      console.log('Casting started');
+      // Sync playback state
+      if (!audio.paused) {
+        const media = castSession.getMediaSession();
+        if (media) {
+          media.play();
+        }
+      }
+    },
+    (error) => {
+      console.error('Error casting:', error);
+    }
+  );
+}
+
+// Cast button handlers
+function handleCastClick() {
+  if (window.cast && window.cast.framework) {
+    const castContext = window.cast.framework.CastContext.getInstance();
+    if (castSession) {
+      // Stop casting
+      castContext.endCurrentSession(true);
+    } else {
+      // Start casting
+      castContext.requestSession().then(
+        () => {
+          console.log('Cast session started');
+        },
+        (error) => {
+          console.error('Error starting cast session:', error);
+        }
+      );
+    }
+    hapticFeedback('light');
+  } else {
+    // Fallback: Try AirPlay (Safari)
+    if (audio.webkitShowPlaybackTargetPicker) {
+      audio.webkitShowPlaybackTargetPicker();
+      hapticFeedback('light');
+    } else {
+      alert('Casting not available. Please use Chrome for Chromecast or Safari for AirPlay.');
+    }
+  }
+}
+
+if (castBtn) {
+  castBtn.onclick = handleCastClick;
+}
+
+if (fsCastBtn) {
+  fsCastBtn.onclick = handleCastClick;
+}
+
+// Initialize Chromecast when page loads
+if (window.chrome && window.chrome.cast) {
+  window['__onGCastApiAvailable'] = (isAvailable) => {
+    if (isAvailable) {
+      initChromecast();
+    }
+  };
+}
+
+// AirPlay support for Safari/iOS
+if (audio.webkitShowPlaybackTargetPicker) {
+  // Show cast button for AirPlay
+  if (castBtn) castBtn.style.display = 'block';
+  if (fsCastBtn) fsCastBtn.style.display = 'block';
+  
+  // Update cast button icon for AirPlay
+  if (castBtn) castBtn.innerHTML = '<i class="fas fa-airplay"></i>';
+  if (fsCastBtn) fsCastBtn.innerHTML = '<i class="fas fa-airplay"></i>';
+}
+
+// Sync audio playback with cast session
+audio.addEventListener('play', () => {
+  if (castSession) {
+    const media = castSession.getMediaSession();
+    if (media) {
+      media.play();
+    }
+  }
+});
+
+audio.addEventListener('pause', () => {
+  if (castSession) {
+    const media = castSession.getMediaSession();
+    if (media) {
+      media.pause();
+    }
+  }
+});
+
+// Update cast when station changes - this will be called from the play function
+function updateCastOnStationChange() {
+  if (castSession) {
+    setTimeout(() => {
+      startCasting();
+    }, 500);
+  }
 }
 /* ---- MEDIA SESSION ---- */
 function updateMediaSession(st) {
