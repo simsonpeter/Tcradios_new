@@ -610,6 +610,32 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fs-prev:active,#fs-play:active,#fs-next:active{transform:scale(0.95)}
 #fs-prev i,#fs-play i,#fs-next i{font-size:1.5rem}
 #fs-play i{font-size:2rem}
+/* Fullscreen Volume Control */
+#fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
+                   margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
+#fs-volume-btn{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+               font-size:1.5rem;cursor:pointer;padding:0.8rem;border-radius:50%;
+               transition:var(--transition);min-width:50px;min-height:50px;
+               display:flex;align-items:center;justify-content:center;
+               box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
+#fs-volume-btn:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-volume-btn:active{transform:scale(0.95)}
+#fs-volume-btn i{font-size:1.2rem}
+#fs-volume-slider{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);
+                 outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+                 transition:var(--transition)}
+#fs-volume-slider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;
+                                       width:18px;height:18px;border-radius:50%;
+                                       background:var(--accent);cursor:pointer;
+                                       box-shadow:0 2px 6px rgba(0,0,0,0.3);
+                                       transition:var(--transition)}
+#fs-volume-slider::-webkit-slider-thumb:hover{transform:scale(1.2);background:#ff6b35}
+#fs-volume-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
+                                   background:var(--accent);cursor:pointer;
+                                   border:none;box-shadow:0 2px 6px rgba(0,0,0,0.3);
+                                   transition:var(--transition)}
+#fs-volume-slider::-moz-range-thumb:hover{transform:scale(1.2);background:#ff6b35}
+#fs-volume-slider::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -638,6 +664,12 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #fs-play{min-width:70px;min-height:70px;font-size:2.5rem;padding:1.2rem}
   #fs-prev i,#fs-next i{font-size:1.3rem}
   #fs-play i{font-size:1.8rem}
+  #fullscreen-volume{margin-top:1rem;padding:0 1rem;max-width:100%}
+  #fs-volume-btn{min-width:44px;min-height:44px;padding:0.6rem;font-size:1.2rem}
+  #fs-volume-btn i{font-size:1rem}
+  #fs-volume-slider{height:5px}
+  #fs-volume-slider::-webkit-slider-thumb{width:16px;height:16px}
+  #fs-volume-slider::-moz-range-thumb{width:16px;height:16px}
 }
 /* Mobile Landscape */
 @media (max-width: 896px) and (orientation: landscape) {
@@ -1085,6 +1117,10 @@ audio{display:none}
     <button id="fs-play" title="Play/Pause"><i class="fas fa-play"></i></button>
     <button id="fs-next" title="Next"><i class="fas fa-step-forward"></i></button>
   </div>
+  <div id="fullscreen-volume">
+    <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
+    <input type="range" id="fs-volume-slider" min="0" max="100" value="100" title="Volume">
+  </div>
 </div>
 <div id="sleepModal">
   <div>
@@ -1140,6 +1176,8 @@ const fullscreenMetadata = document.getElementById('fullscreen-metadata');
 const fsPlay = document.getElementById('fs-play');
 const fsPrev = document.getElementById('fs-prev');
 const fsNext = document.getElementById('fs-next');
+const fsVolumeBtn = document.getElementById('fs-volume-btn');
+const fsVolumeSlider = document.getElementById('fs-volume-slider');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -1587,6 +1625,12 @@ function updateFullscreenPlayer() {
     fullscreenPlayer.classList.remove('playing');
     fsPlay.innerHTML = '<i class="fas fa-play"></i>';
   }
+  
+  // Sync volume control
+  if (fsVolumeSlider) {
+    fsVolumeSlider.value = Math.round(audio.volume * 100);
+    updateVolumeIcon(audio.volume * 100);
+  }
 }
 // Open fullscreen player when clicking on the player (but not on buttons)
 player.addEventListener('click', (e) => {
@@ -1627,6 +1671,63 @@ fsNext.onclick = () => {
   prevNext(1);
   hapticFeedback('light');
 };
+// Volume control functionality
+let previousVolume = 100; // Store volume before muting
+function updateVolumeIcon(volume) {
+  const icon = fsVolumeBtn.querySelector('i');
+  if (volume === 0) {
+    icon.className = 'fas fa-volume-mute';
+  } else if (volume < 50) {
+    icon.className = 'fas fa-volume-down';
+  } else {
+    icon.className = 'fas fa-volume-up';
+  }
+}
+// Initialize volume from audio element
+if (fsVolumeSlider) {
+  fsVolumeSlider.value = Math.round(audio.volume * 100);
+  updateVolumeIcon(audio.volume * 100);
+}
+// Volume slider change
+if (fsVolumeSlider) {
+  fsVolumeSlider.addEventListener('input', (e) => {
+    const volume = parseInt(e.target.value);
+    audio.volume = volume / 100;
+    updateVolumeIcon(volume);
+    previousVolume = volume; // Update previous volume
+    hapticFeedback('light');
+    // Save volume preference
+    localStorage.setItem('tcr-volume', volume);
+  });
+}
+// Mute/unmute button
+if (fsVolumeBtn) {
+  fsVolumeBtn.onclick = () => {
+    if (audio.volume > 0) {
+      // Mute
+      previousVolume = Math.round(audio.volume * 100);
+      audio.volume = 0;
+      fsVolumeSlider.value = 0;
+      updateVolumeIcon(0);
+    } else {
+      // Unmute
+      const restoreVolume = previousVolume > 0 ? previousVolume : 100;
+      audio.volume = restoreVolume / 100;
+      fsVolumeSlider.value = restoreVolume;
+      updateVolumeIcon(restoreVolume);
+    }
+    hapticFeedback('light');
+  };
+}
+// Load saved volume preference on page load
+const savedVolume = localStorage.getItem('tcr-volume');
+if (savedVolume !== null) {
+  audio.volume = parseInt(savedVolume) / 100;
+  if (fsVolumeSlider) {
+    fsVolumeSlider.value = savedVolume;
+    updateVolumeIcon(parseInt(savedVolume));
+  }
+}
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
