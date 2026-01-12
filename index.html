@@ -543,11 +543,13 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
         display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;
         position:fixed;bottom:0;width:100%;flex-shrink:0;z-index:100;
         box-shadow:var(--shadow-xl);backdrop-filter:var(--blur);
-        position:relative}
+        position:relative;cursor:pointer;transition:var(--transition)}
 #player::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                 background:var(--gradient-primary);opacity:0.05;z-index:-1}
+#player:hover{background:var(--card);transform:translateY(-2px)}
 #player img{width:56px;height:56px;border-radius:50%;
-           animation:spin 3s linear infinite paused;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+           animation:spin 3s linear infinite paused;box-shadow:0 2px 8px rgba(0,0,0,0.2);
+           transition:var(--transition)}
 #player.playing img{animation-play-state:running}
 @keyframes spin{to{transform:rotate(360deg)}}
 #player .info{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0;margin:0 1rem}
@@ -563,10 +565,51 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                         font-size:1.8rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                         transition:all 0.2s ease;min-width:48px;min-height:48px;
                         display:flex;align-items:center;justify-content:center;
-                        box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+                        box-shadow:0 2px 4px rgba(0,0,0,0.1);position:relative;z-index:10}
 #p-play:hover,#p-prev:hover,#p-next:hover{background:rgba(249,115,22,0.2);transform:scale(1.05)}
 #p-play:active,#p-prev:active,#p-next:active{transform:scale(0.95)}
 #p-play i,#p-prev i,#p-next i{font-size:1.3rem}
+/* Full Screen Player */
+#fullscreen-player{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);
+                   z-index:1000;display:none;flex-direction:column;align-items:center;
+                   justify-content:center;padding:2rem;overflow:hidden;
+                   backdrop-filter:blur(20px);animation:fadeIn 0.3s ease}
+#fullscreen-player.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#fullscreen-player::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+                           background:var(--gradient-primary);opacity:0.1;z-index:-1}
+#fullscreen-close{position:absolute;top:1.5rem;right:1.5rem;background:rgba(0,0,0,0.3);
+                  border:none;color:var(--text);font-size:1.5rem;cursor:pointer;
+                  padding:0.8rem;border-radius:50%;width:48px;height:48px;
+                  display:flex;align-items:center;justify-content:center;
+                  transition:var(--transition);z-index:1001;backdrop-filter:blur(10px)}
+#fullscreen-close:hover{background:rgba(0,0,0,0.5);transform:scale(1.1)}
+#fullscreen-close:active{transform:scale(0.9)}
+#fullscreen-artwork{width:280px;height:280px;border-radius:1.5rem;object-fit:cover;
+                   box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:2rem;
+                   animation:spin 3s linear infinite paused;transition:var(--transition)}
+#fullscreen-player.playing #fullscreen-artwork{animation-play-state:running}
+#fullscreen-info{text-align:center;margin-bottom:3rem;max-width:90%}
+#fullscreen-name{font-size:2rem;font-weight:700;color:var(--text);margin-bottom:0.5rem;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fullscreen-now{font-size:1rem;color:var(--accent);margin-bottom:1rem;font-weight:500}
+#fullscreen-metadata{margin-top:1rem;font-size:1.1rem}
+#fullscreen-song{color:var(--text);font-weight:500;margin-bottom:0.5rem;font-size:1.2rem}
+#fullscreen-artist{color:var(--accent);font-weight:400;opacity:0.9;font-size:1rem}
+#fullscreen-controls{display:flex;align-items:center;justify-content:center;gap:2rem;
+                    margin-top:2rem}
+#fs-prev,#fs-play,#fs-next{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+                           font-size:2.5rem;cursor:pointer;padding:1.2rem;border-radius:50%;
+                           transition:var(--transition);min-width:70px;min-height:70px;
+                           display:flex;align-items:center;justify-content:center;
+                           box-shadow:0 4px 12px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
+#fs-play{background:var(--gradient-primary);color:#fff;font-size:3rem;min-width:80px;min-height:80px;
+         box-shadow:0 6px 20px rgba(249,115,22,0.4)}
+#fs-prev:hover,#fs-next:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-play:hover{transform:scale(1.1);box-shadow:0 8px 25px rgba(249,115,22,0.5)}
+#fs-prev:active,#fs-play:active,#fs-next:active{transform:scale(0.95)}
+#fs-prev i,#fs-play i,#fs-next i{font-size:1.5rem}
+#fs-play i{font-size:2rem}
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -582,6 +625,19 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
   #headerControls{gap:0.6rem}
+  /* Fullscreen player mobile styles */
+  #fullscreen-player{padding:1.5rem 1rem}
+  #fullscreen-close{top:1rem;right:1rem;width:40px;height:40px;font-size:1.2rem}
+  #fullscreen-artwork{width:220px;height:220px;margin-bottom:1.5rem}
+  #fullscreen-name{font-size:1.5rem}
+  #fullscreen-now{font-size:0.9rem}
+  #fullscreen-song{font-size:1rem}
+  #fullscreen-artist{font-size:0.9rem}
+  #fullscreen-controls{gap:1.5rem;margin-top:1.5rem}
+  #fs-prev,#fs-next{min-width:60px;min-height:60px;font-size:2rem;padding:1rem}
+  #fs-play{min-width:70px;min-height:70px;font-size:2.5rem;padding:1.2rem}
+  #fs-prev i,#fs-next i{font-size:1.3rem}
+  #fs-play i{font-size:1.8rem}
 }
 /* Mobile Landscape */
 @media (max-width: 896px) and (orientation: landscape) {
@@ -1013,6 +1069,23 @@ audio{display:none}
   <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
   <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
 </div>
+<div id="fullscreen-player">
+  <button id="fullscreen-close" title="Close"><i class="fas fa-times"></i></button>
+  <img id="fullscreen-artwork" src="/icons/default-artwork.jpg" alt="Artwork"/>
+  <div id="fullscreen-info">
+    <div id="fullscreen-name"></div>
+    <div id="fullscreen-now">Live</div>
+    <div id="fullscreen-metadata" style="display:none;">
+      <div id="fullscreen-song"></div>
+      <div id="fullscreen-artist"></div>
+    </div>
+  </div>
+  <div id="fullscreen-controls">
+    <button id="fs-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
+    <button id="fs-play" title="Play/Pause"><i class="fas fa-play"></i></button>
+    <button id="fs-next" title="Next"><i class="fas fa-step-forward"></i></button>
+  </div>
+</div>
 <div id="sleepModal">
   <div>
     <h3>Sleep Timer</h3>
@@ -1056,6 +1129,17 @@ const pImg        = document.getElementById('p-img');
 const pName       = document.getElementById('p-name');
 const pPlay       = document.getElementById('p-play');
 const player      = document.getElementById('player');
+const fullscreenPlayer = document.getElementById('fullscreen-player');
+const fullscreenClose = document.getElementById('fullscreen-close');
+const fullscreenArtwork = document.getElementById('fullscreen-artwork');
+const fullscreenName = document.getElementById('fullscreen-name');
+const fullscreenNow = document.getElementById('fullscreen-now');
+const fullscreenSong = document.getElementById('fullscreen-song');
+const fullscreenArtist = document.getElementById('fullscreen-artist');
+const fullscreenMetadata = document.getElementById('fullscreen-metadata');
+const fsPlay = document.getElementById('fs-play');
+const fsPrev = document.getElementById('fs-prev');
+const fsNext = document.getElementById('fs-next');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -1434,6 +1518,10 @@ function play(st, i) {
   // Save last played station
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
+  // Update fullscreen player if open
+  if (fullscreenPlayer.classList.contains('active')) {
+    updateFullscreenPlayer();
+  }
   // Refresh the display to show playing state
   switchTab(currentTab);
   // Haptic feedback for mobile
@@ -1441,25 +1529,8 @@ function play(st, i) {
   // Request notification permission on first play
   requestNotificationPermission();
 }
-audio.onplay  = () => { 
-  pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
-  player.classList.add('playing'); 
-  hapticFeedback('light');
-  updateWidget('playStateUpdate', { playing: true });
-  // Refresh display to show playing state
-  switchTab(currentTab);
-};
-audio.onpause = () => { 
-  pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
-  player.classList.remove('playing'); 
-  hapticFeedback('light');
-  updateWidget('playStateUpdate', { playing: false });
-  // Stop metadata fetching when paused
-  stopMetadataFetching();
-  // Refresh display to remove playing state
-  switchTab(currentTab);
-};
-pPlay.onclick = () => {
+pPlay.onclick = (e) => {
+  e.stopPropagation();
   hapticFeedback('medium');
   audio.paused ? audio.play() : audio.pause();
 };
@@ -1469,8 +1540,122 @@ function prevNext(dir) {
   play(currentList[idx], idx);
   hapticFeedback('light');
 }
-document.getElementById('p-prev').onclick = () => prevNext(-1);
-document.getElementById('p-next').onclick = () => prevNext(1);
+document.getElementById('p-prev').onclick = (e) => {
+  e.stopPropagation();
+  prevNext(-1);
+};
+document.getElementById('p-next').onclick = (e) => {
+  e.stopPropagation();
+  prevNext(1);
+};
+/* ---- FULL SCREEN PLAYER ---- */
+function openFullscreenPlayer() {
+  if (!audio.src) return; // Don't open if nothing is playing
+  fullscreenPlayer.classList.add('active');
+  updateFullscreenPlayer();
+  document.body.style.overflow = 'hidden';
+  hapticFeedback('light');
+}
+function closeFullscreenPlayer() {
+  fullscreenPlayer.classList.remove('active');
+  document.body.style.overflow = '';
+  hapticFeedback('light');
+}
+function updateFullscreenPlayer() {
+  fullscreenArtwork.src = pImg.src;
+  fullscreenName.textContent = pName.textContent.trim() || 'TC RADIOS';
+  fullscreenNow.textContent = document.getElementById('p-now').textContent;
+  
+  // Update metadata if available
+  const songElement = document.getElementById('p-song');
+  const artistElement = document.getElementById('p-artist');
+  const metadataContainer = document.getElementById('p-metadata');
+  
+  if (metadataContainer && metadataContainer.style.display !== 'none' && songElement && songElement.textContent) {
+    fullscreenSong.textContent = songElement.textContent;
+    fullscreenArtist.textContent = artistElement ? artistElement.textContent : '';
+    fullscreenMetadata.style.display = 'block';
+  } else {
+    fullscreenMetadata.style.display = 'none';
+  }
+  
+  // Sync playing state
+  if (player.classList.contains('playing')) {
+    fullscreenPlayer.classList.add('playing');
+    fsPlay.innerHTML = '<i class="fas fa-pause"></i>';
+  } else {
+    fullscreenPlayer.classList.remove('playing');
+    fsPlay.innerHTML = '<i class="fas fa-play"></i>';
+  }
+}
+// Open fullscreen player when clicking on the player (but not on buttons)
+player.addEventListener('click', (e) => {
+  // Don't open if clicking on control buttons
+  if (e.target.closest('button')) return;
+  openFullscreenPlayer();
+});
+// Close fullscreen player
+fullscreenClose.onclick = () => closeFullscreenPlayer();
+// Close on escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && fullscreenPlayer.classList.contains('active')) {
+    closeFullscreenPlayer();
+  }
+});
+// Close when clicking on background (but not on content)
+fullscreenPlayer.addEventListener('click', (e) => {
+  if (e.target === fullscreenPlayer) {
+    closeFullscreenPlayer();
+  }
+});
+// Prevent closing when clicking on content
+const fullscreenInfo = document.getElementById('fullscreen-info');
+const fullscreenControls = document.getElementById('fullscreen-controls');
+if (fullscreenInfo) fullscreenInfo.addEventListener('click', (e) => e.stopPropagation());
+if (fullscreenControls) fullscreenControls.addEventListener('click', (e) => e.stopPropagation());
+if (fullscreenArtwork) fullscreenArtwork.addEventListener('click', (e) => e.stopPropagation());
+// Fullscreen player controls
+fsPlay.onclick = () => {
+  audio.paused ? audio.play() : audio.pause();
+  hapticFeedback('medium');
+};
+fsPrev.onclick = () => {
+  prevNext(-1);
+  hapticFeedback('light');
+};
+fsNext.onclick = () => {
+  prevNext(1);
+  hapticFeedback('light');
+};
+// Update fullscreen player when audio state changes
+audio.onplay = () => { 
+  pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
+  player.classList.add('playing'); 
+  hapticFeedback('light');
+  updateWidget('playStateUpdate', { playing: true });
+  // Update fullscreen player if open
+  if (fullscreenPlayer.classList.contains('active')) {
+    fullscreenPlayer.classList.add('playing');
+    fsPlay.innerHTML = '<i class="fas fa-pause"></i>';
+  }
+  // Refresh display to show playing state
+  switchTab(currentTab);
+};
+audio.onpause = () => { 
+  pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
+  player.classList.remove('playing'); 
+  hapticFeedback('light');
+  updateWidget('playStateUpdate', { playing: false });
+  // Update fullscreen player if open
+  if (fullscreenPlayer.classList.contains('active')) {
+    fullscreenPlayer.classList.remove('playing');
+    fsPlay.innerHTML = '<i class="fas fa-play"></i>';
+  }
+  // Stop metadata fetching when paused
+  stopMetadataFetching();
+  // Refresh display to remove playing state
+  switchTab(currentTab);
+};
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
@@ -1486,6 +1671,12 @@ function updateMetadata(song, artist) {
     if (artistElement) artistElement.textContent = artist || '';
     if (metadataContainer) metadataContainer.style.display = 'block';
     currentMetadata = { song, artist };
+    // Update fullscreen player if open
+    if (fullscreenPlayer.classList.contains('active')) {
+      fullscreenSong.textContent = song;
+      fullscreenArtist.textContent = artist || '';
+      fullscreenMetadata.style.display = 'block';
+    }
     // Update widget with metadata
     updateWidget('metadataUpdate', { song, artist });
     // Debug logging
@@ -1493,6 +1684,9 @@ function updateMetadata(song, artist) {
   } else {
     // Hide metadata container if no valid metadata
     if (metadataContainer) metadataContainer.style.display = 'none';
+    if (fullscreenPlayer.classList.contains('active')) {
+      fullscreenMetadata.style.display = 'none';
+    }
   }
 }
 function startMetadataFetching(station) {
