@@ -578,11 +578,12 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 #fullscreen-player::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                            background:var(--gradient-primary);opacity:0.1;z-index:-1}
-#fullscreen-close{position:absolute;top:1.5rem;right:1.5rem;background:rgba(0,0,0,0.3);
+#fullscreen-close{position:absolute;bottom:2rem;left:2rem;background:rgba(0,0,0,0.3);
                   border:none;color:var(--text);font-size:1.5rem;cursor:pointer;
                   padding:0.8rem;border-radius:50%;width:48px;height:48px;
                   display:flex;align-items:center;justify-content:center;
-                  transition:var(--transition);z-index:1001;backdrop-filter:blur(10px)}
+                  transition:var(--transition);z-index:1001;backdrop-filter:blur(10px);
+                  bottom:calc(2rem + env(safe-area-inset-bottom));left:calc(2rem + env(safe-area-inset-left))}
 #fullscreen-close:hover{background:rgba(0,0,0,0.5);transform:scale(1.1)}
 #fullscreen-close:active{transform:scale(0.9)}
 #fullscreen-artwork{width:280px;height:280px;border-radius:1.5rem;object-fit:cover;
@@ -653,7 +654,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #headerControls{gap:0.6rem}
   /* Fullscreen player mobile styles */
   #fullscreen-player{padding:1.5rem 1rem}
-  #fullscreen-close{top:1rem;right:1rem;width:40px;height:40px;font-size:1.2rem}
+  #fullscreen-close{bottom:calc(1.5rem + env(safe-area-inset-bottom));left:calc(1.5rem + env(safe-area-inset-left));width:44px;height:44px;font-size:1.3rem}
   #fullscreen-artwork{width:220px;height:220px;margin-bottom:1.5rem}
   #fullscreen-name{font-size:1.5rem}
   #fullscreen-now{font-size:0.9rem}
@@ -1002,7 +1003,6 @@ audio{display:none}
   </div>
     <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i></button>
-    <button id="widgetBtn" title="Open Widget"><i class="fas fa-th"></i></button>
     <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
   </div>
 </header>
@@ -2670,7 +2670,7 @@ window.addEventListener('load', () => {
 });
 /* ---- FLOATING WIDGET ---- */
 const floatingWidget = document.getElementById('floating-widget');
-const widgetBtn = document.getElementById('widgetBtn');
+// Widget button removed - widget can still be accessed programmatically if needed
 const widgetClose = document.getElementById('widget-close');
 const widgetImg = document.getElementById('widget-img');
 const widgetName = document.getElementById('widget-name');
@@ -2711,12 +2711,7 @@ function toggleFloatingWidget() {
   }
 }
 
-// Widget button handler
-if (widgetBtn) {
-  widgetBtn.onclick = () => {
-    toggleFloatingWidget();
-  };
-}
+// Widget button removed
 
 // Widget close button
 if (widgetClose) {
