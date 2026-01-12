@@ -636,40 +636,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                                    transition:var(--transition)}
 #fs-volume-slider::-moz-range-thumb:hover{transform:scale(1.2);background:#ff6b35}
 #fs-volume-slider::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
-/* Fullscreen Equalizer */
-#fullscreen-equalizer{display:flex;flex-direction:column;align-items:center;justify-content:center;
-                      margin-top:1.5rem;width:100%;max-width:400px;padding:0 2rem}
-#fs-eq-toggle{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
-              font-size:1.2rem;cursor:pointer;padding:0.6rem;border-radius:50%;
-              transition:var(--transition);min-width:44px;min-height:44px;
-              display:flex;align-items:center;justify-content:center;
-              box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
-#fs-eq-toggle:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
-#fs-eq-toggle:active{transform:scale(0.95)}
-#fs-eq-toggle.active{background:var(--gradient-primary);color:#fff}
-#fs-eq-toggle i{font-size:1rem}
-#eq-panel{width:100%;background:rgba(0,0,0,0.3);border-radius:1rem;padding:1.5rem;
-          margin-top:1rem;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1)}
-#eq-presets{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;justify-content:center}
-.eq-preset{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
-           color:var(--text);padding:0.5rem 1rem;border-radius:0.5rem;cursor:pointer;
-           transition:var(--transition);font-size:0.85rem;font-weight:500}
-.eq-preset:hover{background:rgba(249,115,22,0.2);border-color:var(--accent)}
-.eq-preset.active{background:var(--gradient-primary);color:#fff;border-color:var(--accent)}
-#eq-controls{display:flex;flex-direction:column;gap:1rem}
-.eq-control{display:flex;align-items:center;gap:1rem}
-.eq-control label{min-width:60px;color:var(--text);font-weight:500;font-size:0.9rem}
-.eq-control input[type="range"]{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);
-                                 outline:none;cursor:pointer;appearance:none;-webkit-appearance:none}
-.eq-control input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;
-                                                      width:18px;height:18px;border-radius:50%;
-                                                      background:var(--accent);cursor:pointer;
-                                                      box-shadow:0 2px 6px rgba(0,0,0,0.3)}
-.eq-control input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
-                                                  background:var(--accent);cursor:pointer;
-                                                  border:none;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
-.eq-control input[type="range"]::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
-.eq-control span{min-width:30px;text-align:right;color:var(--accent);font-weight:600;font-size:0.85rem}
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -704,18 +670,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #fs-volume-slider{height:5px}
   #fs-volume-slider::-webkit-slider-thumb{width:16px;height:16px}
   #fs-volume-slider::-moz-range-thumb{width:16px;height:16px}
-  #fullscreen-equalizer{margin-top:1rem;padding:0 1rem;max-width:100%}
-  #fs-eq-toggle{min-width:44px;min-height:44px;padding:0.6rem;font-size:1.1rem}
-  #fs-eq-toggle i{font-size:0.9rem}
-  #eq-panel{padding:1rem;margin-top:0.8rem}
-  #eq-presets{gap:0.4rem;margin-bottom:1rem}
-  .eq-preset{padding:0.4rem 0.8rem;font-size:0.75rem}
-  .eq-control{gap:0.8rem}
-  .eq-control label{min-width:50px;font-size:0.85rem}
-  .eq-control input[type="range"]{height:5px}
-  .eq-control input[type="range"]::-webkit-slider-thumb{width:16px;height:16px}
-  .eq-control input[type="range"]::-moz-range-thumb{width:16px;height:16px}
-  .eq-control span{min-width:25px;font-size:0.8rem}
 }
 /* Mobile Landscape */
 @media (max-width: 896px) and (orientation: landscape) {
@@ -1222,35 +1176,6 @@ audio{display:none}
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
     <input type="range" id="fs-volume-slider" min="0" max="100" value="100" title="Volume">
   </div>
-  <div id="fullscreen-equalizer">
-    <button id="fs-eq-toggle" title="Equalizer"><i class="fas fa-sliders-h"></i></button>
-    <div id="eq-panel" style="display:none;">
-      <div id="eq-presets">
-        <button class="eq-preset active" data-preset="normal">Normal</button>
-        <button class="eq-preset" data-preset="bass">Bass Boost</button>
-        <button class="eq-preset" data-preset="vocal">Vocal</button>
-        <button class="eq-preset" data-preset="treble">Treble</button>
-        <button class="eq-preset" data-preset="flat">Flat</button>
-      </div>
-      <div id="eq-controls">
-        <div class="eq-control">
-          <label>Bass</label>
-          <input type="range" id="eq-bass" min="-12" max="12" value="0" step="1">
-          <span id="eq-bass-value">0</span>
-        </div>
-        <div class="eq-control">
-          <label>Treble</label>
-          <input type="range" id="eq-treble" min="-12" max="12" value="0" step="1">
-          <span id="eq-treble-value">0</span>
-        </div>
-        <div class="eq-control">
-          <label>Balance</label>
-          <input type="range" id="eq-balance" min="-1" max="1" value="0" step="0.1">
-          <span id="eq-balance-value">0</span>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 <!-- Floating Mini Player Widget -->
 <div id="floating-widget" style="display:none;">
@@ -1351,14 +1276,6 @@ const fsPrev = document.getElementById('fs-prev');
 const fsNext = document.getElementById('fs-next');
 const fsVolumeBtn = document.getElementById('fs-volume-btn');
 const fsVolumeSlider = document.getElementById('fs-volume-slider');
-const fsEqToggle = document.getElementById('fs-eq-toggle');
-const eqPanel = document.getElementById('eq-panel');
-const eqBass = document.getElementById('eq-bass');
-const eqTreble = document.getElementById('eq-treble');
-const eqBalance = document.getElementById('eq-balance');
-const eqBassValue = document.getElementById('eq-bass-value');
-const eqTrebleValue = document.getElementById('eq-treble-value');
-const eqBalanceValue = document.getElementById('eq-balance-value');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -1913,193 +1830,6 @@ if (savedVolume !== null) {
     updateVolumeIcon(parseInt(savedVolume));
   }
 }
-/* ---- EQUALIZER FUNCTIONALITY ---- */
-let audioContext = null;
-let sourceNode = null;
-let gainNode = null;
-let bassFilter = null;
-let trebleFilter = null;
-let pannerNode = null;
-let isEqualizerActive = false;
-
-// Initialize Web Audio API
-function initEqualizer() {
-  if (!audioContext && audio.src) {
-    try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      sourceNode = audioContext.createMediaElementSource(audio);
-      
-      // Create gain node for volume
-      gainNode = audioContext.createGain();
-      
-      // Create bass filter (low shelf)
-      bassFilter = audioContext.createBiquadFilter();
-      bassFilter.type = 'lowshelf';
-      bassFilter.frequency.value = 200;
-      
-      // Create treble filter (high shelf)
-      trebleFilter = audioContext.createBiquadFilter();
-      trebleFilter.type = 'highshelf';
-      trebleFilter.frequency.value = 3000;
-      
-      // Create panner for balance
-      pannerNode = audioContext.createStereoPanner();
-      
-      // Connect nodes: source -> bass -> treble -> panner -> gain -> destination
-      sourceNode.connect(bassFilter);
-      bassFilter.connect(trebleFilter);
-      trebleFilter.connect(pannerNode);
-      pannerNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      isEqualizerActive = true;
-    } catch (e) {
-      console.log('Web Audio API not supported or already initialized:', e);
-      isEqualizerActive = false;
-    }
-  }
-}
-
-// Equalizer presets
-const eqPresets = {
-  normal: { bass: 0, treble: 0, balance: 0 },
-  bass: { bass: 8, treble: -2, balance: 0 },
-  vocal: { bass: -3, treble: 6, balance: 0 },
-  treble: { bass: -4, treble: 8, balance: 0 },
-  flat: { bass: 0, treble: 0, balance: 0 }
-};
-
-// Apply equalizer settings
-function applyEqualizer(bass, treble, balance) {
-  if (!isEqualizerActive) {
-    initEqualizer();
-  }
-  
-  if (bassFilter && trebleFilter && pannerNode) {
-    // Bass: -12 to +12 dB
-    bassFilter.gain.value = bass;
-    
-    // Treble: -12 to +12 dB
-    trebleFilter.gain.value = treble;
-    
-    // Balance: -1 (left) to +1 (right)
-    pannerNode.pan.value = balance;
-  }
-  
-  // Update display values
-  if (eqBassValue) eqBassValue.textContent = bass > 0 ? `+${bass}` : bass;
-  if (eqTrebleValue) eqTrebleValue.textContent = treble > 0 ? `+${treble}` : treble;
-  if (eqBalanceValue) eqBalanceValue.textContent = balance.toFixed(1);
-  
-  // Save to localStorage
-  localStorage.setItem('tcr-eq-bass', bass);
-  localStorage.setItem('tcr-eq-treble', treble);
-  localStorage.setItem('tcr-eq-balance', balance);
-}
-
-// Apply preset
-function applyEqPreset(presetName) {
-  const preset = eqPresets[presetName];
-  if (preset) {
-    applyEqualizer(preset.bass, preset.treble, preset.balance);
-    if (eqBass) eqBass.value = preset.bass;
-    if (eqTreble) eqTreble.value = preset.treble;
-    if (eqBalance) eqBalance.value = preset.balance;
-    
-    // Update active preset button
-    document.querySelectorAll('.eq-preset').forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.dataset.preset === presetName) {
-        btn.classList.add('active');
-      }
-    });
-    
-    localStorage.setItem('tcr-eq-preset', presetName);
-    hapticFeedback('light');
-  }
-}
-
-// Toggle equalizer panel
-if (fsEqToggle) {
-  fsEqToggle.onclick = () => {
-    if (eqPanel) {
-      const isVisible = eqPanel.style.display !== 'none';
-      eqPanel.style.display = isVisible ? 'none' : 'block';
-      fsEqToggle.classList.toggle('active', !isVisible);
-      hapticFeedback('light');
-      
-      // Initialize equalizer when opening
-      if (!isVisible && audio.src) {
-        initEqualizer();
-      }
-    }
-  };
-}
-
-// Preset buttons
-document.querySelectorAll('.eq-preset').forEach(btn => {
-  btn.onclick = () => {
-    applyEqPreset(btn.dataset.preset);
-  };
-});
-
-// Manual controls
-if (eqBass) {
-  eqBass.addEventListener('input', (e) => {
-    const value = parseInt(e.target.value);
-    applyEqualizer(value, eqTreble ? parseInt(eqTreble.value) : 0, eqBalance ? parseFloat(eqBalance.value) : 0);
-    // Remove active preset when manually adjusting
-    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
-    localStorage.removeItem('tcr-eq-preset');
-    hapticFeedback('light');
-  });
-}
-
-if (eqTreble) {
-  eqTreble.addEventListener('input', (e) => {
-    const value = parseInt(e.target.value);
-    applyEqualizer(eqBass ? parseInt(eqBass.value) : 0, value, eqBalance ? parseFloat(eqBalance.value) : 0);
-    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
-    localStorage.removeItem('tcr-eq-preset');
-    hapticFeedback('light');
-  });
-}
-
-if (eqBalance) {
-  eqBalance.addEventListener('input', (e) => {
-    const value = parseFloat(e.target.value);
-    applyEqualizer(eqBass ? parseInt(eqBass.value) : 0, eqTreble ? parseInt(eqTreble.value) : 0, value);
-    document.querySelectorAll('.eq-preset').forEach(p => p.classList.remove('active'));
-    localStorage.removeItem('tcr-eq-preset');
-    hapticFeedback('light');
-  });
-}
-
-// Load saved equalizer settings
-const savedBass = localStorage.getItem('tcr-eq-bass');
-const savedTreble = localStorage.getItem('tcr-eq-treble');
-const savedBalance = localStorage.getItem('tcr-eq-balance');
-const savedPreset = localStorage.getItem('tcr-eq-preset');
-
-if (savedPreset && eqPresets[savedPreset]) {
-  applyEqPreset(savedPreset);
-} else if (savedBass !== null || savedTreble !== null || savedBalance !== null) {
-  applyEqualizer(
-    savedBass ? parseInt(savedBass) : 0,
-    savedTreble ? parseInt(savedTreble) : 0,
-    savedBalance ? parseFloat(savedBalance) : 0
-  );
-  if (eqBass) eqBass.value = savedBass || 0;
-  if (eqTreble) eqTreble.value = savedTreble || 0;
-  if (eqBalance) eqBalance.value = savedBalance || 0;
-}
-
-// Initialize equalizer when audio starts playing
-audio.addEventListener('play', () => {
-  if (!isEqualizerActive && audio.src) {
-    initEqualizer();
-  }
-});
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
