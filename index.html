@@ -1011,6 +1011,9 @@ audio{display:none}
 #splash-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);
                display:flex;align-items:center;justify-content:center;z-index:2000;
                flex-direction:column;transition:opacity 0.5s ease,visibility 0.5s ease}
+/* Hide header and tabs during splash screen */
+body.splash-active header,
+body.splash-active #tabs{display:none}
 #splash-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .splash-content{display:flex;flex-direction:column;align-items:center;justify-content:center;
                 text-align:center;padding:2rem;animation:fadeIn 0.5s ease}
@@ -1030,7 +1033,7 @@ audio{display:none}
 }
 </style>
 </head>
-<body>
+<body class="splash-active">
 <header>
   <div class="header-title">
     <span>TC RADIOS</span>
@@ -1413,10 +1416,12 @@ function clearAllCacheOnLaunch() {
   // Show splash screen for 6 seconds
   const splashScreen = document.getElementById('splash-screen');
   const content = document.getElementById('content');
+  const body = document.body;
   if (splashScreen && content) {
     // Wait 6 seconds, then hide splash and show content
     setTimeout(() => {
       splashScreen.classList.add('hidden');
+      body.classList.remove('splash-active');
       content.style.display = 'flex';
       setTimeout(() => {
         splashScreen.style.display = 'none';
