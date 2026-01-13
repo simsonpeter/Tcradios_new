@@ -255,6 +255,10 @@ header{background:var(--header);border-bottom:1px solid var(--border);
        display:flex;justify-content:space-between;align-items:center;
        padding:1rem 1.2rem;font-size:1.25rem;font-weight:700;min-height:70px;
        backdrop-filter:var(--blur);position:relative;z-index:100}
+.header-title{display:flex;flex-direction:column;gap:0.2rem}
+.header-title>span:first-child{font-size:1.25rem;font-weight:700}
+.header-subtitle{font-size:0.75rem;font-weight:400;opacity:0.7;font-style:italic;
+                 color:var(--text)}
 header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                background:var(--gradient-primary);opacity:0.05;z-index:-1}
 header button{background:none;border:none;font-size:1.4rem;cursor:pointer;
@@ -1003,28 +1007,14 @@ audio{display:none}
   #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:32px;min-height:32px;padding:0.4rem;font-size:0.9rem}
   #widget-play-mini{min-width:36px;min-height:36px}
 }
-/* Loading Screen */
-#loading-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);
-                display:flex;align-items:center;justify-content:center;z-index:2000;
-                flex-direction:column;transition:opacity 0.5s ease}
-#loading-screen.hidden{opacity:0;pointer-events:none}
-.loading-content{display:flex;flex-direction:column;align-items:center;justify-content:center;
-                 text-align:center;padding:2rem}
-.loading-logo{width:120px;height:120px;border-radius:50%;object-fit:cover;
-             margin-bottom:1.5rem;box-shadow:0 8px 32px rgba(249,115,22,0.3);
-             border:4px solid var(--accent);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.9}}
-.loading-title{font-size:2.5rem;font-weight:700;color:var(--accent);margin-bottom:0.5rem;
-               text-shadow:0 2px 4px rgba(0,0,0,0.1)}
-.loading-subtitle{font-size:1.1rem;color:var(--text);opacity:0.8;margin-bottom:2rem;
-                 font-weight:400;font-style:italic}
-.loading-spinner{width:40px;height:40px;border:4px solid rgba(249,115,22,0.2);
-                border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 </style>
 </head>
 <body>
 <header>
-  <span>TC RADIOS</span>
+  <div class="header-title">
+    <span>TC RADIOS</span>
+    <span class="header-subtitle">by JayathaSoft</span>
+  </div>
   <div id="headerControls">
   <div id="themeBox">
     <select id="themeSelect">
@@ -1061,15 +1051,7 @@ audio{display:none}
   <span id="tab-fav">Favorites</span>
   <span id="tab-about">About</span>
 </div>
-<div id="loading-screen">
-  <div class="loading-content">
-    <img src="/icons/icon-512x512.png" alt="TC RADIOS" class="loading-logo"/>
-    <h1 class="loading-title">TC RADIOS</h1>
-    <p class="loading-subtitle">by JayathaSoft</p>
-    <div class="loading-spinner"></div>
-  </div>
-</div>
-<div id="content" aria-busy="true" style="display:none;">
+<div id="content" aria-busy="true">
   <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
   <div class="station-list"></div>
 </div>
@@ -1400,18 +1382,6 @@ function clearAllCacheOnLaunch() {
   }
   switchTab(currentTab);
   
-  // Hide loading screen and show content
-  const loadingScreen = document.getElementById('loading-screen');
-  const content = document.getElementById('content');
-  if (loadingScreen && content) {
-    setTimeout(() => {
-      loadingScreen.classList.add('hidden');
-      content.style.display = 'flex';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-      }, 500);
-    }, 800);
-  }
   // Auto-play last played station or first station
   setTimeout(() => {
     if (action === 'resume') {
