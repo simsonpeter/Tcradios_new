@@ -260,6 +260,9 @@ header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
 header button{background:none;border:none;font-size:1.4rem;cursor:pointer;
               padding:0.5rem;border-radius:50%;transition:var(--transition);
               color:var(--header-btn);position:relative;overflow:hidden}
+.header-menu-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;
+                 padding:0.5rem;border-radius:50%;transition:var(--transition);
+                 color:var(--header-btn);position:relative;overflow:hidden}
 header button::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                       background:var(--gradient-primary);opacity:0;transition:var(--transition);
                       border-radius:50%;z-index:-1}
@@ -267,7 +270,21 @@ header button:hover::before{opacity:0.1}
 header button:hover{transform:scale(1.05);box-shadow:var(--shadow-md)}
 header button:active{transform:scale(0.95)}
 header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transition)}
-#headerControls{display:flex;align-items:center;gap:0.8rem}
+#headerControls{display:flex;align-items:center;gap:0.8rem;position:relative}
+.header-btn{display:flex}
+.header-menu-btn{display:none}
+/* Header Menu Dropdown */
+#headerMenu{position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--border);
+           border-radius:0.5rem;box-shadow:var(--shadow-xl);padding:0.5rem;min-width:200px;
+           display:none;flex-direction:column;gap:0.25rem;z-index:1000;margin-top:0.5rem;
+           backdrop-filter:blur(20px)}
+#headerMenu.active{display:flex}
+#headerMenu button{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;
+                   background:var(--bg);border:none;color:var(--text);border-radius:0.4rem;
+                   cursor:pointer;transition:var(--transition);text-align:left;width:100%;
+                   font-size:0.95rem;font-weight:500}
+#headerMenu button:hover{background:var(--gradient-primary);color:#fff;transform:translateX(4px)}
+#headerMenu button i{font-size:1.1rem;width:20px;text-align:center}
 #themeBox{position:relative}
 #themeSelect{appearance:none;background:var(--card);color:var(--text);
             border:1px solid var(--border);border-radius:.4rem;
@@ -637,6 +654,12 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                                    transition:var(--transition)}
 #fs-volume-slider::-moz-range-thumb:hover{transform:scale(1.2);background:#ff6b35}
 #fs-volume-slider::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.2)}
+/* Show menu button on smaller/medium screens */
+@media (max-width: 600px) {
+  .header-btn{display:none !important}
+  .header-menu-btn{display:flex !important}
+  #themeBox, #langBox{display:none}
+}
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
 @media (max-width: 480px) {
@@ -652,6 +675,10 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
   #headerControls{gap:0.6rem}
+  /* Hide individual buttons, show menu button on small screens */
+  .header-btn{display:none !important}
+  .header-menu-btn{display:flex !important}
+  #headerMenu{min-width:180px;right:0.5rem}
   /* Fullscreen player mobile styles */
   #fullscreen-player{padding:1.5rem 1rem}
   #fullscreen-close{bottom:calc(1.5rem + env(safe-area-inset-bottom));left:calc(1.5rem + env(safe-area-inset-left));width:44px;height:44px;font-size:1.3rem}
@@ -1001,9 +1028,15 @@ audio{display:none}
   <div id="langBox">
     <select id="langSelect"></select>
   </div>
-    <button id="sleepBtn" title="Sleep timer"><i class="fas fa-clock"></i></button>
-    <button id="alarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i></button>
-    <button id="installBtn" title="Install App" style="display:none"><i class="fas fa-download"></i></button>
+    <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
+    <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
+    <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
+    <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
+  </div>
+  <div id="headerMenu" class="header-menu">
+    <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
+    <button id="menuAlarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i> Alarm Clock</button>
+    <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
 </header>
 <div id="tabs">
@@ -2353,7 +2386,64 @@ function getDragAfterElement(container, y) {
 /* ---- SLEEP TIMER ---- */
 const sleepModal = document.getElementById('sleepModal');
 const sleepBtn   = document.getElementById('sleepBtn');
-sleepBtn.onclick = () => sleepModal.style.display = 'flex';
+const menuBtn = document.getElementById('menuBtn');
+const headerMenu = document.getElementById('headerMenu');
+const menuSleepBtn = document.getElementById('menuSleepBtn');
+const menuAlarmBtn = document.getElementById('menuAlarmBtn');
+const menuInstallBtn = document.getElementById('menuInstallBtn');
+
+// Menu button toggle
+if (menuBtn) {
+  menuBtn.onclick = (e) => {
+    e.stopPropagation();
+    headerMenu.classList.toggle('active');
+    hapticFeedback('light');
+  };
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (headerMenu && menuBtn && !headerMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+    headerMenu.classList.remove('active');
+  }
+});
+
+// Menu button handlers
+if (menuSleepBtn) {
+  menuSleepBtn.onclick = () => {
+    sleepModal.style.display = 'flex';
+    headerMenu.classList.remove('active');
+    hapticFeedback('light');
+  };
+}
+
+if (menuAlarmBtn) {
+  menuAlarmBtn.onclick = () => {
+    if (alarmBtn && typeof alarmBtn.onclick === 'function') {
+      alarmBtn.onclick();
+    } else if (alarmBtn) {
+      alarmBtn.click();
+    }
+    headerMenu.classList.remove('active');
+    hapticFeedback('light');
+  };
+}
+
+if (menuInstallBtn) {
+  menuInstallBtn.onclick = () => {
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+      installBtn.click();
+    }
+    headerMenu.classList.remove('active');
+    hapticFeedback('light');
+  };
+}
+
+// Original button handlers
+if (sleepBtn) {
+  sleepBtn.onclick = () => sleepModal.style.display = 'flex';
+}
 document.getElementById('cancelSleep').onclick = () => {
   clearTimeout(sleepTimer);
   sleepModal.style.display = 'none';
@@ -3113,8 +3203,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   // Show install button
   const installBtn = document.getElementById('installBtn');
+  const menuInstallBtn = document.getElementById('menuInstallBtn');
   if (installBtn) {
     installBtn.style.display = 'block';
+  }
+  if (menuInstallBtn) {
+    menuInstallBtn.style.display = 'block';
   }
 });
 // Handle install button click
@@ -3128,13 +3222,19 @@ document.getElementById('installBtn').addEventListener('click', async () => {
     // Clear the deferredPrompt variable
     deferredPrompt = null;
     // Hide install button
-    document.getElementById('installBtn').style.display = 'none';
+    const installBtn = document.getElementById('installBtn');
+    const menuInstallBtn = document.getElementById('menuInstallBtn');
+    if (installBtn) installBtn.style.display = 'none';
+    if (menuInstallBtn) menuInstallBtn.style.display = 'none';
   }
 });
 // Handle app installed event
 window.addEventListener('appinstalled', () => {
   console.log('PWA was installed');
-  document.getElementById('installBtn').style.display = 'none';
+  const installBtn = document.getElementById('installBtn');
+  const menuInstallBtn = document.getElementById('menuInstallBtn');
+  if (installBtn) installBtn.style.display = 'none';
+  if (menuInstallBtn) menuInstallBtn.style.display = 'none';
   showNotification('TC RADIOS installed successfully!');
 });
 /* ---- WEAR OS SUPPORT ---- */
