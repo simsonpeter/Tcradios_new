@@ -879,7 +879,7 @@ audio{display:none}
                    border-radius:.3rem;background:var(--bg);color:var(--text)}
 #sleepModal button:hover{background:var(--accent);color:#fff}
 #alarmModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
-            display:none;align-items:center;justify-content:center;z-index:999}
+           display:none;align-items:center;justify-content:center;z-index:2000}
 #alarmModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;
                  text-align:left;color:var(--text);max-width:400px;width:90%}
 #alarmModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
@@ -2733,16 +2733,12 @@ const fsSleep = document.getElementById('fs-sleep');
 const fsAlarm = document.getElementById('fs-alarm');
 if (fsSleep && sleepModal) {
   fsSleep.onclick = () => {
-    // Close fullscreen player first so modal appears on top
-    closeFullscreenPlayer();
     sleepModal.style.display = 'flex';
     hapticFeedback('light');
   };
 }
 if (fsAlarm && alarmBtn) {
   fsAlarm.onclick = () => {
-    // Close fullscreen player first so modal appears on top
-    closeFullscreenPlayer();
     if (typeof alarmBtn.onclick === 'function') {
       alarmBtn.onclick();
     } else {
