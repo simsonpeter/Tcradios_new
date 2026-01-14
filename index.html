@@ -1007,6 +1007,32 @@ audio{display:none}
   #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:32px;min-height:32px;padding:0.4rem;font-size:0.9rem}
   #widget-play-mini{min-width:36px;min-height:36px}
 }
+/* Custom Splash Screen (appears after native PWA splash) */
+#custom-splash{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);
+               display:flex;align-items:center;justify-content:center;z-index:2000;
+               flex-direction:column;animation:fadeInSplash 0.5s ease}
+#custom-splash.hidden{animation:fadeOutSplash 0.5s ease forwards}
+@keyframes fadeInSplash{from{opacity:0}to{opacity:1}}
+@keyframes fadeOutSplash{from{opacity:1}to{opacity:0;visibility:hidden;pointer-events:none}}
+.custom-splash-content{display:flex;flex-direction:column;align-items:center;justify-content:center;
+                       text-align:center;padding:2rem}
+.custom-splash-logo{width:150px;height:150px;border-radius:50%;object-fit:cover;
+                    margin-bottom:2rem;box-shadow:0 12px 40px rgba(249,115,22,0.3);
+                    border:4px solid var(--accent);animation:logoPulse 2s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.9}}
+.custom-splash-title{font-size:3rem;font-weight:700;color:var(--accent);margin-bottom:0.5rem;
+                     text-shadow:0 4px 8px rgba(0,0,0,0.2);letter-spacing:2px;
+                     animation:titleFadeIn 0.8s ease}
+@keyframes titleFadeIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.custom-splash-subtitle{font-size:1.3rem;color:var(--text);opacity:0.8;margin-top:0.5rem;
+                        font-weight:400;font-style:italic;letter-spacing:1px;
+                        animation:subtitleFadeIn 1s ease 0.3s both}
+@keyframes subtitleFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:0.8;transform:translateY(0)}}
+@media (max-width: 480px) {
+  .custom-splash-logo{width:120px;height:120px;margin-bottom:1.5rem}
+  .custom-splash-title{font-size:2.2rem;letter-spacing:1px}
+  .custom-splash-subtitle{font-size:1.1rem}
+}
 </style>
 </head>
 <body>
@@ -1051,7 +1077,14 @@ audio{display:none}
   <span id="tab-fav">Favorites</span>
   <span id="tab-about">About</span>
 </div>
-<div id="content" aria-busy="true">
+<div id="custom-splash">
+  <div class="custom-splash-content">
+    <img src="/icons/icon-512x512.png" alt="TC RADIOS" class="custom-splash-logo"/>
+    <h1 class="custom-splash-title">TC RADIOS</h1>
+    <p class="custom-splash-subtitle">by JayathaSoft</p>
+  </div>
+</div>
+<div id="content" aria-busy="true" style="display:none;">
   <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
   <div class="station-list"></div>
 </div>
@@ -1381,6 +1414,20 @@ function clearAllCacheOnLaunch() {
     localStorage.setItem('currentTab', currentTab);
   }
   switchTab(currentTab);
+  
+  // Show custom splash screen for 6 seconds (appears after native PWA splash)
+  const customSplash = document.getElementById('custom-splash');
+  const content = document.getElementById('content');
+  if (customSplash && content) {
+    // Wait 6 seconds, then hide splash and show content
+    setTimeout(() => {
+      customSplash.classList.add('hidden');
+      content.style.display = 'flex';
+      setTimeout(() => {
+        customSplash.style.display = 'none';
+      }, 500);
+    }, 6000);
+  }
   
   // Auto-play last played station or first station
   setTimeout(() => {
