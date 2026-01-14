@@ -1007,10 +1007,13 @@ audio{display:none}
   #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:32px;min-height:32px;padding:0.4rem;font-size:0.9rem}
   #widget-play-mini{min-width:36px;min-height:36px}
 }
-/* Custom Splash Screen (appears after native PWA splash) */
+/* Custom Splash Screen (replaces native PWA splash) */
 #custom-splash{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);
                display:flex;align-items:center;justify-content:center;z-index:2000;
-               flex-direction:column;animation:fadeInSplash 0.5s ease}
+               flex-direction:column;animation:fadeInSplash 0.3s ease}
+/* Hide header and tabs during custom splash */
+body.splash-active header,
+body.splash-active #tabs{display:none}
 #custom-splash.hidden{animation:fadeOutSplash 0.5s ease forwards}
 @keyframes fadeInSplash{from{opacity:0}to{opacity:1}}
 @keyframes fadeOutSplash{from{opacity:1}to{opacity:0;visibility:hidden;pointer-events:none}}
@@ -1035,7 +1038,7 @@ audio{display:none}
 }
 </style>
 </head>
-<body>
+<body class="splash-active">
 <header>
   <div class="header-title">
     <span>TC RADIOS</span>
@@ -1415,13 +1418,15 @@ function clearAllCacheOnLaunch() {
   }
   switchTab(currentTab);
   
-  // Show custom splash screen for 6 seconds (appears after native PWA splash)
+  // Show custom splash screen for 6 seconds (replaces native PWA splash)
   const customSplash = document.getElementById('custom-splash');
   const content = document.getElementById('content');
+  const body = document.body;
   if (customSplash && content) {
     // Wait 6 seconds, then hide splash and show content
     setTimeout(() => {
       customSplash.classList.add('hidden');
+      body.classList.remove('splash-active');
       content.style.display = 'flex';
       setTimeout(() => {
         customSplash.style.display = 'none';
