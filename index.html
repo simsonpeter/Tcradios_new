@@ -872,7 +872,7 @@ audio{display:none}
   }
 }
 #sleepModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
-           display:none;align-items:center;justify-content:center;z-index:999}
+           display:none;align-items:center;justify-content:center;z-index:2000}
 #sleepModal>div{background:var(--card);padding:1rem;border-radius:.5rem;
                 text-align:center;color:var(--text)}
 #sleepModal button{margin:.3rem;padding:.4rem .8rem;border:1px solid var(--border);
@@ -2731,9 +2731,14 @@ if (alarmBtn) {
 // Fullscreen timer and alarm buttons
 const fsSleep = document.getElementById('fs-sleep');
 const fsAlarm = document.getElementById('fs-alarm');
-if (fsSleep && sleepModal) {
+if (fsSleep && sleepModal && sleepBtn) {
   fsSleep.onclick = () => {
-    sleepModal.style.display = 'flex';
+    // Use the same handler as the header sleep button
+    if (typeof sleepBtn.onclick === 'function') {
+      sleepBtn.onclick();
+    } else {
+      sleepBtn.click();
+    }
     hapticFeedback('light');
   };
 }
