@@ -2728,6 +2728,26 @@ if (alarmBtn) {
   };
 }
 
+// Fullscreen timer and alarm buttons
+const fsSleep = document.getElementById('fs-sleep');
+const fsAlarm = document.getElementById('fs-alarm');
+if (fsSleep && sleepModal) {
+  fsSleep.onclick = () => {
+    sleepModal.style.display = 'flex';
+    hapticFeedback('light');
+  };
+}
+if (fsAlarm && alarmBtn) {
+  fsAlarm.onclick = () => {
+    if (typeof alarmBtn.onclick === 'function') {
+      alarmBtn.onclick();
+    } else {
+      alarmBtn.click();
+    }
+    hapticFeedback('light');
+  };
+}
+
 if (document.getElementById('setAlarm')) {
   document.getElementById('setAlarm').onclick = () => {
     setAlarm();
