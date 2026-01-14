@@ -632,6 +632,17 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fs-prev:active,#fs-play:active,#fs-next:active{transform:scale(0.95)}
 #fs-prev i,#fs-play i,#fs-next i{font-size:1.5rem}
 #fs-play i{font-size:2rem}
+/* Fullscreen Extra Controls (Timer & Alarm) */
+#fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1.5rem;
+                            margin-top:1.5rem}
+#fs-sleep,#fs-alarm{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+                     font-size:1.3rem;cursor:pointer;padding:0.8rem;border-radius:50%;
+                     transition:var(--transition);min-width:50px;min-height:50px;
+                     display:flex;align-items:center;justify-content:center;
+                     box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
+#fs-sleep:hover,#fs-alarm:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-sleep:active,#fs-alarm:active{transform:scale(0.95)}
+#fs-sleep i,#fs-alarm i{font-size:1.2rem}
 /* Fullscreen Volume Control */
 #fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
                    margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
@@ -1211,6 +1222,10 @@ audio{display:none}
     <button id="fs-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
     <button id="fs-play" title="Play/Pause"><i class="fas fa-play"></i></button>
     <button id="fs-next" title="Next"><i class="fas fa-step-forward"></i></button>
+  </div>
+  <div id="fullscreen-extra-controls">
+    <button id="fs-sleep" title="Sleep Timer"><i class="fas fa-clock"></i></button>
+    <button id="fs-alarm" title="Alarm Clock"><i class="fas fa-bell"></i></button>
   </div>
   <div id="fullscreen-volume">
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
