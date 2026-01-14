@@ -2733,12 +2733,16 @@ const fsSleep = document.getElementById('fs-sleep');
 const fsAlarm = document.getElementById('fs-alarm');
 if (fsSleep && sleepModal) {
   fsSleep.onclick = () => {
+    // Close fullscreen player first so modal appears on top
+    closeFullscreenPlayer();
     sleepModal.style.display = 'flex';
     hapticFeedback('light');
   };
 }
 if (fsAlarm && alarmBtn) {
   fsAlarm.onclick = () => {
+    // Close fullscreen player first so modal appears on top
+    closeFullscreenPlayer();
     if (typeof alarmBtn.onclick === 'function') {
       alarmBtn.onclick();
     } else {
