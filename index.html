@@ -289,6 +289,35 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                    font-size:0.95rem;font-weight:500}
 #headerMenu button:hover{background:var(--gradient-primary);color:#fff;transform:translateX(4px)}
 #headerMenu button i{font-size:1.1rem;width:20px;text-align:center}
+
+/* Theme/Language controls when placed inside the header menu (mobile) */
+#headerMenu #themeBox,
+#headerMenu #langBox{
+  display:flex;
+  flex-direction:column;
+  gap:0.35rem;
+  padding:0.5rem 0.5rem 0.25rem;
+  border-radius:0.4rem;
+  background:var(--bg);
+  border:1px solid var(--border);
+}
+#headerMenu #themeBox::before{
+  content:'Theme';
+  font-size:0.8rem;
+  font-weight:600;
+  opacity:0.85;
+}
+#headerMenu #langBox::before{
+  content:'Language';
+  font-size:0.8rem;
+  font-weight:600;
+  opacity:0.85;
+}
+#headerMenu #themeSelect,
+#headerMenu #langSelect{
+  width:100%;
+  min-width:0;
+}
 #themeBox{position:relative}
 #themeSelect{appearance:none;background:var(--card);color:var(--text);
             border:1px solid var(--border);border-radius:.4rem;
@@ -673,7 +702,9 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 @media (max-width: 600px) {
   .header-btn{display:none !important}
   .header-menu-btn{display:flex !important}
-  #themeBox, #langBox{display:none}
+  /* Hide theme/language only in the header row; on mobile they will be moved into the menu */
+  #headerControls #themeBox,
+  #headerControls #langBox{display:none}
 }
 /* Mobile responsive adjustments */
 /* Mobile Portrait */
@@ -2414,6 +2445,27 @@ const headerMenu = document.getElementById('headerMenu');
 const menuSleepBtn = document.getElementById('menuSleepBtn');
 const menuAlarmBtn = document.getElementById('menuAlarmBtn');
 const menuInstallBtn = document.getElementById('menuInstallBtn');
+const headerControls = document.getElementById('headerControls');
+const themeBox = document.getElementById('themeBox');
+const langBox = document.getElementById('langBox');
+
+// On small screens, move Theme/Language into the hamburger menu so they remain accessible
+function placeThemeLanguageControls() {
+  if (!headerMenu || !headerControls || !themeBox || !langBox) return;
+  const isCompact = window.matchMedia('(max-width: 600px)').matches;
+
+  if (isCompact) {
+    // Put controls at the top of the menu
+    if (!headerMenu.contains(themeBox)) headerMenu.insertBefore(themeBox, headerMenu.firstChild);
+    if (!headerMenu.contains(langBox)) headerMenu.insertBefore(langBox, themeBox.nextSibling);
+  } else {
+    // Restore controls into the header row (before buttons)
+    if (!headerControls.contains(themeBox)) headerControls.insertBefore(themeBox, headerControls.firstChild);
+    if (!headerControls.contains(langBox)) headerControls.insertBefore(langBox, themeBox.nextSibling);
+  }
+}
+placeThemeLanguageControls();
+window.addEventListener('resize', placeThemeLanguageControls);
 
 // Menu button toggle
 if (menuBtn) {
