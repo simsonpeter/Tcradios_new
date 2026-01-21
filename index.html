@@ -1797,12 +1797,57 @@ player.addEventListener('click', (e) => {
 });
 // Close fullscreen player
 fullscreenClose.onclick = () => closeFullscreenPlayer();
-// Close on escape key
+// Handle keyboard events
 document.addEventListener('keydown', (e) => {
+  // Close fullscreen player on escape
   if (e.key === 'Escape' && fullscreenPlayer.classList.contains('active')) {
     closeFullscreenPlayer();
+    return;
   }
-});
+  
+  // Handle volume buttons when fullscreen player is active
+  if (fullscreenPlayer.classList.contains('active')) {
+    // Check for volume button key codes (various browser implementations)
+    const isVolumeUp = e.key === 'VolumeUp' || 
+                       e.keyCode === 175 || 
+                       e.which === 175 ||
+                       (e.key === 'ArrowUp' && (e.ctrlKey || e.metaKey));
+    const isVolumeDown = e.key === 'VolumeDown' || 
+                         e.keyCode === 174 || 
+                         e.which === 174 ||
+                         (e.key === 'ArrowDown' && (e.ctrlKey || e.metaKey));
+    
+    if (isVolumeUp || isVolumeDown) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      // Get current volume
+      let currentVolume = Math.round(audio.volume * 100);
+      
+      // Adjust volume by 5% increments
+      if (isVolumeUp) {
+        currentVolume = Math.min(100, currentVolume + 5);
+      } else {
+        currentVolume = Math.max(0, currentVolume - 5);
+      }
+      
+      // Apply volume change
+      audio.volume = currentVolume / 100;
+      if (fsVolumeSlider) {
+        fsVolumeSlider.value = currentVolume;
+        updateVolumeIcon(currentVolume);
+      }
+      
+      // Save volume preference
+      localStorage.setItem('tcr-volume', currentVolume);
+      hapticFeedback('light');
+      
+      // Return early to prevent any other handlers from processing this event
+      return false;
+    }
+  }
+}, true); // Use capture phase to catch events early
 // Close when clicking on background (but not on content)
 fullscreenPlayer.addEventListener('click', (e) => {
   if (e.target === fullscreenPlayer) {
