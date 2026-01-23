@@ -1892,7 +1892,32 @@ if (fsVolumeSlider) {
 }
 // Volume slider change
 if (fsVolumeSlider) {
+  // Stop all event propagation to prevent swipe gestures from triggering
+  const stopPropagation = (e) => {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  };
+  
+  // Prevent swipe gestures when interacting with slider
+  fsVolumeSlider.addEventListener('mousedown', stopPropagation, true);
+  fsVolumeSlider.addEventListener('touchstart', stopPropagation, true);
+  fsVolumeSlider.addEventListener('mousemove', stopPropagation, true);
+  fsVolumeSlider.addEventListener('touchmove', stopPropagation, true);
+  fsVolumeSlider.addEventListener('mouseup', stopPropagation, true);
+  fsVolumeSlider.addEventListener('touchend', stopPropagation, true);
+  
+  // Also prevent on the volume container
+  const fsVolumeContainer = document.getElementById('fullscreen-volume');
+  if (fsVolumeContainer) {
+    fsVolumeContainer.addEventListener('mousedown', stopPropagation, true);
+    fsVolumeContainer.addEventListener('touchstart', stopPropagation, true);
+    fsVolumeContainer.addEventListener('mousemove', stopPropagation, true);
+    fsVolumeContainer.addEventListener('touchmove', stopPropagation, true);
+  }
+  
   fsVolumeSlider.addEventListener('input', (e) => {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
     const volume = parseInt(e.target.value);
     audio.volume = volume / 100;
     updateVolumeIcon(volume);
@@ -3242,11 +3267,25 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
+
+// Check if touch target is volume slider or its container
+function isVolumeSliderInteraction(e) {
+  const target = e.target;
+  return target.id === 'fs-volume-slider' || 
+         target.id === 'fs-volume-btn' ||
+         target.closest('#fullscreen-volume') ||
+         target.closest('#fs-volume-slider');
+}
+
 document.addEventListener('touchstart', e => {
+  // Don't track swipe if interacting with volume slider
+  if (isVolumeSliderInteraction(e)) return;
   touchStartX = e.changedTouches[0].screenX;
   touchStartY = e.changedTouches[0].screenY;
 }, false);
 document.addEventListener('touchend', e => {
+  // Don't handle swipe if interacting with volume slider
+  if (isVolumeSliderInteraction(e)) return;
   touchEndX = e.changedTouches[0].screenX;
   touchEndY = e.changedTouches[0].screenY;
   handleSwipe();
@@ -3385,6 +3424,8 @@ function addWearOSListeners() {
   // Add double-tap gesture for play/pause
   let lastTap = 0;
   document.addEventListener('touchend', (e) => {
+    // Don't handle if interacting with volume slider
+    if (isVolumeSliderInteraction(e)) return;
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
     if (tapLength < 500 && tapLength > 0) {
@@ -3398,21 +3439,32 @@ function addWearOSListeners() {
   // Add long press for next station
   let longPressTimer;
   document.addEventListener('touchstart', (e) => {
+    // Don't handle if interacting with volume slider
+    if (isVolumeSliderInteraction(e)) return;
     longPressTimer = setTimeout(() => {
       prevNext(1);
       hapticFeedback('heavy');
     }, 800);
   });
-  document.addEventListener('touchend', () => {
+  document.addEventListener('touchend', (e) => {
+    // Don't handle if interacting with volume slider
+    if (isVolumeSliderInteraction(e)) {
+      if (longPressTimer) clearTimeout(longPressTimer);
+      return;
+    }
     clearTimeout(longPressTimer);
   });
   // Add swipe gestures for station navigation
   let startX, startY;
   document.addEventListener('touchstart', (e) => {
+    // Don't handle if interacting with volume slider
+    if (isVolumeSliderInteraction(e)) return;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
   });
   document.addEventListener('touchend', (e) => {
+    // Don't handle if interacting with volume slider
+    if (isVolumeSliderInteraction(e)) return;
     if (!startX || !startY) return;
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
