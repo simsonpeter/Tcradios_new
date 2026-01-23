@@ -3283,9 +3283,12 @@ function hapticFeedback(type = 'light') {
 /* ---- SERVICE WORKER (PWA) ---- */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-      // Check for updates
-      registration.update();
+    // Add version parameter to force update
+    navigator.serviceWorker.register('/sw.js?v=4').then(registration => {
+      // Check for updates immediately
+      setInterval(() => {
+        registration.update();
+      }, 1000);
       // Listen for updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
@@ -3295,6 +3298,14 @@ if ('serviceWorker' in navigator) {
             window.location.reload();
           }
         });
+      });
+    });
+    // Unregister old service workers
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => {
+        if (registration.scope.includes('/') && !registration.active?.scriptURL.includes('v=4')) {
+          registration.unregister();
+        }
       });
     });
   });
