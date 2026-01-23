@@ -565,11 +565,17 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
-.favorite-button,.share-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition)}
-.favorite-button i,.share-button i{font-size:1.1rem}
+.favorite-button,.share-button,.rating-button,.comments-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
+.favorite-button i,.share-button i,.rating-button i,.comments-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
 .share-button:hover{color:var(--accent);transform:scale(1.1)}
 .favorite-button:hover{transform:scale(1.1)}
+.rating-button:hover{color:var(--accent);transform:scale(1.1)}
+.rating-button i.rated{color:#ffc107}
+.comments-button:hover{color:var(--accent);transform:scale(1.1)}
+.comment-count{position:absolute;top:-5px;right:-5px;background:var(--accent);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem}
+.station-rating-display i{font-size:0.7rem}
 #player{background:var(--header);border-top:1px solid var(--border);
         display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;
         position:fixed;bottom:0;width:100%;flex-shrink:0;z-index:100;
@@ -900,6 +906,18 @@ audio{display:none}
 #alarmModal button:hover{background:var(--accent);color:#fff}
 #alarmModal #cancelAlarm{background:rgba(220,38,38,0.2);border-color:rgba(220,38,38,0.5)}
 #alarmModal #cancelAlarm:hover{background:rgba(220,38,38,0.8);color:#fff}
+#ratingModal,#commentsModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+#ratingModal>div,#commentsModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:90%;box-shadow:var(--shadow-xl)}
+#ratingModal h3,#commentsModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
+#ratingModal button,#commentsModal button{margin:.3rem;padding:.5rem 1rem;border:1px solid var(--border);border-radius:.3rem;background:var(--bg);color:var(--text);cursor:pointer;transition:var(--transition)}
+#ratingModal button:hover,#commentsModal button:hover{background:var(--accent);color:#fff}
+.rating-stars i{cursor:pointer;color:#ddd;transition:var(--transition)}
+.rating-stars i:hover,.rating-stars i.active{color:#ffc107;transform:scale(1.2)}
+.rating-stars i.fas{color:#ffc107}
+.comment-item{background:var(--bg);padding:0.75rem;border-radius:0.5rem;margin-bottom:0.5rem;border:1px solid var(--border)}
+.comment-item .comment-text{margin:0.5rem 0;color:var(--text)}
+.comment-item .comment-date{font-size:0.75rem;color:var(--text-secondary)}
+#commentsList:empty::before{content:"No comments yet. Be the first to comment!";display:block;text-align:center;color:var(--text-secondary);padding:2rem}
 
 /* Drag and Drop Styles */
 .item.dragging {
@@ -1302,6 +1320,37 @@ audio{display:none}
     </div>
   </div>
 </div>
+<div id="ratingModal">
+  <div>
+    <h3>Rate Station</h3>
+    <div id="ratingStationName" style="text-align:center;margin-bottom:1rem;font-weight:600"></div>
+    <div class="rating-stars" style="display:flex;justify-content:center;gap:0.5rem;margin:1.5rem 0;font-size:2rem">
+      <i class="far fa-star" data-rating="1"></i>
+      <i class="far fa-star" data-rating="2"></i>
+      <i class="far fa-star" data-rating="3"></i>
+      <i class="far fa-star" data-rating="4"></i>
+      <i class="far fa-star" data-rating="5"></i>
+    </div>
+    <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem">
+      <button id="saveRating">Save Rating</button>
+      <button id="closeRatingModal">Close</button>
+    </div>
+  </div>
+</div>
+<div id="commentsModal">
+  <div style="max-width:500px;max-height:80vh;overflow-y:auto">
+    <h3>Comments & Reviews</h3>
+    <div id="commentsStationName" style="text-align:center;margin-bottom:1rem;font-weight:600"></div>
+    <div id="commentsList" style="margin:1rem 0;max-height:300px;overflow-y:auto"></div>
+    <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+      <textarea id="newComment" placeholder="Write a comment or review..." style="width:100%;min-height:80px;padding:0.5rem;border:1px solid var(--border);border-radius:0.5rem;background:var(--card);color:var(--text);resize:vertical;margin-bottom:0.5rem"></textarea>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end">
+        <button id="addComment">Add Comment</button>
+        <button id="closeCommentsModal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <audio id="audio"></audio>
 <script>
 /* ---- CONFIG ---- */
@@ -1322,6 +1371,8 @@ let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
 let favoritesOrder  = JSON.parse(localStorage.getItem('tcr-fav-order') || '[]'); // Custom order for favorites
 let playbackHistory = JSON.parse(localStorage.getItem('tcr-history') || '[]'); // Playback history with timestamps
 let playCounts      = JSON.parse(localStorage.getItem('tcr-play-counts') || '{}'); // Play counts for most played
+let stationRatings  = JSON.parse(localStorage.getItem('tcr-ratings') || '{}'); // User ratings for stations
+let stationComments = JSON.parse(localStorage.getItem('tcr-comments') || '{}'); // User comments/reviews for stations
 let currentLang     = localStorage.getItem('currentLang') || 'tamil';
 let currentTab      = localStorage.getItem('currentTab') || 'all';
 let currentList     = [];
@@ -1713,15 +1764,24 @@ function render(list) {
       <div class="station-info">
         <div class="station-name">${st.name}</div>
         <div class="station-genre">${st.genre}</div>
+        ${stationRatings[st.name] ? `<div class="station-rating-display"><i class="fas fa-star"></i> ${stationRatings[st.name].rating}/5</div>` : ''}
       </div>
       <div class="station-actions">
+        <div class="rating-button" data-station='${JSON.stringify(st)}' title="Rate">
+          <i class="fas fa-star ${stationRatings[st.name] ? 'rated' : ''}"></i>
+        </div>
+        <div class="comments-button" data-station='${JSON.stringify(st)}' title="Comments">
+          <i class="fas fa-comment"></i>
+          ${stationComments[st.name] && stationComments[st.name].length > 0 ? `<span class="comment-count">${stationComments[st.name].length}</span>` : ''}
+        </div>
         <div class="share-button" data-station='${JSON.stringify(st)}' title="Share"><i class="fas fa-share-alt"></i></div>
         <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
     `;
     
     div.onclick = e => { 
-      if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button')) {
+      if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button') && 
+          !e.target.closest('.rating-button') && !e.target.closest('.comments-button')) {
         play(st, i);
       }
     };
@@ -1732,6 +1792,14 @@ function render(list) {
     div.querySelector('.share-button').onclick = e => {
       e.stopPropagation();
       shareStation(st);
+    };
+    div.querySelector('.rating-button').onclick = e => {
+      e.stopPropagation();
+      showRatingModal(st);
+    };
+    div.querySelector('.comments-button').onclick = e => {
+      e.stopPropagation();
+      showCommentsModal(st);
     };
     stationList.appendChild(div);
   });
@@ -3089,15 +3157,25 @@ if (fsAlarm && alarmBtn) {
 }
 
 // Share station functionality - reusable function
-async function shareStation(station) {
+async function shareStation(station, includeNowPlaying = false) {
   if (!station) {
     showNotification('No station to share');
     return;
   }
   
+  // Get current song info if available and requested
+  let nowPlayingText = '';
+  if (includeNowPlaying && currentMetadata.song) {
+    nowPlayingText = `\n🎵 Now playing: ${currentMetadata.song}${currentMetadata.artist ? ' by ' + currentMetadata.artist : ''}`;
+  }
+  
   const shareData = {
-    title: `Listen to ${station.name} on TC RADIOS`,
-    text: `Check out ${station.name} - ${station.genre || 'Christian Radio'}`,
+    title: includeNowPlaying && currentMetadata.song 
+      ? `🎵 Listening to ${currentMetadata.song} on ${station.name}`
+      : `Listen to ${station.name} on TC RADIOS`,
+    text: includeNowPlaying && currentMetadata.song
+      ? `🎵 Now playing: ${currentMetadata.song}${currentMetadata.artist ? ' by ' + currentMetadata.artist : ''}\n\nTune in to ${station.name} - ${station.genre || 'Christian Radio'}\n\n`
+      : `Check out ${station.name} - ${station.genre || 'Christian Radio'}`,
     url: window.location.href + `?station=${encodeURIComponent(station.name)}`
   };
   
@@ -3105,11 +3183,12 @@ async function shareStation(station) {
     // Try Web Share API first (mobile)
     if (navigator.share) {
       await navigator.share(shareData);
-      showNotification('Station shared!');
+      showNotification('Shared!');
       hapticFeedback('light');
     } else {
       // Fallback: Copy to clipboard
-      await navigator.clipboard.writeText(shareData.url);
+      const shareText = `${shareData.text}\n${shareData.url}`;
+      await navigator.clipboard.writeText(shareText);
       showNotification('Link copied to clipboard!');
       hapticFeedback('light');
     }
@@ -3117,7 +3196,8 @@ async function shareStation(station) {
     if (error.name !== 'AbortError') {
       // Fallback: Copy to clipboard
       try {
-        await navigator.clipboard.writeText(shareData.url);
+        const shareText = `${shareData.text}\n${shareData.url}`;
+        await navigator.clipboard.writeText(shareText);
         showNotification('Link copied to clipboard!');
         hapticFeedback('light');
       } catch (clipboardError) {
@@ -3129,14 +3209,15 @@ async function shareStation(station) {
   }
 }
 
-// Fullscreen player share button
+// Fullscreen player share button - share what you're listening to
 if (fsShare) {
   fsShare.onclick = async () => {
     if (!lastPlayedStation) {
       showNotification('No station playing');
       return;
     }
-    await shareStation(lastPlayedStation.station);
+    // Share with "what you're listening to" by default
+    await shareStation(lastPlayedStation.station, true);
   };
 }
 
@@ -3255,6 +3336,206 @@ if (document.getElementById('closeAlarmModal')) {
   document.getElementById('closeAlarmModal').onclick = () => {
     alarmModal.style.display = 'none';
   };
+}
+
+/* ---- RATING SYSTEM ---- */
+let currentRatingStation = null;
+let selectedRating = 0;
+
+function showRatingModal(station) {
+  currentRatingStation = station;
+  const ratingModal = document.getElementById('ratingModal');
+  const stationName = document.getElementById('ratingStationName');
+  const stars = ratingModal.querySelectorAll('.rating-stars i');
+  
+  stationName.textContent = station.name;
+  
+  // Load existing rating if any
+  if (stationRatings[station.name]) {
+    selectedRating = stationRatings[station.name].rating;
+  } else {
+    selectedRating = 0;
+  }
+  
+  // Update star display
+  stars.forEach((star, index) => {
+    const rating = index + 1;
+    star.className = rating <= selectedRating ? 'fas fa-star' : 'far fa-star';
+    star.style.color = rating <= selectedRating ? '#ffc107' : '#ddd';
+  });
+  
+  // Star hover and click handlers
+  stars.forEach((star, index) => {
+    const rating = index + 1;
+    star.onmouseenter = () => {
+      stars.forEach((s, i) => {
+        const r = i + 1;
+        s.className = r <= rating ? 'fas fa-star active' : 'far fa-star';
+        s.style.color = r <= rating ? '#ffc107' : '#ddd';
+      });
+    };
+    star.onmouseleave = () => {
+      stars.forEach((s, i) => {
+        const r = i + 1;
+        s.className = r <= selectedRating ? 'fas fa-star' : 'far fa-star';
+        s.style.color = r <= selectedRating ? '#ffc107' : '#ddd';
+      });
+    };
+    star.onclick = () => {
+      selectedRating = rating;
+      stars.forEach((s, i) => {
+        const r = i + 1;
+        s.className = r <= rating ? 'fas fa-star' : 'far fa-star';
+        s.style.color = r <= rating ? '#ffc107' : '#ddd';
+      });
+    };
+  });
+  
+  ratingModal.style.display = 'flex';
+}
+
+function saveRating() {
+  if (!currentRatingStation || selectedRating === 0) {
+    showNotification('Please select a rating');
+    return;
+  }
+  
+  stationRatings[currentRatingStation.name] = {
+    rating: selectedRating,
+    timestamp: new Date().toISOString()
+  };
+  
+  localStorage.setItem('tcr-ratings', JSON.stringify(stationRatings));
+  showNotification(`Rated ${currentRatingStation.name} ${selectedRating} stars!`);
+  hapticFeedback('success');
+  
+  // Update UI
+  switchTab(currentTab);
+  
+  // Close modal
+  document.getElementById('ratingModal').style.display = 'none';
+}
+
+// Rating modal handlers
+if (document.getElementById('saveRating')) {
+  document.getElementById('saveRating').onclick = saveRating;
+}
+if (document.getElementById('closeRatingModal')) {
+  document.getElementById('closeRatingModal').onclick = () => {
+    document.getElementById('ratingModal').style.display = 'none';
+  };
+}
+
+/* ---- COMMENTS/REVIEWS SYSTEM ---- */
+let currentCommentsStation = null;
+
+function showCommentsModal(station) {
+  currentCommentsStation = station;
+  const commentsModal = document.getElementById('commentsModal');
+  const stationName = document.getElementById('commentsStationName');
+  const commentsList = document.getElementById('commentsList');
+  const newComment = document.getElementById('newComment');
+  
+  stationName.textContent = station.name;
+  newComment.value = '';
+  
+  // Load and display comments
+  if (!stationComments[station.name]) {
+    stationComments[station.name] = [];
+  }
+  
+  renderComments(stationComments[station.name]);
+  
+  commentsModal.style.display = 'flex';
+}
+
+function renderComments(comments) {
+  const commentsList = document.getElementById('commentsList');
+  
+  if (comments.length === 0) {
+    commentsList.innerHTML = '';
+    return;
+  }
+  
+  commentsList.innerHTML = comments.map((comment, index) => `
+    <div class="comment-item">
+      <div class="comment-text">${escapeHtml(comment.text)}</div>
+      <div class="comment-date">${formatTimestamp(comment.timestamp)}</div>
+      <button onclick="deleteComment(${index})" style="margin-top:0.5rem;padding:0.25rem 0.5rem;font-size:0.75rem;background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.5);color:var(--text);border-radius:0.3rem;cursor:pointer">Delete</button>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function addComment() {
+  const newComment = document.getElementById('newComment');
+  const text = newComment.value.trim();
+  
+  if (!text) {
+    showNotification('Please enter a comment');
+    return;
+  }
+  
+  if (!currentCommentsStation) return;
+  
+  if (!stationComments[currentCommentsStation.name]) {
+    stationComments[currentCommentsStation.name] = [];
+  }
+  
+  stationComments[currentCommentsStation.name].unshift({
+    text: text,
+    timestamp: new Date().toISOString()
+  });
+  
+  localStorage.setItem('tcr-comments', JSON.stringify(stationComments));
+  
+  renderComments(stationComments[currentCommentsStation.name]);
+  newComment.value = '';
+  showNotification('Comment added!');
+  hapticFeedback('success');
+  
+  // Update comment count in UI
+  switchTab(currentTab);
+}
+
+function deleteComment(index) {
+  if (!currentCommentsStation) return;
+  
+  stationComments[currentCommentsStation.name].splice(index, 1);
+  localStorage.setItem('tcr-comments', JSON.stringify(stationComments));
+  
+  renderComments(stationComments[currentCommentsStation.name]);
+  showNotification('Comment deleted');
+  hapticFeedback('light');
+  
+  // Update comment count in UI
+  switchTab(currentTab);
+}
+
+// Make deleteComment available globally
+window.deleteComment = deleteComment;
+
+// Comments modal handlers
+if (document.getElementById('addComment')) {
+  document.getElementById('addComment').onclick = addComment;
+}
+if (document.getElementById('closeCommentsModal')) {
+  document.getElementById('closeCommentsModal').onclick = () => {
+    document.getElementById('commentsModal').style.display = 'none';
+  };
+}
+// Allow Enter key to submit comment
+if (document.getElementById('newComment')) {
+  document.getElementById('newComment').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      addComment();
+    }
+  });
 }
 
 // Restore alarm on page load
