@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v2';
+const CACHE = 'tcr-v3';
 const FILES = [
   '/',
   '/index.html',
@@ -15,12 +15,46 @@ const FILES = [
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+  self.skipWaiting(); // Activate immediately
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim(); // Take control of all pages immediately
 });
 
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
-  );
+  // For HTML files, try network first, then cache
+  if (e.request.url.endsWith('.html') || e.request.url === new URL(e.request.url).origin + '/') {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          // Clone the response
+          const resClone = res.clone();
+          // Update cache
+          caches.open(CACHE).then(cache => {
+            cache.put(e.request, resClone);
+          });
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+  } else {
+    // For other files, use cache first
+    e.respondWith(
+      caches.match(e.request).then(res => res || fetch(e.request))
+    );
+  }
 });
 
 // Android Auto support
