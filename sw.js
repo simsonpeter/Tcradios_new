@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v3';
+const CACHE = 'tcr-v4';
 const FILES = [
   '/',
   '/index.html',
@@ -34,10 +34,11 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // For HTML files, try network first, then cache
-  if (e.request.url.endsWith('.html') || e.request.url === new URL(e.request.url).origin + '/') {
+  const url = new URL(e.request.url);
+  // For HTML files and root, try network first, then cache
+  if (e.request.url.endsWith('.html') || url.pathname === '/') {
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: 'no-store' })
         .then(res => {
           // Clone the response
           const resClone = res.clone();
