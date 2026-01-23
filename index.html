@@ -635,14 +635,16 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 /* Fullscreen Extra Controls (Timer & Alarm) */
 #fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1.5rem;
                             margin-top:1.5rem}
-#fs-sleep,#fs-alarm{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+#fs-sleep,#fs-alarm,#fs-share{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
                      font-size:1.3rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                      transition:var(--transition);min-width:50px;min-height:50px;
                      display:flex;align-items:center;justify-content:center;
                      box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
-#fs-sleep:hover,#fs-alarm:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
-#fs-sleep:active,#fs-alarm:active{transform:scale(0.95)}
-#fs-sleep i,#fs-alarm i{font-size:1.2rem}
+#fs-sleep:hover,#fs-alarm:hover,#fs-share:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-sleep:active,#fs-alarm:active,#fs-share:active{transform:scale(0.95)}
+#fs-sleep i,#fs-alarm i,#fs-share i{font-size:1.2rem}
+#stream-info{margin-top:1rem;padding:0.5rem;font-size:0.85rem;color:rgba(255,255,255,0.7);text-align:center}
+#stream-quality,#stream-bitrate{margin:0.25rem 0}
 /* Fullscreen Volume Control */
 #fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
                    margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
@@ -1225,10 +1227,15 @@ audio{display:none}
   <div id="fullscreen-extra-controls">
     <button id="fs-sleep" title="Sleep Timer"><i class="fas fa-clock"></i></button>
     <button id="fs-alarm" title="Alarm Clock"><i class="fas fa-bell"></i></button>
+    <button id="fs-share" title="Share Station"><i class="fas fa-share-alt"></i></button>
   </div>
   <div id="fullscreen-volume">
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
     <input type="range" id="fs-volume-slider" min="0" max="100" value="100" title="Volume">
+  </div>
+  <div id="stream-info" style="display:none;text-align:center;margin-top:1rem;font-size:0.85rem;color:rgba(255,255,255,0.7);">
+    <div id="stream-quality"></div>
+    <div id="stream-bitrate"></div>
   </div>
 </div>
 <!-- Floating Mini Player Widget -->
@@ -1330,6 +1337,10 @@ const fsPrev = document.getElementById('fs-prev');
 const fsNext = document.getElementById('fs-next');
 const fsVolumeBtn = document.getElementById('fs-volume-btn');
 const fsVolumeSlider = document.getElementById('fs-volume-slider');
+const fsShare = document.getElementById('fs-share');
+const streamInfo = document.getElementById('stream-info');
+const streamQuality = document.getElementById('stream-quality');
+const streamBitrate = document.getElementById('stream-bitrate');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
   const promises = Object.keys(LANG_URLS).map(async lang => {
@@ -1706,6 +1717,8 @@ function play(st, i) {
   updateWearOSMediaSession(st);
   // Start metadata fetching (will show only if metadata is available)
   startMetadataFetching(st);
+  // Start stream quality detection
+  detectStreamQuality(st);
   // Save last played station
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
@@ -1991,6 +2004,8 @@ audio.onpause = () => {
   }
   // Stop metadata fetching when paused
   stopMetadataFetching();
+  // Stop stream quality detection when paused
+  stopStreamQualityDetection();
   // Refresh display to remove playing state
   switchTab(currentTab);
 };
@@ -2014,6 +2029,10 @@ function updateMetadata(song, artist) {
       fullscreenSong.textContent = song;
       fullscreenArtist.textContent = artist || '';
       fullscreenMetadata.style.display = 'block';
+    }
+    // Update Media Session with song/artist info
+    if (lastPlayedStation && 'mediaSession' in navigator) {
+      updateMediaSession(lastPlayedStation.station);
     }
     // Update widget with metadata
     updateWidget('metadataUpdate', { song, artist });
@@ -2822,6 +2841,148 @@ if (fsAlarm && alarmBtn) {
   };
 }
 
+// Share station functionality
+if (fsShare) {
+  fsShare.onclick = async () => {
+    if (!lastPlayedStation) {
+      showNotification('No station playing');
+      return;
+    }
+    
+    const station = lastPlayedStation.station;
+    const shareData = {
+      title: `Listen to ${station.name} on TC RADIOS`,
+      text: `Check out ${station.name} - ${station.genre || 'Christian Radio'}`,
+      url: window.location.href + `?station=${encodeURIComponent(station.name)}`
+    };
+    
+    try {
+      // Try Web Share API first (mobile)
+      if (navigator.share) {
+        await navigator.share(shareData);
+        showNotification('Station shared!');
+        hapticFeedback('light');
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        showNotification('Link copied to clipboard!');
+        hapticFeedback('light');
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        // Fallback: Copy to clipboard
+        try {
+          await navigator.clipboard.writeText(shareData.url);
+          showNotification('Link copied to clipboard!');
+          hapticFeedback('light');
+        } catch (clipboardError) {
+          // Last resort: Show URL in alert
+          prompt('Copy this link:', shareData.url);
+          showNotification('Link ready to copy');
+        }
+      }
+    }
+  };
+}
+
+// Stream quality and bitrate detection
+let streamQualityInterval;
+function detectStreamQuality(station) {
+  if (!audio.src || !streamInfo) return;
+  
+  // Clear existing interval
+  if (streamQualityInterval) {
+    clearInterval(streamQualityInterval);
+  }
+  
+  // Try to detect stream quality from headers
+  fetch(station.url, { method: 'HEAD', mode: 'no-cors' })
+    .catch(() => {
+      // CORS might block, try alternative method
+      detectStreamQualityFromAudio();
+    });
+  
+  // Monitor audio element for quality info
+  detectStreamQualityFromAudio();
+  
+  // Update periodically
+  streamQualityInterval = setInterval(() => {
+    detectStreamQualityFromAudio();
+  }, 5000);
+}
+
+function detectStreamQualityFromAudio() {
+  if (!audio.src || !streamInfo || !streamQuality || !streamBitrate) return;
+  
+  try {
+    // Try to get bitrate from audio element
+    // Note: Most browsers don't expose this directly, so we estimate
+    const audioElement = audio;
+    
+    // Check if we can get any quality info
+    // For radio streams, we typically see:
+    // - MP3: 64kbps, 128kbps, 192kbps, 320kbps
+    // - AAC: 48kbps, 64kbps, 96kbps, 128kbps
+    
+    // Estimate based on stream URL patterns
+    const url = audioElement.src;
+    let estimatedBitrate = '';
+    let quality = '';
+    
+    // Check URL for bitrate indicators
+    if (url.match(/64|64k|64kb/i)) {
+      estimatedBitrate = '64 kbps';
+      quality = 'Low';
+    } else if (url.match(/96|96k|96kb/i)) {
+      estimatedBitrate = '96 kbps';
+      quality = 'Medium';
+    } else if (url.match(/128|128k|128kb/i)) {
+      estimatedBitrate = '128 kbps';
+      quality = 'High';
+    } else if (url.match(/192|192k|192kb/i)) {
+      estimatedBitrate = '192 kbps';
+      quality = 'High';
+    } else if (url.match(/320|320k|320kb/i)) {
+      estimatedBitrate = '320 kbps';
+      quality = 'Very High';
+    } else {
+      // Default estimate for radio streams
+      estimatedBitrate = '~128 kbps';
+      quality = 'Standard';
+    }
+    
+    // Check codec from URL
+    let codec = '';
+    if (url.includes('.mp3') || url.includes('mp3')) {
+      codec = 'MP3';
+    } else if (url.includes('.aac') || url.includes('aac')) {
+      codec = 'AAC';
+    } else if (url.includes('.ogg') || url.includes('ogg')) {
+      codec = 'OGG';
+    } else {
+      codec = 'Stream';
+    }
+    
+    // Update display
+    streamQuality.textContent = `Quality: ${quality} (${codec})`;
+    streamBitrate.textContent = `Bitrate: ${estimatedBitrate}`;
+    streamInfo.style.display = 'block';
+    
+  } catch (error) {
+    console.log('Stream quality detection error:', error);
+  }
+}
+
+function stopStreamQualityDetection() {
+  if (streamQualityInterval) {
+    clearInterval(streamQualityInterval);
+    streamQualityInterval = null;
+  }
+  if (streamInfo) {
+    streamInfo.style.display = 'none';
+  }
+}
+
 if (document.getElementById('setAlarm')) {
   document.getElementById('setAlarm').onclick = () => {
     setAlarm();
@@ -2963,10 +3124,14 @@ if (widgetVisible === 'true' && floatingWidget) {
 /* ---- MEDIA SESSION ---- */
 function updateMediaSession(st) {
   if ('mediaSession' in navigator) {
+    // Use song/artist metadata if available, otherwise use station name
+    const title = currentMetadata.song || st.name;
+    const artist = currentMetadata.artist || 'TC RADIOS';
+    
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: st.name,
-      artist: 'TC RADIOS',
-      album: st.genre,
+      title: title,
+      artist: artist,
+      album: st.genre || 'Christian Radio',
       artwork: [{
         src: st.logo || '/icons/icon-512x512.png',
         sizes: '512x512', type: 'image/png'
