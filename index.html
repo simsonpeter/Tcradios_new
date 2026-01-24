@@ -565,8 +565,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
-.favorite-button,.share-button,.rating-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
-.favorite-button i,.share-button i,.rating-button i{font-size:1.1rem}
+.favorite-button,.share-button,.rating-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative;display:flex;align-items:center;justify-content:center;line-height:1}
+.favorite-button i,.share-button i,.rating-button i{font-size:1.1rem;line-height:1}
 .favorite-button.on{color:var(--accent)}
 .share-button:hover{color:var(--accent);transform:scale(1.1)}
 .favorite-button:hover{transform:scale(1.1)}
@@ -758,7 +758,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   .station-list .item:active{transform:scale(0.98)}
   #p-play,#p-prev,#p-next{min-width:48px;min-height:48px}
   header button{min-width:44px;min-height:44px}
-  .favorite-button,.share-button{min-width:44px;min-height:44px}
+  .favorite-button,.share-button,.rating-button{min-width:44px;min-height:44px}
 }
 /* Widget mode styles */
 .widget-mode {
