@@ -3512,7 +3512,7 @@ const SUPABASE_URL = 'https://ieavylmfyxpccxfwkhvd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYXZ5bG1meXhwY2N4ZndraHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNjA2MDIsImV4cCI6MjA4NDkzNjYwMn0.GUwKUrJiDiuMO4GayNlnY2lnt4HprsXGqJM4K-ktaOM';
 
 // Initialize Supabase client (wait for script to load)
-let supabase = null;
+let supabaseClient = null;
 let supabaseInitAttempts = 0;
 const MAX_SUPABASE_INIT_ATTEMPTS = 50; // Max 5 seconds (50 * 100ms)
 
@@ -3531,7 +3531,7 @@ function initSupabase() {
     }
     
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('Supabase client initialized successfully.');
     } else {
       console.warn('Supabase not configured. Please add your Supabase URL and API key.');
@@ -3557,7 +3557,7 @@ if (document.readyState === 'loading') {
 }
 // Also try on window load as fallback
 window.addEventListener('load', () => {
-  if (!supabase && supabaseInitAttempts < MAX_SUPABASE_INIT_ATTEMPTS) {
+  if (!supabaseClient && supabaseInitAttempts < MAX_SUPABASE_INIT_ATTEMPTS) {
     initSupabase();
   }
 });
@@ -3565,19 +3565,19 @@ window.addEventListener('load', () => {
 /* ---- AUTHENTICATION & API FUNCTIONS ---- */
 async function registerUser(email, password) {
   // Ensure Supabase is initialized before proceeding
-  if (!supabase) {
+  if (!supabaseClient) {
     // Try to initialize one more time
     initSupabase();
     // Wait a bit for initialization
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    if (!supabase) {
+    if (!supabaseClient) {
       throw new Error('Supabase not configured. Please refresh the page and try again.');
     }
   }
   
   try {
-    const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseClientClientClient.auth.signUp({
       email: email,
       password: password
     });
@@ -3604,19 +3604,19 @@ async function registerUser(email, password) {
 
 async function loginUser(email, password) {
   // Ensure Supabase is initialized before proceeding
-  if (!supabase) {
+  if (!supabaseClient) {
     // Try to initialize one more time
     initSupabase();
     // Wait a bit for initialization
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    if (!supabase) {
+    if (!supabaseClient) {
       throw new Error('Supabase not configured. Please refresh the page and try again.');
     }
   }
   
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClientClientClient.auth.signInWithPassword({
       email: email,
       password: password
     });
@@ -3643,8 +3643,8 @@ async function loginUser(email, password) {
 }
 
 function logoutUser() {
-  if (supabase) {
-    supabase.auth.signOut();
+  if (supabaseClient) {
+    supabaseClient.auth.signOut();
   }
   
   currentUser = null;
@@ -3656,10 +3656,10 @@ function logoutUser() {
 }
 
 async function syncFavoritesToServer() {
-  if (!currentUser || !supabase) return;
+  if (!currentUser || !supabaseClient) return;
   
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('user_favorites')
       .upsert({
         user_id: currentUser.id,
@@ -3683,10 +3683,10 @@ async function syncFavoritesToServer() {
 }
 
 async function syncFavoritesFromServer() {
-  if (!currentUser || !supabase) return;
+  if (!currentUser || !supabaseClient) return;
   
   try {
-    const { data, error } = await supabase
+      const { data, error } = await supabaseClientClient
       .from('user_favorites')
       .select('favorites, favorites_order')
       .eq('user_id', currentUser.id)
@@ -3717,7 +3717,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
     // Check if user already rated this station
     let ratingRecord = null;
     if (currentUser) {
-      const { data } = await supabase
+      const { data } = await supabaseClient
         .from('user_ratings')
         .select('id, rating')
         .eq('user_id', currentUser.id)
@@ -3729,7 +3729,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
     
     if (ratingRecord) {
       // Update existing rating
-      const { error } = await supabase
+      const { error } = await supabaseClientClient
         .from('user_ratings')
         .update({
           rating: rating,
@@ -3750,7 +3750,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
         ratingData.user_id = currentUser.id;
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseClientClient
         .from('user_ratings')
         .insert([ratingData]);
       
@@ -3767,7 +3767,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
 }
 
 async function fetchGlobalRatings() {
-  if (!supabase) {
+  if (!supabaseClient) {
     // Fallback to localStorage if Supabase not configured
     const globalRatingsData = localStorage.getItem('tcr-global-ratings');
     if (globalRatingsData) {
@@ -3779,7 +3779,7 @@ async function fetchGlobalRatings() {
   
   try {
     // Get aggregated ratings from Supabase
-    const { data, error } = await supabase
+      const { data, error } = await supabaseClientClient
       .from('user_ratings')
       .select('station_name, rating');
     
@@ -3821,10 +3821,10 @@ async function checkSupabaseSession() {
   if (!supabase) return;
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
     if (session) {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabaseClient.auth.getUser();
       currentUser = {
         id: user.id,
         email: user.email,
