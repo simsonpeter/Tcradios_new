@@ -20,7 +20,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
 <style>
 /* Modern Elegant Theme System */
 :root{
@@ -3469,13 +3469,20 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Initialize Supabase client (wait for script to load)
 let supabase = null;
+let supabaseInitAttempts = 0;
+const MAX_SUPABASE_INIT_ATTEMPTS = 50; // Max 5 seconds (50 * 100ms)
+
 function initSupabase() {
   try {
     // Check if Supabase library is loaded
     if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-      console.warn('Supabase script not loaded yet. Retrying...');
-      // Retry after a short delay
-      setTimeout(initSupabase, 100);
+      supabaseInitAttempts++;
+      if (supabaseInitAttempts < MAX_SUPABASE_INIT_ATTEMPTS) {
+        // Retry after a short delay
+        setTimeout(initSupabase, 100);
+      } else {
+        console.warn('Supabase script failed to load after multiple attempts. App will continue without Supabase.');
+      }
       return;
     }
     
@@ -3491,16 +3498,19 @@ function initSupabase() {
   }
 }
 
-// Wait for DOM and script to be ready
+// Wait for DOM and script to be ready (non-blocking)
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initSupabase);
+  document.addEventListener('DOMContentLoaded', () => {
+    // Don't block - initialize in background
+    setTimeout(initSupabase, 100);
+  });
 } else {
-  // DOM already loaded, try immediately and retry if needed
-  initSupabase();
+  // DOM already loaded, try after a short delay
+  setTimeout(initSupabase, 100);
 }
 // Also try on window load as fallback
 window.addEventListener('load', () => {
-  if (!supabase) {
+  if (!supabase && supabaseInitAttempts < MAX_SUPABASE_INIT_ATTEMPTS) {
     initSupabase();
   }
 });
