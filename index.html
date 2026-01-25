@@ -3469,10 +3469,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Initialize Supabase client
 let supabase = null;
-if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} else {
-  console.warn('Supabase not configured. Please add your Supabase URL and API key.');
+try {
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY' && window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else {
+    console.warn('Supabase not configured. Please add your Supabase URL and API key.');
+  }
+} catch (error) {
+  console.error('Supabase initialization error:', error);
+  // Continue without Supabase - app will work with local storage only
 }
 
 /* ---- AUTHENTICATION & API FUNCTIONS ---- */
@@ -3733,8 +3738,16 @@ async function checkSupabaseSession() {
       updateAccountUI();
       
       // Sync favorites and fetch global ratings
-      await syncFavoritesFromServer();
-      await fetchGlobalRatings();
+      try {
+        await syncFavoritesFromServer();
+      } catch (error) {
+        console.error('Failed to sync favorites:', error);
+      }
+      try {
+        await fetchGlobalRatings();
+      } catch (error) {
+        console.error('Failed to fetch global ratings:', error);
+      }
     }
   } catch (error) {
     console.error('Session check error:', error);
@@ -3936,24 +3949,37 @@ document.getElementById('accountModal').onclick = (e) => {
 
 // Initialize: Check if user is logged in and sync
 window.addEventListener('load', async () => {
-  updateAccountUI();
-  
-  // Check Supabase session first
-  await checkSupabaseSession();
-  
-  // If no Supabase session but have local user, try to restore
-  if (!currentUser && localStorage.getItem('tcr-user')) {
-    const savedUser = JSON.parse(localStorage.getItem('tcr-user'));
-    const savedToken = localStorage.getItem('tcr-token');
-    if (savedUser && savedToken) {
-      currentUser = savedUser;
-      authToken = savedToken;
-      updateAccountUI();
+  try {
+    updateAccountUI();
+    
+    // Check Supabase session first (don't block if it fails)
+    try {
+      await checkSupabaseSession();
+    } catch (error) {
+      console.error('Supabase session check error:', error);
     }
+    
+    // If no Supabase session but have local user, try to restore
+    if (!currentUser && localStorage.getItem('tcr-user')) {
+      const savedUser = JSON.parse(localStorage.getItem('tcr-user'));
+      const savedToken = localStorage.getItem('tcr-token');
+      if (savedUser && savedToken) {
+        currentUser = savedUser;
+        authToken = savedToken;
+        updateAccountUI();
+      }
+    }
+    
+    // Fetch global ratings (works even without account, don't block if it fails)
+    try {
+      await fetchGlobalRatings();
+    } catch (error) {
+      console.error('Failed to fetch global ratings:', error);
+    }
+  } catch (error) {
+    console.error('Account initialization error:', error);
+    // Don't block the app if account features fail
   }
-  
-  // Fetch global ratings (works even without account)
-  await fetchGlobalRatings();
 });
 
 // Restore alarm on page load
