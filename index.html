@@ -3459,6 +3459,286 @@ if (document.getElementById('closeRatingModal')) {
   };
 }
 
+/* ---- SUPABASE CONFIGURATION ---- */
+// TODO: Replace these with your Supabase project credentials
+// Get them from: https://app.supabase.com -> Your Project -> Settings -> API
+const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g., 'https://xxxxx.supabase.co'
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your anon/public key
+
+// Initialize Supabase client
+let supabase = null;
+if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  console.warn('Supabase not configured. Please add your Supabase URL and API key.');
+}
+
+/* ---- AUTHENTICATION & API FUNCTIONS ---- */
+async function registerUser(email, password) {
+  if (!supabase) {
+    throw new Error('Supabase not configured. Please add your Supabase credentials.');
+  }
+  
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password
+    });
+    
+    if (error) throw error;
+    
+    currentUser = {
+      id: data.user.id,
+      email: data.user.email,
+      createdAt: data.user.created_at
+    };
+    authToken = data.session?.access_token || null;
+    
+    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
+    if (authToken) {
+      localStorage.setItem('tcr-token', authToken);
+    }
+    
+    return { user: currentUser, token: authToken };
+  } catch (error) {
+    throw new Error(error.message || 'Registration failed');
+  }
+}
+
+async function loginUser(email, password) {
+  if (!supabase) {
+    throw new Error('Supabase not configured. Please add your Supabase credentials.');
+  }
+  
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+    
+    if (error) throw error;
+    
+    currentUser = {
+      id: data.user.id,
+      email: data.user.email,
+      createdAt: data.user.created_at
+    };
+    authToken = data.session.access_token;
+    
+    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
+    localStorage.setItem('tcr-token', authToken);
+    
+    // Sync favorites from server
+    await syncFavoritesFromServer();
+    
+    return { user: currentUser, token: authToken };
+  } catch (error) {
+    throw new Error(error.message || 'Login failed');
+  }
+}
+
+function logoutUser() {
+  if (supabase) {
+    supabase.auth.signOut();
+  }
+  
+  currentUser = null;
+  authToken = null;
+  localStorage.removeItem('tcr-user');
+  localStorage.removeItem('tcr-token');
+  showNotification('Logged out');
+  updateAccountUI();
+}
+
+async function syncFavoritesToServer() {
+  if (!currentUser || !supabase) return;
+  
+  try {
+    const { error } = await supabase
+      .from('user_favorites')
+      .upsert({
+        user_id: currentUser.id,
+        favorites: favorites,
+        favorites_order: favoritesOrder,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      });
+    
+    if (error) throw error;
+    
+    localStorage.setItem('tcr-fav-synced', 'true');
+    showNotification('Favorites synced!');
+    return true;
+  } catch (error) {
+    console.error('Failed to sync favorites:', error);
+    showNotification('Failed to sync favorites', 'error');
+    return false;
+  }
+}
+
+async function syncFavoritesFromServer() {
+  if (!currentUser || !supabase) return;
+  
+  try {
+    const { data, error } = await supabase
+      .from('user_favorites')
+      .select('favorites, favorites_order')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+    
+    if (data && data.favorites && data.favorites.length > 0) {
+      // Merge server favorites with local (server takes priority)
+      favorites = data.favorites;
+      favoritesOrder = data.favorites_order || data.favorites;
+      localStorage.setItem('tcr-fav', JSON.stringify(favorites));
+      localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
+      switchTab(currentTab);
+      showNotification('Favorites synced from cloud!');
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to sync favorites:', error);
+    return false;
+  }
+}
+
+async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
+  if (!supabase) return;
+  
+  try {
+    // Check if user already rated this station
+    let ratingRecord = null;
+    if (currentUser) {
+      const { data } = await supabase
+        .from('user_ratings')
+        .select('id, rating')
+        .eq('user_id', currentUser.id)
+        .eq('station_name', stationName)
+        .single();
+      
+      ratingRecord = data;
+    }
+    
+    if (ratingRecord) {
+      // Update existing rating
+      const { error } = await supabase
+        .from('user_ratings')
+        .update({
+          rating: rating,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', ratingRecord.id);
+      
+      if (error) throw error;
+    } else {
+      // Insert new rating
+      const ratingData = {
+        station_name: stationName,
+        rating: rating,
+        updated_at: new Date().toISOString()
+      };
+      
+      if (currentUser) {
+        ratingData.user_id = currentUser.id;
+      }
+      
+      const { error } = await supabase
+        .from('user_ratings')
+        .insert([ratingData]);
+      
+      if (error) throw error;
+    }
+    
+    // Fetch updated global ratings
+    await fetchGlobalRatings();
+    return true;
+  } catch (error) {
+    console.error('Failed to submit rating:', error);
+    return false;
+  }
+}
+
+async function fetchGlobalRatings() {
+  if (!supabase) {
+    // Fallback to localStorage if Supabase not configured
+    const globalRatingsData = localStorage.getItem('tcr-global-ratings');
+    if (globalRatingsData) {
+      globalRatings = JSON.parse(globalRatingsData);
+      updateRatingDisplays();
+    }
+    return globalRatings;
+  }
+  
+  try {
+    // Get aggregated ratings from Supabase
+    const { data, error } = await supabase
+      .from('user_ratings')
+      .select('station_name, rating');
+    
+    if (error) throw error;
+    
+    // Aggregate ratings
+    const aggregated = {};
+    data.forEach(item => {
+      if (!aggregated[item.station_name]) {
+        aggregated[item.station_name] = { sum: 0, count: 0, total: 0 };
+      }
+      aggregated[item.station_name].sum += item.rating;
+      aggregated[item.station_name].count++;
+    });
+    
+    // Calculate averages
+    Object.keys(aggregated).forEach(station => {
+      aggregated[station].total = aggregated[station].sum / aggregated[station].count;
+    });
+    
+    globalRatings = aggregated;
+    updateRatingDisplays();
+    return globalRatings;
+  } catch (error) {
+    console.error('Failed to fetch global ratings:', error);
+    return {};
+  }
+}
+
+function updateRatingDisplays() {
+  // This will be called to update rating displays with global data
+  if (currentTab !== 'about') {
+    switchTab(currentTab);
+  }
+}
+
+// Check for existing session on page load
+async function checkSupabaseSession() {
+  if (!supabase) return;
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUser = {
+        id: user.id,
+        email: user.email,
+        createdAt: user.created_at
+      };
+      authToken = session.access_token;
+      localStorage.setItem('tcr-user', JSON.stringify(currentUser));
+      localStorage.setItem('tcr-token', authToken);
+      updateAccountUI();
+      
+      // Sync favorites and fetch global ratings
+      await syncFavoritesFromServer();
+      await fetchGlobalRatings();
+    }
+  } catch (error) {
+    console.error('Session check error:', error);
+  }
+}
+
 /* ---- API CONFIGURATION ---- */
 // Change this URL to your backend API endpoint
 const API_BASE_URL = 'https://your-api-domain.com/api'; // TODO: Replace with your API URL
@@ -3493,192 +3773,6 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
 // Mock API for development (replace with real API calls)
 async function mockApiRequest(endpoint, method, data) {
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
-  
-  if (endpoint === '/auth/register') {
-    if (!data.email || !data.password) {
-      throw new Error('Email and password required');
-    }
-    // Simulate registration
-    const user = {
-      id: Date.now().toString(),
-      email: data.email,
-      createdAt: new Date().toISOString()
-    };
-    const token = 'mock_token_' + Date.now();
-    return { user, token };
-  }
-  
-  if (endpoint === '/auth/login') {
-    if (!data.email || !data.password) {
-      throw new Error('Email and password required');
-    }
-    // Simulate login (in real app, verify credentials)
-    const user = {
-      id: 'user_' + data.email.replace('@', '_'),
-      email: data.email,
-      createdAt: new Date().toISOString()
-    };
-    const token = 'mock_token_' + Date.now();
-    return { user, token };
-  }
-  
-  if (endpoint === '/favorites' && method === 'GET') {
-    // Return synced favorites from localStorage
-    const syncedFavs = localStorage.getItem('tcr-synced-favs');
-    return { favorites: syncedFavs ? JSON.parse(syncedFavs) : [] };
-  }
-  
-  if (endpoint === '/favorites' && method === 'POST') {
-    // Save favorites
-    localStorage.setItem('tcr-synced-favs', JSON.stringify(data.favorites));
-    return { success: true };
-  }
-  
-  if (endpoint === '/ratings/global' && method === 'GET') {
-    // Return global ratings (mock data for now)
-    const globalRatingsData = localStorage.getItem('tcr-global-ratings');
-    return { ratings: globalRatingsData ? JSON.parse(globalRatingsData) : {} };
-  }
-  
-  if (endpoint === '/ratings' && method === 'POST') {
-    // Submit rating to global system
-    const globalRatingsData = JSON.parse(localStorage.getItem('tcr-global-ratings') || '{}');
-    const stationName = data.stationName;
-    
-    if (!globalRatingsData[stationName]) {
-      globalRatingsData[stationName] = { total: 0, sum: 0, count: 0 };
-    }
-    
-    // Update rating (if user already rated, update it)
-    const existingRating = data.existingRating || 0;
-    if (existingRating > 0) {
-      globalRatingsData[stationName].sum -= existingRating;
-      globalRatingsData[stationName].count--;
-    }
-    
-    globalRatingsData[stationName].sum += data.rating;
-    globalRatingsData[stationName].count++;
-    globalRatingsData[stationName].total = globalRatingsData[stationName].sum / globalRatingsData[stationName].count;
-    
-    localStorage.setItem('tcr-global-ratings', JSON.stringify(globalRatingsData));
-    return { success: true };
-  }
-  
-  return { success: true };
-}
-
-async function registerUser(email, password) {
-  try {
-    const response = await apiRequest('/auth/register', 'POST', { email, password });
-    currentUser = response.user;
-    authToken = response.token;
-    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
-    localStorage.setItem('tcr-token', authToken);
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function loginUser(email, password) {
-  try {
-    const response = await apiRequest('/auth/login', 'POST', { email, password });
-    currentUser = response.user;
-    authToken = response.token;
-    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
-    localStorage.setItem('tcr-token', authToken);
-    
-    // Sync favorites from server
-    await syncFavoritesFromServer();
-    
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
-function logoutUser() {
-  currentUser = null;
-  authToken = null;
-  localStorage.removeItem('tcr-user');
-  localStorage.removeItem('tcr-token');
-  showNotification('Logged out');
-  updateAccountUI();
-}
-
-async function syncFavoritesToServer() {
-  if (!currentUser) return;
-  
-  try {
-    await apiRequest('/favorites', 'POST', { favorites, favoritesOrder });
-    localStorage.setItem('tcr-fav-synced', 'true');
-    showNotification('Favorites synced!');
-    return true;
-  } catch (error) {
-    console.error('Failed to sync favorites:', error);
-    return false;
-  }
-}
-
-async function syncFavoritesFromServer() {
-  if (!currentUser) return;
-  
-  try {
-    const response = await apiRequest('/favorites', 'GET');
-    if (response.favorites && response.favorites.length > 0) {
-      // Merge server favorites with local (server takes priority)
-      favorites = response.favorites;
-      favoritesOrder = response.favoritesOrder || response.favorites;
-      localStorage.setItem('tcr-fav', JSON.stringify(favorites));
-      localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
-      switchTab(currentTab);
-      showNotification('Favorites synced from cloud!');
-    }
-    return true;
-  } catch (error) {
-    console.error('Failed to sync favorites:', error);
-    return false;
-  }
-}
-
-async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
-  if (!currentUser) {
-    // Still save locally even without account
-    return;
-  }
-  
-  try {
-    await apiRequest('/ratings', 'POST', { stationName, rating, existingRating });
-    await fetchGlobalRatings();
-    return true;
-  } catch (error) {
-    console.error('Failed to submit rating:', error);
-    return false;
-  }
-}
-
-async function fetchGlobalRatings() {
-  try {
-    const response = await apiRequest('/ratings/global', 'GET');
-    if (response.ratings) {
-      globalRatings = response.ratings;
-      // Update UI to show global ratings
-      updateRatingDisplays();
-    }
-    return globalRatings;
-  } catch (error) {
-    console.error('Failed to fetch global ratings:', error);
-    return {};
-  }
-}
-
-function updateRatingDisplays() {
-  // This will be called to update rating displays with global data
-  if (currentTab !== 'about') {
-    switchTab(currentTab);
-  }
-}
 
 /* ---- ACCOUNT MODAL UI ---- */
 function showAccountModal() {
@@ -3842,15 +3936,22 @@ document.getElementById('accountModal').onclick = (e) => {
 window.addEventListener('load', async () => {
   updateAccountUI();
   
-  if (currentUser && authToken) {
-    // Sync favorites from server
-    await syncFavoritesFromServer();
-    // Fetch global ratings
-    await fetchGlobalRatings();
-  } else {
-    // Still fetch global ratings even without account
-    await fetchGlobalRatings();
+  // Check Supabase session first
+  await checkSupabaseSession();
+  
+  // If no Supabase session but have local user, try to restore
+  if (!currentUser && localStorage.getItem('tcr-user')) {
+    const savedUser = JSON.parse(localStorage.getItem('tcr-user'));
+    const savedToken = localStorage.getItem('tcr-token');
+    if (savedUser && savedToken) {
+      currentUser = savedUser;
+      authToken = savedToken;
+      updateAccountUI();
+    }
   }
+  
+  // Fetch global ratings (works even without account)
+  await fetchGlobalRatings();
 });
 
 // Restore alarm on page load
