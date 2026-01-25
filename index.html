@@ -1439,12 +1439,27 @@ const streamQuality = document.getElementById('stream-quality');
 const streamBitrate = document.getElementById('stream-bitrate');
 /* ---- LOAD + INIT ---- */
 async function loadAll() {
-  const promises = Object.keys(LANG_URLS).map(async lang => {
-    const res = await fetch(LANG_URLS[lang]);
-    stationsPerLang[lang] = await res.json();
-  });
-  await Promise.allSettled(promises);
-  // Data is now loaded. The calling function will handle UI updates.
+  console.log('Loading stations...');
+  try {
+    const promises = Object.keys(LANG_URLS).map(async lang => {
+      try {
+        console.log(`Loading stations for ${lang}...`);
+        const res = await fetch(LANG_URLS[lang]);
+        if (!res.ok) {
+          throw new Error(`Failed to load ${lang}: ${res.status} ${res.statusText}`);
+        }
+        stationsPerLang[lang] = await res.json();
+        console.log(`Loaded ${stationsPerLang[lang]?.length || 0} stations for ${lang}`);
+      } catch (error) {
+        console.error(`Error loading ${lang}:`, error);
+        stationsPerLang[lang] = []; // Set empty array on error
+      }
+    });
+    await Promise.allSettled(promises);
+    console.log('All stations loaded. Total languages:', Object.keys(stationsPerLang).length);
+  } catch (error) {
+    console.error('Error loading stations:', error);
+  }
 }
 // Clear cache on every app launch
 function clearAllCacheOnLaunch() {
@@ -1486,22 +1501,34 @@ function clearAllCacheOnLaunch() {
 
 // Make the main initialization async
 (async function initApp() {
+  console.log('Initializing app...');
   // Clear cache on every app launch
   clearAllCacheOnLaunch();
   
-  await loadAll(); // <-- AWAIT the loading to finish
-  // Now that data is loaded, populate UI
-  populateLangSelect();
-  initThemeSystem(); // Initialize theme system
-  // Handle URL parameters for shortcuts
-  const urlParams = new URLSearchParams(window.location.search);
-  const action = urlParams.get('action');
-  const tab = urlParams.get('tab');
-  if (tab) {
-    currentTab = tab;
-    localStorage.setItem('currentTab', currentTab);
+  try {
+    await loadAll(); // <-- AWAIT the loading to finish
+    console.log('Stations loaded, rendering UI...');
+    
+    // Now that data is loaded, populate UI
+    populateLangSelect();
+    initThemeSystem(); // Initialize theme system
+    // Handle URL parameters for shortcuts
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const tab = urlParams.get('tab');
+    if (tab) {
+      currentTab = tab;
+      localStorage.setItem('currentTab', currentTab);
+    }
+    switchTab(currentTab);
+    console.log('App initialized successfully');
+  } catch (error) {
+    console.error('App initialization error:', error);
+    // Show error to user
+    if (stationList) {
+      stationList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text);">Error loading stations. Please refresh the page.</div>';
+    }
   }
-  switchTab(currentTab);
   
   // Auto-play last played station or first station
   setTimeout(() => {
