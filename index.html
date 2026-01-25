@@ -19,8 +19,25 @@
 <meta name="application-name" content="TC RADIOS">
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+<!-- Supabase Client - Load dynamically to avoid blocking -->
+<script>
+(function() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.async = true;
+  script.onload = function() {
+    console.log('Supabase script loaded successfully');
+    // Trigger initialization when script loads
+    if (typeof window.initSupabase === 'function') {
+      window.initSupabase();
+    }
+  };
+  script.onerror = function() {
+    console.warn('Failed to load Supabase script. App will continue without Supabase features.');
+  };
+  document.head.appendChild(script);
+})();
+</script>
 <style>
 /* Modern Elegant Theme System */
 :root{
@@ -3497,6 +3514,9 @@ function initSupabase() {
     // Continue without Supabase - app will work with local storage only
   }
 }
+
+// Make initSupabase available globally so script onload can call it
+window.initSupabase = initSupabase;
 
 // Wait for DOM and script to be ready (non-blocking)
 if (document.readyState === 'loading') {
