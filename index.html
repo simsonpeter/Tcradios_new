@@ -2581,6 +2581,14 @@ function toggleFav(name) {
   switchTab(currentTab);
   // Haptic feedback for favorite toggle
   hapticFeedback(favorites.includes(name) ? 'success' : 'light');
+  
+  // Auto-sync to server if logged in
+  if (currentUser) {
+    clearTimeout(window.syncTimeout);
+    window.syncTimeout = setTimeout(() => {
+      syncFavoritesToServer();
+    }, 1000);
+  }
 }
 
 function getFavoritesInOrder() {
