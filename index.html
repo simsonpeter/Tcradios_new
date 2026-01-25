@@ -3711,7 +3711,7 @@ async function syncFavoritesFromServer() {
 }
 
 async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
-  if (!supabase) return;
+  if (!supabaseClient) return;
   
   try {
     // Check if user already rated this station
@@ -3818,7 +3818,7 @@ function updateRatingDisplays() {
 
 // Check for existing session on page load
 async function checkSupabaseSession() {
-  if (!supabase) return;
+  if (!supabaseClient) return;
   
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
