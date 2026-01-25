@@ -3467,18 +3467,31 @@ if (document.getElementById('closeRatingModal')) {
 const SUPABASE_URL = 'https://ieavylmfyxpccxfwkhvd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYXZ5bG1meXhwY2N4ZndraHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNjA2MDIsImV4cCI6MjA4NDkzNjYwMn0.GUwKUrJiDiuMO4GayNlnY2lnt4HprsXGqJM4K-ktaOM';
 
-// Initialize Supabase client
+// Initialize Supabase client (wait for script to load)
 let supabase = null;
-try {
-  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY' && window.supabase) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  } else {
-    console.warn('Supabase not configured. Please add your Supabase URL and API key.');
+function initSupabase() {
+  try {
+    // Wait a bit for the script to load if needed
+    if (typeof window.supabase === 'undefined') {
+      console.warn('Supabase script not loaded yet. Will retry on window load.');
+      return;
+    }
+    
+    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase client initialized successfully.');
+    } else {
+      console.warn('Supabase not configured. Please add your Supabase URL and API key.');
+    }
+  } catch (error) {
+    console.error('Supabase initialization error:', error);
+    // Continue without Supabase - app will work with local storage only
   }
-} catch (error) {
-  console.error('Supabase initialization error:', error);
-  // Continue without Supabase - app will work with local storage only
 }
+
+// Try to initialize immediately, and also on window load
+initSupabase();
+window.addEventListener('load', initSupabase);
 
 /* ---- AUTHENTICATION & API FUNCTIONS ---- */
 async function registerUser(email, password) {
