@@ -20,7 +20,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* Modern Elegant Theme System */
 :root{
@@ -3471,9 +3471,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabase = null;
 function initSupabase() {
   try {
-    // Wait a bit for the script to load if needed
-    if (typeof window.supabase === 'undefined') {
-      console.warn('Supabase script not loaded yet. Will retry on window load.');
+    // Check if Supabase library is loaded
+    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+      console.warn('Supabase script not loaded yet. Retrying...');
+      // Retry after a short delay
+      setTimeout(initSupabase, 100);
       return;
     }
     
@@ -3489,14 +3491,32 @@ function initSupabase() {
   }
 }
 
-// Try to initialize immediately, and also on window load
-initSupabase();
-window.addEventListener('load', initSupabase);
+// Wait for DOM and script to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSupabase);
+} else {
+  // DOM already loaded, try immediately and retry if needed
+  initSupabase();
+}
+// Also try on window load as fallback
+window.addEventListener('load', () => {
+  if (!supabase) {
+    initSupabase();
+  }
+});
 
 /* ---- AUTHENTICATION & API FUNCTIONS ---- */
 async function registerUser(email, password) {
+  // Ensure Supabase is initialized before proceeding
   if (!supabase) {
-    throw new Error('Supabase not configured. Please add your Supabase credentials.');
+    // Try to initialize one more time
+    initSupabase();
+    // Wait a bit for initialization
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    if (!supabase) {
+      throw new Error('Supabase not configured. Please refresh the page and try again.');
+    }
   }
   
   try {
@@ -3526,8 +3546,16 @@ async function registerUser(email, password) {
 }
 
 async function loginUser(email, password) {
+  // Ensure Supabase is initialized before proceeding
   if (!supabase) {
-    throw new Error('Supabase not configured. Please add your Supabase credentials.');
+    // Try to initialize one more time
+    initSupabase();
+    // Wait a bit for initialization
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    if (!supabase) {
+      throw new Error('Supabase not configured. Please refresh the page and try again.');
+    }
   }
   
   try {
