@@ -3767,41 +3767,6 @@ async function checkSupabaseSession() {
   }
 }
 
-/* ---- API CONFIGURATION ---- */
-// Change this URL to your backend API endpoint
-const API_BASE_URL = 'https://your-api-domain.com/api'; // TODO: Replace with your API URL
-// For now, using a mock API that stores in localStorage (can be replaced with real backend)
-
-/* ---- AUTHENTICATION & API FUNCTIONS ---- */
-async function apiRequest(endpoint, method = 'GET', data = null) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const options = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  };
-  
-  if (authToken) {
-    options.headers['Authorization'] = `Bearer ${authToken}`;
-  }
-  
-  if (data) {
-    options.body = JSON.stringify(data);
-  }
-  
-  try {
-    // For now, simulate API calls with localStorage (replace with real API)
-    return await mockApiRequest(endpoint, method, data);
-  } catch (error) {
-    console.error('API Error:', error);
-    throw error;
-  }
-}
-
-// Mock API for development (replace with real API calls)
-async function mockApiRequest(endpoint, method, data) {
-
 /* ---- ACCOUNT MODAL UI ---- */
 function showAccountModal() {
   const accountModal = document.getElementById('accountModal');
