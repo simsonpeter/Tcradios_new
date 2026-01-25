@@ -3577,7 +3577,7 @@ async function registerUser(email, password) {
   }
   
   try {
-      const { data, error } = await supabaseClientClientClient.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
       email: email,
       password: password
     });
@@ -3616,7 +3616,7 @@ async function loginUser(email, password) {
   }
   
   try {
-      const { data, error } = await supabaseClientClientClient.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: email,
       password: password
     });
@@ -3686,7 +3686,7 @@ async function syncFavoritesFromServer() {
   if (!currentUser || !supabaseClient) return;
   
   try {
-      const { data, error } = await supabaseClientClient
+      const { data, error } = await supabaseClient
       .from('user_favorites')
       .select('favorites, favorites_order')
       .eq('user_id', currentUser.id)
@@ -3729,7 +3729,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
     
     if (ratingRecord) {
       // Update existing rating
-      const { error } = await supabaseClientClient
+      const { error } = await supabaseClient
         .from('user_ratings')
         .update({
           rating: rating,
@@ -3750,7 +3750,7 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
         ratingData.user_id = currentUser.id;
       }
       
-      const { error } = await supabaseClientClient
+      const { error } = await supabaseClient
         .from('user_ratings')
         .insert([ratingData]);
       
@@ -3779,7 +3779,7 @@ async function fetchGlobalRatings() {
   
   try {
     // Get aggregated ratings from Supabase
-      const { data, error } = await supabaseClientClient
+      const { data, error } = await supabaseClient
       .from('user_ratings')
       .select('station_name, rating');
     
