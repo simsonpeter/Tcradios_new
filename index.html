@@ -3668,8 +3668,16 @@ async function loginUser(email, password) {
     localStorage.setItem('tcr-user', JSON.stringify(currentUser));
     localStorage.setItem('tcr-token', authToken);
     
-    // Sync favorites from server
-    await syncFavoritesFromServer();
+    // Update UI first
+    updateAccountUI();
+    
+    // Sync favorites from server (this will merge server favorites with local)
+    try {
+      await syncFavoritesFromServer();
+    } catch (error) {
+      console.error('Error syncing favorites on login:', error);
+      // Continue even if sync fails
+    }
     
     return { user: currentUser, token: authToken };
   } catch (error) {
