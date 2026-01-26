@@ -3588,27 +3588,51 @@ async function registerUser(email, password) {
   }
   
   try {
-      const { data, error } = await supabaseClient.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
       email: email,
       password: password
     });
     
-    if (error) throw error;
-    
-    currentUser = {
-      id: data.user.id,
-      email: data.user.email,
-      createdAt: data.user.created_at
-    };
-    authToken = data.session?.access_token || null;
-    
-    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
-    if (authToken) {
-      localStorage.setItem('tcr-token', authToken);
+    if (error) {
+      // Handle specific error cases
+      if (error.message && error.message.includes('already registered') || error.message.includes('already exists') || error.code === 'signup_disabled' || error.message.includes('User already registered')) {
+        throw new Error('An account with this email already exists. Please login instead.');
+      }
+      throw error;
     }
     
-    return { user: currentUser, token: authToken };
+    // Check if email confirmation is required
+    if (data.user && !data.session) {
+      // Email confirmation required
+      showNotification('Registration successful! Please check your email to confirm your account before logging in.', 'success');
+      return { 
+        user: data.user, 
+        token: null,
+        requiresConfirmation: true 
+      };
+    }
+    
+    // User is immediately logged in (if email confirmation is disabled)
+    if (data.user && data.session) {
+      currentUser = {
+        id: data.user.id,
+        email: data.user.email,
+        createdAt: data.user.created_at
+      };
+      authToken = data.session.access_token;
+      
+      localStorage.setItem('tcr-user', JSON.stringify(currentUser));
+      localStorage.setItem('tcr-token', authToken);
+      
+      return { user: currentUser, token: authToken };
+    }
+    
+    return { user: data.user, token: null };
   } catch (error) {
+    // Handle duplicate account error
+    if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.message.includes('User already registered'))) {
+      throw new Error('An account with this email already exists. Please login instead.');
+    }
     throw new Error(error.message || 'Registration failed');
   }
 }
@@ -3697,7 +3721,7 @@ async function syncFavoritesFromServer() {
   if (!currentUser || !supabaseClient) return;
   
   try {
-      const { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('user_favorites')
       .select('favorites, favorites_order')
       .eq('user_id', currentUser.id)
@@ -3705,14 +3729,35 @@ async function syncFavoritesFromServer() {
     
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
     
-    if (data && data.favorites && data.favorites.length > 0) {
-      // Merge server favorites with local (server takes priority)
-      favorites = data.favorites;
-      favoritesOrder = data.favorites_order || data.favorites;
+    if (data) {
+      // Server has favorites - use them (server takes priority)
+      if (data.favorites && Array.isArray(data.favorites) && data.favorites.length > 0) {
+        favorites = data.favorites;
+        favoritesOrder = data.favorites_order || data.favorites || [];
+      } else {
+        // Server has empty favorites - check if we have local favorites to sync
+        const localFavs = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
+        if (localFavs.length > 0) {
+          // We have local favorites but server is empty - sync local to server
+          await syncFavoritesToServer();
+          return true;
+        }
+      }
+      
+      // Save to localStorage
       localStorage.setItem('tcr-fav', JSON.stringify(favorites));
       localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
+      localStorage.setItem('tcr-fav-synced', 'true');
+      
+      // Refresh UI
       switchTab(currentTab);
       showNotification('Favorites synced from cloud!');
+    } else {
+      // No favorites on server - sync local favorites to server if we have any
+      const localFavs = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
+      if (localFavs.length > 0) {
+        await syncFavoritesToServer();
+      }
     }
     return true;
   } catch (error) {
@@ -3949,15 +3994,42 @@ function showAccountModal() {
       }
       
       try {
-        await registerUser(email, password);
-        // Sync favorites after registration
-        await syncFavoritesToServer();
-        showAccountStatus('Account created! Favorites synced.', 'success');
-        setTimeout(() => {
-          showAccountModal();
-        }, 1500);
+        const result = await registerUser(email, password);
+        
+        if (result.requiresConfirmation) {
+          // Email confirmation required
+          showAccountStatus('Account created! Please check your email to confirm your account, then login.', 'success');
+          // Switch to login form
+          setTimeout(() => {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            showAccountModal();
+          }, 2000);
+        } else if (result.user && result.token) {
+          // User is immediately logged in
+          updateAccountUI();
+          // Sync favorites after registration
+          await syncFavoritesToServer();
+          showAccountStatus('Account created and logged in! Favorites synced.', 'success');
+          setTimeout(() => {
+            showAccountModal();
+          }, 1500);
+        } else {
+          showAccountStatus('Account created! Please check your email to confirm.', 'success');
+        }
       } catch (error) {
-        showAccountStatus(error.message || 'Registration failed', 'error');
+        // Check if it's a duplicate account error
+        if (error.message && error.message.includes('already exists')) {
+          showAccountStatus('An account with this email already exists. Please login instead.', 'error');
+          // Switch to login form
+          setTimeout(() => {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('loginEmail').value = email;
+          }, 1500);
+        } else {
+          showAccountStatus(error.message || 'Registration failed', 'error');
+        }
       }
     };
     
