@@ -1505,6 +1505,11 @@ function clearAllCacheOnLaunch() {
   // Clear cache on every app launch
   clearAllCacheOnLaunch();
   
+  // Handle URL parameters for shortcuts (define action outside try block)
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  const tab = urlParams.get('tab');
+  
   try {
     await loadAll(); // <-- AWAIT the loading to finish
     console.log('Stations loaded, rendering UI...');
@@ -1512,10 +1517,7 @@ function clearAllCacheOnLaunch() {
     // Now that data is loaded, populate UI
     populateLangSelect();
     initThemeSystem(); // Initialize theme system
-    // Handle URL parameters for shortcuts
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    const tab = urlParams.get('tab');
+    
     if (tab) {
       currentTab = tab;
       localStorage.setItem('currentTab', currentTab);
