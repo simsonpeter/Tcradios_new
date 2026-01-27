@@ -324,27 +324,15 @@ body {
 }
 
 .card.android {
-    top: 10%;
+    top: 20%;
     right: -20%;
     animation-delay: 0s;
 }
 
-.card.tv {
-    top: 30%;
-    left: -25%;
-    animation-delay: 1.5s;
-}
-
-.card.tesla {
-    bottom: 30%;
-    right: -15%;
-    animation-delay: 3s;
-}
-
-.card.watch {
-    bottom: 10%;
+.card.web {
+    bottom: 20%;
     left: -20%;
-    animation-delay: 4.5s;
+    animation-delay: 1.5s;
 }
 
 @keyframes float {
