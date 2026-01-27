@@ -316,12 +316,13 @@ body {
 }
 
 .phone-screen iframe {
-    width: 100%;
-    height: 100%;
+    width: 375px; /* Standard mobile width */
+    height: 812px; /* Standard mobile height */
     border: none;
     display: block;
-    transform: scale(1);
+    transform: scale(0.76); /* Scale down to fit 300px width (300/375 = 0.8, adjusted to 0.76 for padding) */
     transform-origin: top left;
+    pointer-events: none; /* Prevent interaction in preview */
 }
 
 .floating-cards {
