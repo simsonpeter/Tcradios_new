@@ -300,9 +300,6 @@ body {
     border-radius: 32px;
     overflow: hidden;
     position: relative;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
 }
 
 .phone-screen::before {
@@ -320,13 +317,15 @@ body {
 
 .phone-screen iframe {
     width: 375px; /* Standard mobile width */
-    height: 667px; /* Adjusted height to show more content */
+    height: 667px; /* iPhone 8 height - fits better */
     border: none;
     display: block;
-    transform: scale(0.76); /* Scale down to fit 300px width */
+    transform: scale(0.76); /* Scale down to fit 300px width (300/375 = 0.8, adjusted for padding) */
     transform-origin: top left;
     pointer-events: auto; /* Allow scrolling */
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .floating-cards {
