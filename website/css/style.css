@@ -830,6 +830,120 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Coming Soon Badge */
+.badge {
+    display: inline-block;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* Coming Soon Cards */
+.platform-card.coming-soon {
+    opacity: 0.7;
+    position: relative;
+}
+
+.platform-card.coming-soon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+/* Featured Download Card */
+.download-card.featured {
+    border: 2px solid var(--primary-color);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+}
+
+.download-card.featured::before {
+    content: '⭐ Recommended';
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.download-note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.download-note i {
+    color: var(--primary-color);
+}
+
+/* Coming Soon Section */
+.coming-soon-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.coming-soon-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.coming-soon-section p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.coming-soon-platforms {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.platform-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.platform-badge:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.platform-badge i {
+    color: var(--primary-color);
+}
+
 /* Loading animation */
 @keyframes fadeInUp {
     from {
