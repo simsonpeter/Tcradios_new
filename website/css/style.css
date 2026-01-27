@@ -320,7 +320,7 @@ body {
     height: 812px; /* Full height to show player */
     border: none;
     display: block;
-    transform: scale(0.72); /* Scale down to fit better (300/375 = 0.8, adjusted to 0.72 for better fit) */
+    transform: scale(0.72); /* Scale down to fit better */
     transform-origin: top left;
     pointer-events: auto; /* Allow scrolling */
     overflow-y: scroll;
@@ -329,6 +329,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
+    background: #111827; /* Match app background while loading */
 }
 
 .floating-cards {
