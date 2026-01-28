@@ -793,8 +793,15 @@ section {
     }
 
     .phone-mockup {
-        width: 250px;
-        height: 500px;
+        width: 280px;
+        height: 560px;
+        margin: 0 auto;
+    }
+
+    .phone-screen iframe {
+        width: 375px;
+        height: 667px;
+        transform: scale(0.68); /* Smaller scale for mobile */
     }
 
     .card {
@@ -842,6 +849,21 @@ section {
     .btn {
         padding: 0.75rem 1.25rem;
         font-size: 0.875rem;
+    }
+
+    .phone-mockup {
+        width: 240px;
+        height: 480px;
+    }
+
+    .phone-screen iframe {
+        width: 375px;
+        height: 667px;
+        transform: scale(0.58); /* Even smaller scale for very small screens */
+    }
+
+    .hero-container {
+        gap: 1.5rem;
     }
 }
 

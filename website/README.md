@@ -1,12 +1,12 @@
 # TC RADIOS Website
 
-A modern, responsive website showcasing the TC RADIOS Christian radio platform across multiple devices and platforms.
+A modern, responsive website showcasing the TC RADIOS Christian radio platform on Android and Web (PWA).
 
 ## Features
 
 - **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
 - **Modern UI**: Clean, professional design with smooth animations
-- **Multi-Platform Showcase**: Dedicated pages for Android, Samsung TV, Tesla, and Smartwatch
+- **Platform Showcase**: Focused on Android app and Web app (PWA, installable on Android and iPhone)
 - **Download Integration**: Direct links to download apps for each platform
 - **SEO Optimized**: Meta tags, Open Graph, and Twitter Card support
 - **Performance Optimized**: Lazy loading, optimized images, and efficient CSS/JS
@@ -39,9 +39,6 @@ website/
 
 ### Platform Pages (`platforms/`)
 - **Android**: Detailed Android app information, installation guide, screenshots
-- **Samsung TV**: TV app features and installation
-- **Tesla**: Tesla-specific app information
-- **Smartwatch**: Smartwatch app details and compatibility
 
 ## Technologies Used
 
