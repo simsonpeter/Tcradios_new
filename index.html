@@ -2130,6 +2130,10 @@ audio.onplay = () => {
   player.classList.add('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
+  // Update Media Session playback state for Android Auto
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
+  }
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.add('playing');
@@ -2148,6 +2152,10 @@ audio.onpause = () => {
   player.classList.remove('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
+  // Update Media Session playback state for Android Auto
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'paused';
+  }
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
@@ -4273,14 +4281,32 @@ function updateMediaSession(st) {
         sizes: '512x512', type: 'image/png'
       }]
     });
+    
+    // Set playback state based on current audio state
+    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+    
+    // Set position state for Android Auto (radio streams are continuous)
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: Infinity,
+        playbackRate: 1.0,
+        position: 0
+      });
+    } catch (e) {
+      // Position state might not be supported, continue anyway
+      console.log('Position state not supported:', e);
+    }
+    
     // Enhanced media session controls for Android Auto
     navigator.mediaSession.setActionHandler('play', () => {
-      audio.play();
+      audio.play().catch(err => console.error('Play error:', err));
+      navigator.mediaSession.playbackState = 'playing';
       showNotification('Playing: ' + st.name);
       updateWidget('playStateUpdate', { playing: true });
     });
     navigator.mediaSession.setActionHandler('pause', () => {
       audio.pause();
+      navigator.mediaSession.playbackState = 'paused';
       showNotification('Paused: ' + st.name);
       updateWidget('playStateUpdate', { playing: false });
     });
@@ -4296,6 +4322,7 @@ function updateMediaSession(st) {
     navigator.mediaSession.setActionHandler('stop', () => {
       audio.pause();
       audio.currentTime = 0;
+      navigator.mediaSession.playbackState = 'paused';
       showNotification('Stopped');
       updateWidget('playStateUpdate', { playing: false });
     });
@@ -4381,14 +4408,29 @@ function initAndroidAutoIntegration() {
   
   // Enhanced media session for Android Auto
   if ('mediaSession' in navigator) {
+    // Set initial playback state
+    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+    
     // Set up additional Android Auto specific handlers
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       console.log('Seek to:', details.seekTime);
       showNotification('Seek to ' + Math.round(details.seekTime) + 's');
     });
     
-    // Update playback state
-    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+    // Set position state for Android Auto
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: Infinity,
+        playbackRate: 1.0,
+        position: 0
+      });
+    } catch (e) {
+      console.log('Position state not supported:', e);
+    }
+    
+    console.log('Android Auto Media Session initialized');
+  } else {
+    console.warn('Media Session API not supported - Android Auto may not work');
   }
   
   // Listen for Android Auto events
@@ -4396,6 +4438,10 @@ function initAndroidAutoIntegration() {
     if (document.hidden) {
       // App is in background - optimize for Android Auto
       console.log('App in background - Android Auto mode');
+      // Ensure Media Session is updated when app goes to background
+      if ('mediaSession' in navigator && lastPlayedStation) {
+        updateMediaSession(lastPlayedStation.station);
+      }
     } else {
       // App is in foreground
       console.log('App in foreground');
@@ -4406,6 +4452,13 @@ function initAndroidAutoIntegration() {
   window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'android-auto') {
       handleAndroidAutoMessage(event.data);
+    }
+  });
+  
+  // Listen for page visibility changes to maintain Media Session
+  document.addEventListener('visibilitychange', () => {
+    if ('mediaSession' in navigator && lastPlayedStation) {
+      navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
     }
   });
 }
@@ -4477,14 +4530,20 @@ window.addEventListener('message', (event) => {
 function initAndroidAuto() {
   // Enhanced media session for Android Auto
   if ('mediaSession' in navigator) {
-    // Set playback state
-    navigator.mediaSession.playbackState = 'none';
+    // Set initial playback state
+    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'none';
+    
     // Add position state for Android Auto
-    navigator.mediaSession.setPositionState({
-      duration: Infinity, // Radio streams are continuous
-      playbackRate: 1.0,
-      position: 0
-    });
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: Infinity, // Radio streams are continuous
+        playbackRate: 1.0,
+        position: 0
+      });
+    } catch (e) {
+      console.log('Position state not supported:', e);
+    }
+    
     // Handle Android Auto specific events
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime !== undefined) {
@@ -4492,11 +4551,14 @@ function initAndroidAuto() {
         showNotification('Seek to ' + Math.round(details.seekTime) + 's');
       }
     });
+    
+    console.log('Android Auto support initialized');
   }
+  
   // Register for Android Auto
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data.type === 'ANDROID_AUTO_COMMAND') {
+      if (event.data && event.data.type === 'ANDROID_AUTO_COMMAND') {
         handleAndroidAutoCommand(event.data.command);
       }
     });
