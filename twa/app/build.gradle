@@ -150,9 +150,39 @@ android {
 
         
     }
+    signingConfigs {
+        release {
+            // Try to load from keystore.properties file first
+            def keystorePropertiesFile = rootProject.file("keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                def storePassword = keystoreProperties['storePassword']
+                if (storePassword && !storePassword.isEmpty()) {
+                    storeFile file(keystoreProperties['storeFile'] ?: '../jayathasoft.keystore')
+                    storePassword storePassword
+                    keyAlias keystoreProperties['keyAlias'] ?: 'jayathasoft-keystore'
+                    keyPassword keystoreProperties['keyPassword'] ?: storePassword
+                }
+            } else {
+                // Try environment variables
+                def storePassword = System.getenv("KEYSTORE_PASSWORD")
+                if (storePassword && !storePassword.isEmpty()) {
+                    storeFile file('../jayathasoft.keystore')
+                    storePassword storePassword
+                    keyAlias System.getenv("KEY_ALIAS") ?: "jayathasoft-keystore"
+                    keyPassword System.getenv("KEY_PASSWORD") ?: storePassword
+                }
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
+            // Only use signing config if it's properly configured
+            if (signingConfigs.release.storePassword) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {

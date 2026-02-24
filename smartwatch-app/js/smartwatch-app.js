@@ -40,7 +40,9 @@ class TCRadiosSmartwatch {
             english: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/english.json',
             dutch: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/dutch.json',
             hindi: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/hindi.json',
-            malayalam: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json'
+            malayalam: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json',
+            sinhala: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/sinhala.json',
+            telugu: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/telugu.json'
         };
 
         const promises = Object.keys(langUrls).map(async (lang) => {

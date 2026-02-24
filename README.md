@@ -150,7 +150,9 @@ const LANG_URLS = {
   english: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/english.json',
   dutch: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/dutch.json',
   hindi: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/hindi.json',
-  malayalam: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json'
+  malayalam: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json',
+  sinhala: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/sinhala.json',
+  telugu: 'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/telugu.json'
 };
 ```
 
@@ -171,7 +173,7 @@ Android app settings in `twa/twa-manifest.json`:
 ## 📊 Statistics
 
 - **50+** Radio Stations
-- **5** Languages Supported
+- **7** Languages Supported
 - **24/7** Availability
 - **100%** Free to Use
 - **Multi-Platform** Support
