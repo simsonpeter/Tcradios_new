@@ -1386,7 +1386,9 @@ audio{display:none}
 /* ---- CONFIG ---- */
 const DATA_OWNER = 'simsonpeter';
 const DATA_REPO = 'Tcradios';
-const DATA_REF = '096ba5628fd54e2c523fb5acada4d9c5c8271f73';
+// Use the live data branch so new station/stream updates appear immediately.
+const DATA_REF = 'main';
+const KANNADA_LIVE_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/languages/Kannada.json`;
 const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
 const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
 const FALLBACK_LANG_URLS = {
@@ -1397,7 +1399,8 @@ const FALLBACK_LANG_URLS = {
   malayalam: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/malayalam.json`,
   sinhala: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/sinhala.json`,
   telugu: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/telugu.json`,
-  kannada: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/Kannada.json`
+  // Keep Kannada pinned to the live branch even if other data is version-pinned.
+  kannada: KANNADA_LIVE_URL
 };
 let LANG_URLS = { ...FALLBACK_LANG_URLS };
 /* ---- STATE ---- */
@@ -1451,6 +1454,73 @@ function buildLanguageRawUrl(fileName) {
   return `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/${encodeURIComponent(fileName)}`;
 }
 
+function collectStationUrls(station) {
+  if (!station || typeof station !== 'object') return [];
+
+  const candidates = [];
+  const pushUrl = value => {
+    if (typeof value === 'string' && value.trim()) {
+      candidates.push(value.trim());
+    }
+  };
+
+  pushUrl(station.url);
+
+  Object.keys(station)
+    .filter(key => /^url\d+$/i.test(key))
+    .sort((a, b) => Number(a.replace(/\D/g, '')) - Number(b.replace(/\D/g, '')))
+    .forEach(key => pushUrl(station[key]));
+
+  if (Array.isArray(station.urls)) {
+    station.urls.forEach(item => {
+      if (typeof item === 'string') {
+        pushUrl(item);
+      } else if (item && typeof item === 'object') {
+        pushUrl(item.url);
+      }
+    });
+  }
+
+  if (Array.isArray(station.streams)) {
+    station.streams.forEach(item => {
+      if (typeof item === 'string') {
+        pushUrl(item);
+      } else if (item && typeof item === 'object') {
+        pushUrl(item.url);
+      }
+    });
+  }
+
+  return [...new Set(candidates)];
+}
+
+function normalizeStationEntries(rawPayload) {
+  const sourceStations = Array.isArray(rawPayload)
+    ? rawPayload
+    : (rawPayload && Array.isArray(rawPayload.stations) ? rawPayload.stations : []);
+
+  return sourceStations.flatMap((station, stationIndex) => {
+    if (!station || typeof station !== 'object') return [];
+
+    const baseName = (typeof station.name === 'string' && station.name.trim())
+      ? station.name.trim()
+      : `Station ${stationIndex + 1}`;
+    const urls = collectStationUrls(station);
+
+    if (!urls.length) return [];
+    if (urls.length === 1) {
+      return [{ ...station, name: baseName, url: urls[0] }];
+    }
+
+    // Expand multi-stream station objects into individually playable rows.
+    return urls.map((url, urlIndex) => ({
+      ...station,
+      name: `${baseName} (${urlIndex + 1})`,
+      url
+    }));
+  });
+}
+
 async function loadLanguageUrls() {
   try {
     console.log('Loading language list from GitHub folder...');
@@ -1473,6 +1543,8 @@ async function loadLanguageUrls() {
     discovered.forEach(file => {
       LANG_URLS[file.key] = file.url;
     });
+    // Kannada gets frequent station additions; always use the live URL.
+    LANG_URLS.kannada = KANNADA_LIVE_URL;
 
     if (Object.keys(LANG_URLS).length <= 1) {
       throw new Error('No language JSON files discovered in languages folder.');
@@ -1502,7 +1574,8 @@ async function loadAll() {
         if (!res.ok) {
           throw new Error(`Failed to load ${lang}: ${res.status} ${res.statusText}`);
         }
-        stationsPerLang[lang] = await res.json();
+        const rawStations = await res.json();
+        stationsPerLang[lang] = normalizeStationEntries(rawStations);
         console.log(`Loaded ${stationsPerLang[lang]?.length || 0} stations for ${lang}`);
       } catch (error) {
         console.error(`Error loading ${lang}:`, error);
