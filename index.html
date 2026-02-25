@@ -1384,18 +1384,22 @@ audio{display:none}
 <audio id="audio"></audio>
 <script>
 /* ---- CONFIG ---- */
-const LANG_URLS = {
-  tamil:    'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/stations.json',
-  english:  'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/english.json',
-  dutch:    'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/dutch.json',
-  hindi:    'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/hindi.json',
-  malayalam:'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/malayalam.json',
-  sinhala:  'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/sinhala.json',
-  telugu:   'https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main/languages/telugu.json'
-  // --- FUTURE LANGUAGES GO HERE ---
-  // spanish: 'https://yourdomain.com/path/to/spanish.json',
-  // french: 'https://yourdomain.com/path/to/french.json'
+const DATA_OWNER = 'simsonpeter';
+const DATA_REPO = 'Tcradios';
+const DATA_REF = '096ba5628fd54e2c523fb5acada4d9c5c8271f73';
+const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
+const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
+const FALLBACK_LANG_URLS = {
+  tamil: TAMIL_STATIONS_URL,
+  english: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/english.json`,
+  dutch: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/dutch.json`,
+  hindi: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/hindi.json`,
+  malayalam: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/malayalam.json`,
+  sinhala: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/sinhala.json`,
+  telugu: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/telugu.json`,
+  kannada: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/Kannada.json`
 };
+let LANG_URLS = { ...FALLBACK_LANG_URLS };
 /* ---- STATE ---- */
 let stationsPerLang = {};
 let favorites       = JSON.parse(localStorage.getItem('tcr-fav') || '[]');
@@ -1439,9 +1443,58 @@ const streamInfo = document.getElementById('stream-info');
 const streamQuality = document.getElementById('stream-quality');
 const streamBitrate = document.getElementById('stream-bitrate');
 /* ---- LOAD + INIT ---- */
+function getLanguageKeyFromFileName(fileName) {
+  return fileName.replace(/\.json$/i, '').trim().toLowerCase();
+}
+
+function buildLanguageRawUrl(fileName) {
+  return `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/${encodeURIComponent(fileName)}`;
+}
+
+async function loadLanguageUrls() {
+  try {
+    console.log('Loading language list from GitHub folder...');
+    const response = await fetch(LANGUAGES_FOLDER_API_URL, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Language folder request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const files = await response.json();
+    const discovered = (Array.isArray(files) ? files : [])
+      .filter(file => file && file.type === 'file' && /\.json$/i.test(file.name))
+      .map(file => ({
+        key: getLanguageKeyFromFileName(file.name),
+        url: file.download_url || buildLanguageRawUrl(file.name)
+      }))
+      .filter(file => file.key && file.key !== 'tamil')
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    LANG_URLS = { tamil: TAMIL_STATIONS_URL };
+    discovered.forEach(file => {
+      LANG_URLS[file.key] = file.url;
+    });
+
+    if (Object.keys(LANG_URLS).length <= 1) {
+      throw new Error('No language JSON files discovered in languages folder.');
+    }
+
+    console.log('Discovered languages:', Object.keys(LANG_URLS).join(', '));
+  } catch (error) {
+    console.error('Failed to auto-load language list; using fallback URLs.', error);
+    LANG_URLS = { ...FALLBACK_LANG_URLS };
+  }
+
+  if (!LANG_URLS[currentLang]) {
+    currentLang = 'tamil';
+    localStorage.setItem('currentLang', currentLang);
+  }
+}
+
 async function loadAll() {
   console.log('Loading stations...');
   try {
+    stationsPerLang = {};
+    await loadLanguageUrls();
     const promises = Object.keys(LANG_URLS).map(async lang => {
       try {
         console.log(`Loading stations for ${lang}...`);
