@@ -1386,7 +1386,8 @@ audio{display:none}
 /* ---- CONFIG ---- */
 const DATA_OWNER = 'simsonpeter';
 const DATA_REPO = 'Tcradios';
-const DATA_REF = '096ba5628fd54e2c523fb5acada4d9c5c8271f73';
+// Use the live data branch so new station/stream updates appear immediately.
+const DATA_REF = 'main';
 const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
 const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
 const FALLBACK_LANG_URLS = {
