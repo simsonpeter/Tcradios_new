@@ -1388,6 +1388,7 @@ const DATA_OWNER = 'simsonpeter';
 const DATA_REPO = 'Tcradios';
 // Use the live data branch so new station/stream updates appear immediately.
 const DATA_REF = 'main';
+const KANNADA_LIVE_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/languages/Kannada.json`;
 const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
 const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
 const FALLBACK_LANG_URLS = {
@@ -1398,7 +1399,8 @@ const FALLBACK_LANG_URLS = {
   malayalam: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/malayalam.json`,
   sinhala: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/sinhala.json`,
   telugu: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/telugu.json`,
-  kannada: `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/Kannada.json`
+  // Keep Kannada pinned to the live branch even if other data is version-pinned.
+  kannada: KANNADA_LIVE_URL
 };
 let LANG_URLS = { ...FALLBACK_LANG_URLS };
 /* ---- STATE ---- */
@@ -1541,6 +1543,8 @@ async function loadLanguageUrls() {
     discovered.forEach(file => {
       LANG_URLS[file.key] = file.url;
     });
+    // Kannada gets frequent station additions; always use the live URL.
+    LANG_URLS.kannada = KANNADA_LIVE_URL;
 
     if (Object.keys(LANG_URLS).length <= 1) {
       throw new Error('No language JSON files discovered in languages folder.');
