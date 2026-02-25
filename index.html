@@ -1389,6 +1389,34 @@ const DATA_REPO = 'Tcradios';
 // Use the live data branch so new station/stream updates appear immediately.
 const DATA_REF = 'main';
 const KANNADA_LIVE_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/languages/Kannada.json`;
+const KANNADA_BACKUP_URLS = [
+  KANNADA_LIVE_URL,
+  `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/main/languages/Kannada.json`,
+  `https://cdn.jsdelivr.net/gh/${DATA_OWNER}/${DATA_REPO}@main/languages/Kannada.json`
+];
+const KANNADA_EMERGENCY_STATIONS = [
+  {
+    name: 'Firstborn Ministries Kannada',
+    url: 'https://centova71.instainternet.com/proxy/christianfm?mp=/stream&1745909125962/;stream/1',
+    logo: 'https://tvradiotuner.com/wp-content/uploads/Firstborn-Ministries.jpg',
+    genre: 'Kannada Christian',
+    metadata: true
+  },
+  {
+    name: 'HOJ Kannada',
+    url: 'https://dc1.serverse.com/proxy/hojkannada/stream',
+    logo: 'https://tamilradios.net/webpimg/kerala/radio_39070_Hand-Of-Jesus-%E2%80%93-Telugu.webp',
+    genre: 'Kannada Christian',
+    metadata: true
+  },
+  {
+    name: 'Kannada Bible Radio',
+    url: 'https://gains.reviveradio.net/proxy/kannadabible?mp=/stream',
+    logo: 'https://indiabible.radio/wp-content/uploads/2022/05/default-2.png',
+    genre: 'Kannada Christian',
+    metadata: true
+  }
+];
 const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
 const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
 const FALLBACK_LANG_URLS = {
@@ -1452,6 +1480,37 @@ function getLanguageKeyFromFileName(fileName) {
 
 function buildLanguageRawUrl(fileName) {
   return `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/${encodeURIComponent(fileName)}`;
+}
+
+async function fetchJsonFromUrl(url) {
+  const response = await fetch(url, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+async function fetchLanguageStations(lang, primaryUrl) {
+  const candidateUrls = lang === 'kannada'
+    ? [...new Set([primaryUrl, ...KANNADA_BACKUP_URLS])]
+    : [primaryUrl];
+  let lastError = null;
+
+  for (const url of candidateUrls) {
+    try {
+      return await fetchJsonFromUrl(url);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Failed ${lang} source ${url}:`, error);
+    }
+  }
+
+  if (lang === 'kannada') {
+    console.warn('Using embedded Kannada fallback stations due to fetch failures.');
+    return KANNADA_EMERGENCY_STATIONS;
+  }
+
+  throw lastError || new Error(`No working source found for ${lang}`);
 }
 
 function collectStationUrls(station) {
@@ -1570,11 +1629,7 @@ async function loadAll() {
     const promises = Object.keys(LANG_URLS).map(async lang => {
       try {
         console.log(`Loading stations for ${lang}...`);
-        const res = await fetch(LANG_URLS[lang]);
-        if (!res.ok) {
-          throw new Error(`Failed to load ${lang}: ${res.status} ${res.statusText}`);
-        }
-        const rawStations = await res.json();
+        const rawStations = await fetchLanguageStations(lang, LANG_URLS[lang]);
         stationsPerLang[lang] = normalizeStationEntries(rawStations);
         console.log(`Loaded ${stationsPerLang[lang]?.length || 0} stations for ${lang}`);
       } catch (error) {
