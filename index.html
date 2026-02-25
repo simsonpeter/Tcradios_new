@@ -1388,6 +1388,7 @@ const DATA_OWNER = 'simsonpeter';
 const DATA_REPO = 'Tcradios';
 // Use the live data branch so new station/stream updates appear immediately.
 const DATA_REF = 'main';
+const LEGACY_DATA_REF = '096ba5628fd54e2c523fb5acada4d9c5c8271f73';
 const KANNADA_LIVE_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/languages/Kannada.json`;
 const KANNADA_BACKUP_URLS = [
   KANNADA_LIVE_URL,
@@ -1417,6 +1418,40 @@ const KANNADA_EMERGENCY_STATIONS = [
     metadata: true
   }
 ];
+const SINHALA_EMERGENCY_STATIONS = [
+  {
+    name: 'Dimuthu Handa',
+    url: 'https://cp11.serverse.com/proxy/geethika/stream',
+    logo: 'https://i.ibb.co/1tKDL1Dg/cropped-site-icon-1.png',
+    genre: 'Sinhala Christian',
+    metadata: true
+  },
+  {
+    name: 'Havilah FM',
+    url: 'https://stream.zeno.fm/434ubnhq638uv',
+    logo: 'https://listenonlineradio.com/wp-content/uploads/HaVilah-FM.jpg',
+    genre: 'Sinhala Christian',
+    metadata: true
+  },
+  {
+    name: 'Jesus Coming FM',
+    url: 'https://live.jesuscomingfm.com/proxy/sinhala/stream.aac',
+    logo: 'https://static-media.streema.com/media/cache/e0/05/e0055f1d09d7cbe84c6187f1a6e50823.jpg',
+    genre: 'Sinhala Christian',
+    metadata: true
+  },
+  {
+    name: 'Judah Sinhala Bible',
+    url: 'https://stream-176.zeno.fm/3gw6wa7apy8uv',
+    logo: 'https://zeno.fm/_ipx/_/https://images.zeno.fm/v5odCxVtfQv1o-_hRnC8NYmIxVAS7rKVDHOYZYLQfLw/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ3d3WnFmOVFnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ3dzZkRrcFFrTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY1MDczMjMyODAwMA.webp',
+    genre: 'Sinhala Christian',
+    metadata: true
+  }
+];
+const EMERGENCY_STATIONS_BY_LANG = {
+  kannada: KANNADA_EMERGENCY_STATIONS,
+  sinhala: SINHALA_EMERGENCY_STATIONS
+};
 const TAMIL_STATIONS_URL = `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/stations.json`;
 const LANGUAGES_FOLDER_API_URL = `https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/languages?ref=${DATA_REF}`;
 const FALLBACK_LANG_URLS = {
@@ -1482,6 +1517,39 @@ function buildLanguageRawUrl(fileName) {
   return `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${DATA_REF}/languages/${encodeURIComponent(fileName)}`;
 }
 
+function getLanguageFileName(lang) {
+  return lang === 'kannada' ? 'Kannada.json' : `${lang}.json`;
+}
+
+function buildLanguageCandidateUrls(lang, primaryUrl) {
+  const urls = [primaryUrl];
+
+  if (lang === 'kannada') {
+    urls.push(...KANNADA_BACKUP_URLS);
+  }
+
+  if (lang === 'tamil') {
+    urls.push(
+      TAMIL_STATIONS_URL,
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/stations.json`,
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/main/stations.json`,
+      `https://cdn.jsdelivr.net/gh/${DATA_OWNER}/${DATA_REPO}@main/stations.json`,
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${LEGACY_DATA_REF}/stations.json`
+    );
+  } else {
+    const fileName = getLanguageFileName(lang);
+    const encodedFileName = encodeURIComponent(fileName);
+    urls.push(
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/refs/heads/main/languages/${encodedFileName}`,
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/main/languages/${encodedFileName}`,
+      `https://cdn.jsdelivr.net/gh/${DATA_OWNER}/${DATA_REPO}@main/languages/${encodedFileName}`,
+      `https://raw.githubusercontent.com/${DATA_OWNER}/${DATA_REPO}/${LEGACY_DATA_REF}/languages/${encodedFileName}`
+    );
+  }
+
+  return [...new Set(urls.filter(Boolean))];
+}
+
 async function fetchJsonFromUrl(url) {
   const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) {
@@ -1491,9 +1559,7 @@ async function fetchJsonFromUrl(url) {
 }
 
 async function fetchLanguageStations(lang, primaryUrl) {
-  const candidateUrls = lang === 'kannada'
-    ? [...new Set([primaryUrl, ...KANNADA_BACKUP_URLS])]
-    : [primaryUrl];
+  const candidateUrls = buildLanguageCandidateUrls(lang, primaryUrl);
   let lastError = null;
 
   for (const url of candidateUrls) {
@@ -1505,9 +1571,10 @@ async function fetchLanguageStations(lang, primaryUrl) {
     }
   }
 
-  if (lang === 'kannada') {
-    console.warn('Using embedded Kannada fallback stations due to fetch failures.');
-    return KANNADA_EMERGENCY_STATIONS;
+  const emergencyStations = EMERGENCY_STATIONS_BY_LANG[lang];
+  if (Array.isArray(emergencyStations) && emergencyStations.length) {
+    console.warn(`Using embedded ${lang} fallback stations due to fetch failures.`);
+    return emergencyStations;
   }
 
   throw lastError || new Error(`No working source found for ${lang}`);
