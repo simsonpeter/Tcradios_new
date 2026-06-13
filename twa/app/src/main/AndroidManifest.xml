@@ -23,6 +23,9 @@
     package="com.jayathasoft.tcradios.app">
 
     
+        <uses-permission android:name="android.permission.INTERNET"/>
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
         <uses-permission android:name="android.permission.RECORD_AUDIO"/>
         <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
@@ -192,6 +195,16 @@
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".AndroidAutoMediaService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:label="@string/appName">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 
