@@ -17,7 +17,7 @@
   "maskableIconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
+    "path": "jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
   "appVersionName": "Android Auto Native Media",

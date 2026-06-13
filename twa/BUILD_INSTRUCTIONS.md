@@ -79,16 +79,16 @@ After building, the signed APK will be at:
 
 ## Version Information
 
-- **Version Code**: 29 (incremented for Android Auto fixes)
-- **Version Name**: "Android Auto"
+- **Version Code**: 30 (incremented for native Android Auto media service)
+- **Version Name**: "Android Auto Native Media"
 - **Package ID**: com.jayathasoft.tcradios.app
 
 ## Android Auto Changes
 
 This build includes fixes for Android Auto:
-- ✅ Media Session playback state updates on play/pause
-- ✅ Proper position state for Android Auto
-- ✅ Enhanced Media Session handlers
+- ✅ Native MediaBrowserServiceCompat for Android Auto discovery
+- ✅ Native MediaSessionCompat transport controls
+- ✅ Direct native radio stream playback for Android Auto
 - ✅ Background playback state maintenance
 
 ## Troubleshooting
