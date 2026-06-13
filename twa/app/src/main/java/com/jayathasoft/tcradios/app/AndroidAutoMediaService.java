@@ -69,6 +69,12 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
                     "https://zeno.fm/favicon.ico")
     };
 
+    private MediaSessionCompat mediaSession;
+    private MediaPlayer mediaPlayer;
+    private AudioManager audioManager;
+    private Station currentStation = STATIONS[0];
+    private int currentStationIndex = 0;
+
     private final AudioManager.OnAudioFocusChangeListener audioFocusListener = focusChange -> {
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             stopPlayback();
@@ -78,12 +84,6 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             resumePlayback();
         }
     };
-
-    private MediaSessionCompat mediaSession;
-    private MediaPlayer mediaPlayer;
-    private AudioManager audioManager;
-    private Station currentStation = STATIONS[0];
-    private int currentStationIndex = 0;
 
     @Override
     public void onCreate() {
