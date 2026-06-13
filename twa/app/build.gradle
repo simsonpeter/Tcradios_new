@@ -157,21 +157,21 @@ android {
             if (keystorePropertiesFile.exists()) {
                 def keystoreProperties = new Properties()
                 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-                def storePassword = keystoreProperties['storePassword']
-                if (storePassword && !storePassword.isEmpty()) {
+                def releaseStorePassword = keystoreProperties['storePassword']
+                if (releaseStorePassword && !releaseStorePassword.isEmpty()) {
                     storeFile file(keystoreProperties['storeFile'] ?: '../jayathasoft.keystore')
-                    storePassword storePassword
-                    keyAlias keystoreProperties['keyAlias'] ?: 'jayathasoft-keystore'
-                    keyPassword keystoreProperties['keyPassword'] ?: storePassword
+                    storePassword = releaseStorePassword
+                    keyAlias = keystoreProperties['keyAlias'] ?: 'jayathasoft-keystore'
+                    keyPassword = keystoreProperties['keyPassword'] ?: releaseStorePassword
                 }
             } else {
                 // Try environment variables
-                def storePassword = System.getenv("KEYSTORE_PASSWORD")
-                if (storePassword && !storePassword.isEmpty()) {
+                def releaseStorePassword = System.getenv("KEYSTORE_PASSWORD")
+                if (releaseStorePassword && !releaseStorePassword.isEmpty()) {
                     storeFile file('../jayathasoft.keystore')
-                    storePassword storePassword
-                    keyAlias System.getenv("KEY_ALIAS") ?: "jayathasoft-keystore"
-                    keyPassword System.getenv("KEY_PASSWORD") ?: storePassword
+                    storePassword = releaseStorePassword
+                    keyAlias = System.getenv("KEY_ALIAS") ?: "jayathasoft-keystore"
+                    keyPassword = System.getenv("KEY_PASSWORD") ?: releaseStorePassword
                 }
             }
         }
