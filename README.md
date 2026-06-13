@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-24.0-blue.svg)](https://github.com/simsonpeter/Tcradios_new)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Web-blue.svg)](https://tcradios-new.vercel.app)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20Web%20%7C%20Google%20Nest-blue.svg)](https://tcradios-new.vercel.app)
 [![PWA](https://img.shields.io/badge/PWA-enabled-orange.svg)](https://tcradios-new.vercel.app)
 
 A modern Progressive Web App (PWA) and Android application that brings uplifting Christian music and inspirational messages to believers worldwide. Built with cutting-edge web technologies and optimized for mobile devices.
@@ -21,6 +21,7 @@ A modern Progressive Web App (PWA) and Android application that brings uplifting
 ### 📱 **Cross-Platform**
 - **Progressive Web App (PWA)** - Install on any device
 - **Android App** - Native Android application
+- **Google Nest / Chromecast** - Cast live stations to Nest speakers and smart displays
 - **Responsive Design** - Works on all screen sizes
 - **Offline Support** - Cached content for offline listening
 
@@ -36,6 +37,7 @@ A modern Progressive Web App (PWA) and Android application that brings uplifting
 - **Cache Management** - Automatic cache clearing on startup
 - **Metadata Display** - Shows current song and artist
 - **Media Session** - Android Auto and Wear OS support
+- **Google Cast** - Remote playback controls and station metadata for Google Nest devices
 - **Notifications** - Rich media notifications
 - **Swipe Gestures** - Navigate with touch gestures
 

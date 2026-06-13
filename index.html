@@ -38,6 +38,16 @@
   document.head.appendChild(script);
 })();
 </script>
+<!-- Google Cast sender support for Google Nest speakers and displays -->
+<script>
+window.__onGCastApiAvailable = function(isAvailable) {
+  window.__tcrCastApiAvailable = isAvailable;
+  if (isAvailable && typeof window.initGoogleNestCast === 'function') {
+    window.initGoogleNestCast();
+  }
+};
+</script>
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" async></script>
 <style>
 /* Modern Elegant Theme System */
 :root{
@@ -296,6 +306,10 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #headerControls{display:flex;align-items:center;gap:0.8rem;position:relative}
 .header-btn{display:flex}
 .header-menu-btn{display:none}
+#castBtn.cast-connected{color:var(--accent)}
+#castBtn.cast-connected i{color:var(--accent)}
+#menuCastBtn{display:none}
+#menuCastBtn.cast-connected{color:var(--accent)}
 /* Header Menu Dropdown */
 #headerMenu{position:absolute;top:100%;right:0;background:var(--card);border:1px solid var(--border);
            border-radius:0.5rem;box-shadow:var(--shadow-xl);padding:0.5rem;min-width:200px;
@@ -1110,6 +1124,7 @@ audio{display:none}
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
+    <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
   </div>
@@ -1117,6 +1132,7 @@ audio{display:none}
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
     <button id="menuAlarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i> Alarm Clock</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
+    <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
 </header>
@@ -2114,7 +2130,11 @@ function play(st, i) {
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
   player.classList.add('playing');
-  audio.play().catch(()=>{});
+  if (isGoogleNestCasting()) {
+    loadStationOnGoogleNest(st, true);
+  } else {
+    audio.play().catch(()=>{});
+  }
   updateMediaSession(st);
   // Update Wear OS media session
   updateWearOSMediaSession(st);
@@ -2145,7 +2165,7 @@ function play(st, i) {
 pPlay.onclick = (e) => {
   e.stopPropagation();
   hapticFeedback('medium');
-  audio.paused ? audio.play() : audio.pause();
+  toggleActivePlayback();
 };
 function prevNext(dir) {
   if (!currentList.length) return;
@@ -2280,7 +2300,7 @@ if (fullscreenControls) fullscreenControls.addEventListener('click', (e) => e.st
 if (fullscreenArtwork) fullscreenArtwork.addEventListener('click', (e) => e.stopPropagation());
 // Fullscreen player controls
 fsPlay.onclick = () => {
-  audio.paused ? audio.play() : audio.pause();
+  toggleActivePlayback();
   hapticFeedback('medium');
 };
 fsPrev.onclick = () => {
@@ -2427,6 +2447,305 @@ let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
 let metadataAttempts = 0;
 const MAX_METADATA_ATTEMPTS = 3;
+/* ---- GOOGLE NEST / CAST SUPPORT ---- */
+const GOOGLE_NEST_RECEIVER_APP_ID = 'CC1AD845'; // Default Media Receiver
+let googleNestCastInitialized = false;
+let googleNestCastState = 'NO_DEVICES_AVAILABLE';
+let googleNestSession = null;
+let googleNestRemotePlayer = null;
+let googleNestRemoteController = null;
+
+function getCastContext() {
+  if (window.cast && window.cast.framework && window.chrome && window.chrome.cast) {
+    return cast.framework.CastContext.getInstance();
+  }
+  return null;
+}
+
+function getGoogleNestCastSession() {
+  const context = getCastContext();
+  if (!context) return googleNestSession;
+  googleNestSession = context.getCurrentSession();
+  return googleNestSession;
+}
+
+function isGoogleNestCasting() {
+  const session = getGoogleNestCastSession();
+  return Boolean(session && googleNestRemotePlayer && googleNestRemotePlayer.isConnected);
+}
+
+function isPlaybackCurrentlyPlaying() {
+  return isGoogleNestCasting() ? player.classList.contains('playing') : !audio.paused;
+}
+
+function updatePlaybackUiForRemote(isPlaying) {
+  pPlay.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+  player.classList.toggle('playing', isPlaying);
+  updateWidget('playStateUpdate', { playing: isPlaying });
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }
+
+  if (fullscreenPlayer.classList.contains('active')) {
+    fullscreenPlayer.classList.toggle('playing', isPlaying);
+    fsPlay.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+  }
+
+  if (floatingWidget && floatingWidget.classList.contains('active')) {
+    floatingWidget.classList.toggle('playing', isPlaying);
+    widgetPlayMini.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+  }
+
+  switchTab(currentTab);
+}
+
+function getAbsoluteAssetUrl(src) {
+  try {
+    return new URL(src || '/icons/icon-512x512.png', window.location.origin).href;
+  } catch (error) {
+    return `${window.location.origin}/icons/icon-512x512.png`;
+  }
+}
+
+function inferCastContentType(url) {
+  const cleanUrl = String(url || '').split('?')[0].toLowerCase();
+  if (cleanUrl.endsWith('.m3u8')) return 'application/x-mpegURL';
+  if (cleanUrl.endsWith('.aac')) return 'audio/aac';
+  if (cleanUrl.endsWith('.m4a')) return 'audio/mp4';
+  if (cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.oga')) return 'audio/ogg';
+  if (cleanUrl.endsWith('.wav')) return 'audio/wav';
+  return 'audio/mpeg';
+}
+
+function buildGoogleNestMediaInfo(st) {
+  const mediaInfo = new chrome.cast.media.MediaInfo(st.url, inferCastContentType(st.url));
+  mediaInfo.streamType = chrome.cast.media.StreamType.LIVE;
+
+  const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+  metadata.title = currentMetadata.song || st.name || 'TC RADIOS';
+  metadata.artist = currentMetadata.artist || 'TC RADIOS';
+  metadata.albumName = st.genre || 'Christian Radio';
+  metadata.images = [new chrome.cast.Image(getAbsoluteAssetUrl(st.logo || '/icons/icon-512x512.png'))];
+  mediaInfo.metadata = metadata;
+
+  return mediaInfo;
+}
+
+async function loadStationOnGoogleNest(st, autoplay = true) {
+  const session = getGoogleNestCastSession();
+  if (!session || !window.chrome || !chrome.cast || !st || !st.url) return false;
+
+  if (!audio.paused) {
+    audio.pause();
+  }
+
+  const request = new chrome.cast.media.LoadRequest(buildGoogleNestMediaInfo(st));
+  request.autoplay = autoplay;
+  request.currentTime = 0;
+
+  try {
+    await session.loadMedia(request);
+    updatePlaybackUiForRemote(autoplay);
+    updateGoogleNestCastControls();
+    if (autoplay) {
+      showNotification(`Casting ${st.name} to Google Nest`);
+    }
+    return true;
+  } catch (error) {
+    console.error('Google Nest cast load failed:', error);
+    showNotification('Unable to cast this station to Google Nest');
+    return false;
+  }
+}
+
+function playActiveStream() {
+  if (isGoogleNestCasting()) {
+    if (lastPlayedStation && lastPlayedStation.station) {
+      return loadStationOnGoogleNest(lastPlayedStation.station, true);
+    }
+
+    const media = getGoogleNestCastSession()?.getMediaSession();
+    if (media && window.chrome && chrome.cast) {
+      media.play(new chrome.cast.media.PlayRequest(), () => updatePlaybackUiForRemote(true), error => {
+        console.error('Google Nest play failed:', error);
+      });
+    }
+    return;
+  }
+
+  return audio.play().catch(err => console.error('Play error:', err));
+}
+
+function pauseActiveStream() {
+  if (isGoogleNestCasting()) {
+    const media = getGoogleNestCastSession()?.getMediaSession();
+    if (media && window.chrome && chrome.cast) {
+      media.pause(new chrome.cast.media.PauseRequest(), () => {
+        updatePlaybackUiForRemote(false);
+        stopMetadataFetching();
+        stopStreamQualityDetection();
+      }, error => {
+        console.error('Google Nest pause failed:', error);
+      });
+    } else {
+      updatePlaybackUiForRemote(false);
+    }
+    return;
+  }
+
+  audio.pause();
+}
+
+function stopActiveStream() {
+  if (isGoogleNestCasting()) {
+    const media = getGoogleNestCastSession()?.getMediaSession();
+    if (media) {
+      media.stop(new chrome.cast.media.StopRequest(), () => updatePlaybackUiForRemote(false), error => {
+        console.error('Google Nest stop failed:', error);
+      });
+    } else {
+      updatePlaybackUiForRemote(false);
+    }
+    stopMetadataFetching();
+    stopStreamQualityDetection();
+    return;
+  }
+
+  audio.pause();
+  audio.currentTime = 0;
+}
+
+function toggleActivePlayback() {
+  if (isGoogleNestCasting()) {
+    if (player.classList.contains('playing')) {
+      pauseActiveStream();
+    } else {
+      playActiveStream();
+    }
+    return;
+  }
+
+  audio.paused ? playActiveStream() : pauseActiveStream();
+}
+
+function syncGoogleNestPlaybackState() {
+  if (!isGoogleNestCasting() || !googleNestRemotePlayer) return;
+
+  const playerState = googleNestRemotePlayer.playerState;
+  const isPlaying = playerState === 'PLAYING' || (playerState !== 'IDLE' && !googleNestRemotePlayer.isPaused);
+  updatePlaybackUiForRemote(isPlaying);
+}
+
+function updateGoogleNestCastControls() {
+  const noDevicesState = window.cast?.framework?.CastState?.NO_DEVICES_AVAILABLE || 'NO_DEVICES_AVAILABLE';
+  const canCast = googleNestCastState && googleNestCastState !== noDevicesState;
+  const connected = isGoogleNestCasting();
+  const label = connected ? 'Casting to Google Nest' : 'Cast to Google Nest';
+  const castControl = document.getElementById('castBtn');
+  const menuCastControl = document.getElementById('menuCastBtn');
+
+  if (castControl) {
+    castControl.style.display = canCast ? 'flex' : 'none';
+    castControl.classList.toggle('cast-connected', connected);
+    castControl.title = label;
+    castControl.setAttribute('aria-label', label);
+  }
+
+  if (menuCastControl) {
+    menuCastControl.style.display = canCast ? 'flex' : 'none';
+    menuCastControl.classList.toggle('cast-connected', connected);
+    menuCastControl.innerHTML = `<i class="fab fa-chromecast"></i> ${label}`;
+  }
+}
+
+async function requestGoogleNestCastSession() {
+  const context = getCastContext();
+  if (!context) {
+    showNotification('Google Nest casting is not available in this browser');
+    return;
+  }
+
+  try {
+    await context.requestSession();
+    googleNestSession = context.getCurrentSession();
+    updateGoogleNestCastControls();
+
+    if (lastPlayedStation && lastPlayedStation.station && audio.src) {
+      await loadStationOnGoogleNest(lastPlayedStation.station, isPlaybackCurrentlyPlaying());
+    } else {
+      showNotification('Select a station to cast to Google Nest');
+    }
+  } catch (error) {
+    const canceled = error === chrome.cast.ErrorCode.CANCEL || error?.code === chrome.cast.ErrorCode.CANCEL;
+    if (!canceled) {
+      console.error('Google Nest cast session failed:', error);
+      showNotification('Unable to connect to Google Nest');
+    }
+  }
+}
+
+function handleGoogleNestSessionState(event) {
+  const sessionState = cast.framework.SessionState;
+
+  if (
+    event.sessionState === sessionState.SESSION_STARTED ||
+    event.sessionState === sessionState.SESSION_RESUMED
+  ) {
+    googleNestSession = event.session || getGoogleNestCastSession();
+    updateGoogleNestCastControls();
+  }
+
+  if (
+    event.sessionState === sessionState.SESSION_ENDED ||
+    event.sessionState === sessionState.SESSION_ENDING
+  ) {
+    googleNestSession = null;
+    updatePlaybackUiForRemote(false);
+    updateGoogleNestCastControls();
+  }
+}
+
+function initGoogleNestCast() {
+  if (googleNestCastInitialized) return;
+
+  const context = getCastContext();
+  if (!context) return;
+
+  googleNestCastInitialized = true;
+  context.setOptions({
+    receiverApplicationId: GOOGLE_NEST_RECEIVER_APP_ID,
+    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+    resumeSavedSession: true
+  });
+
+  context.addEventListener(cast.framework.CastContextEventType.CAST_STATE_CHANGED, event => {
+    googleNestCastState = event.castState;
+    updateGoogleNestCastControls();
+  });
+
+  context.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, handleGoogleNestSessionState);
+
+  googleNestRemotePlayer = new cast.framework.RemotePlayer();
+  googleNestRemoteController = new cast.framework.RemotePlayerController(googleNestRemotePlayer);
+  const remoteEvents = cast.framework.RemotePlayerEventType;
+  if (remoteEvents.IS_CONNECTED_CHANGED) {
+    googleNestRemoteController.addEventListener(remoteEvents.IS_CONNECTED_CHANGED, updateGoogleNestCastControls);
+  }
+  if (remoteEvents.IS_PAUSED_CHANGED) {
+    googleNestRemoteController.addEventListener(remoteEvents.IS_PAUSED_CHANGED, syncGoogleNestPlaybackState);
+  }
+  if (remoteEvents.PLAYER_STATE_CHANGED) {
+    googleNestRemoteController.addEventListener(remoteEvents.PLAYER_STATE_CHANGED, syncGoogleNestPlaybackState);
+  }
+
+  googleNestCastState = context.getCastState();
+  googleNestSession = context.getCurrentSession();
+  updateGoogleNestCastControls();
+}
+
+window.initGoogleNestCast = initGoogleNestCast;
+
 function updateMetadata(song, artist) {
   const songElement = document.getElementById('p-song');
   const artistElement = document.getElementById('p-artist');
@@ -3135,6 +3454,8 @@ const menuBtn = document.getElementById('menuBtn');
 const headerMenu = document.getElementById('headerMenu');
 const menuSleepBtn = document.getElementById('menuSleepBtn');
 const menuAlarmBtn = document.getElementById('menuAlarmBtn');
+const castBtn = document.getElementById('castBtn');
+const menuCastBtn = document.getElementById('menuCastBtn');
 const menuInstallBtn = document.getElementById('menuInstallBtn');
 
 // Menu button toggle
@@ -3174,6 +3495,22 @@ if (menuAlarmBtn) {
   };
 }
 
+if (castBtn) {
+  castBtn.onclick = (e) => {
+    e.stopPropagation();
+    requestGoogleNestCastSession();
+    hapticFeedback('light');
+  };
+}
+
+if (menuCastBtn) {
+  menuCastBtn.onclick = () => {
+    requestGoogleNestCastSession();
+    headerMenu.classList.remove('active');
+    hapticFeedback('light');
+  };
+}
+
 if (menuInstallBtn) {
   menuInstallBtn.onclick = () => {
     const installBtn = document.getElementById('installBtn');
@@ -3203,7 +3540,7 @@ document.getElementById('setCustom').onclick = () => {
 function setSleep(min) {
   clearTimeout(sleepTimer);
   sleepTimer = setTimeout(() => {
-    audio.pause();
+    pauseActiveStream();
     document.getElementById('p-now').textContent = 'Live';
     sleepModal.style.display = 'none';
   }, min * 60000);
@@ -4484,7 +4821,7 @@ if (widgetClose) {
 // Widget controls
 if (widgetPlayMini) {
   widgetPlayMini.onclick = () => {
-    audio.paused ? audio.play() : audio.pause();
+    toggleActivePlayback();
     hapticFeedback('medium');
   };
 }
@@ -4532,7 +4869,7 @@ function updateMediaSession(st) {
     });
     
     // Set playback state based on current audio state
-    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+    navigator.mediaSession.playbackState = isPlaybackCurrentlyPlaying() ? 'playing' : 'paused';
     
     // Set position state for Android Auto (radio streams are continuous)
     try {
@@ -4548,13 +4885,13 @@ function updateMediaSession(st) {
     
     // Enhanced media session controls for Android Auto
     navigator.mediaSession.setActionHandler('play', () => {
-      audio.play().catch(err => console.error('Play error:', err));
+      playActiveStream();
       navigator.mediaSession.playbackState = 'playing';
       showNotification('Playing: ' + st.name);
       updateWidget('playStateUpdate', { playing: true });
     });
     navigator.mediaSession.setActionHandler('pause', () => {
-      audio.pause();
+      pauseActiveStream();
       navigator.mediaSession.playbackState = 'paused';
       showNotification('Paused: ' + st.name);
       updateWidget('playStateUpdate', { playing: false });
@@ -4569,8 +4906,7 @@ function updateMediaSession(st) {
     });
     // Add stop action for better mobile support
     navigator.mediaSession.setActionHandler('stop', () => {
-      audio.pause();
-      audio.currentTime = 0;
+      stopActiveStream();
       navigator.mediaSession.playbackState = 'paused';
       showNotification('Stopped');
       updateWidget('playStateUpdate', { playing: false });
@@ -4614,11 +4950,11 @@ function initAndroidAutoVoiceCommands() {
           switchTab('favorites');
           showNotification('Showing favorites');
         } else {
-          audio.play();
+          playActiveStream();
           showNotification('Playing');
         }
       } else if (command.includes('pause') || command.includes('stop')) {
-        audio.pause();
+        pauseActiveStream();
         showNotification('Paused');
       } else if (command.includes('favorite') || command.includes('favourite')) {
         if (lastPlayedStation) {
@@ -4717,10 +5053,10 @@ function handleAndroidAutoMessage(data) {
   
   switch (data.action) {
     case 'play':
-      audio.play();
+      playActiveStream();
       break;
     case 'pause':
-      audio.pause();
+      pauseActiveStream();
       break;
     case 'next':
       prevNext(1);
@@ -4758,7 +5094,7 @@ window.addEventListener('message', (event) => {
   if (event.data.action) {
     switch(event.data.action) {
       case 'play':
-        audio.paused ? audio.play() : audio.pause();
+        toggleActivePlayback();
         break;
       case 'prev':
         prevNext(-1);
@@ -4816,10 +5152,10 @@ function initAndroidAuto() {
 function handleAndroidAutoCommand(command) {
   switch(command.action) {
     case 'PLAY':
-      audio.play();
+      playActiveStream();
       break;
     case 'PAUSE':
-      audio.pause();
+      pauseActiveStream();
       break;
     case 'NEXT':
       prevNext(1);
@@ -4828,8 +5164,7 @@ function handleAndroidAutoCommand(command) {
       prevNext(-1);
       break;
     case 'STOP':
-      audio.pause();
-      audio.currentTime = 0;
+      stopActiveStream();
       break;
   }
 }
@@ -5043,7 +5378,7 @@ function addWearOSListeners() {
     if (tapLength < 500 && tapLength > 0) {
       // Double tap detected
       e.preventDefault();
-      audio.paused ? audio.play() : audio.pause();
+      toggleActivePlayback();
       hapticFeedback('medium');
     }
     lastTap = currentTime;
@@ -5121,11 +5456,11 @@ function updateWearOSMediaSession(st) {
     });
     // Wear OS specific action handlers
     navigator.mediaSession.setActionHandler('play', () => {
-      audio.play();
+      playActiveStream();
       hapticFeedback('light');
     });
     navigator.mediaSession.setActionHandler('pause', () => {
-      audio.pause();
+      pauseActiveStream();
       hapticFeedback('light');
     });
     navigator.mediaSession.setActionHandler('previoustrack', () => {
@@ -5137,14 +5472,17 @@ function updateWearOSMediaSession(st) {
       hapticFeedback('medium');
     });
     navigator.mediaSession.setActionHandler('stop', () => {
-      audio.pause();
-      audio.currentTime = 0;
+      stopActiveStream();
       hapticFeedback('heavy');
     });
   }
 }
 /* ---- INITIALIZE MOBILE FEATURES ---- */
 window.addEventListener('load', () => {
+  // Initialize Google Cast support for Google Nest speakers/displays
+  if (window.__tcrCastApiAvailable) {
+    initGoogleNestCast();
+  }
   // Initialize Android Auto support
   initAndroidAuto();
   // Initialize Wear OS support
