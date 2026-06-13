@@ -34,17 +34,18 @@ Supported voice commands:
 
 ## Technical Implementation
 
-### Web-Based Android Auto Integration
-TC RADIOS uses a **web-based approach** to Android Auto integration, which provides excellent compatibility and seamless user experience without complex native Android Auto services.
+### Native Android Auto Media Integration
+TC RADIOS exposes a native `MediaBrowserServiceCompat` from the Android app so Android Auto can discover it as a media app. The web/TWA app still provides the full phone UI, while Android Auto receives a car-safe station browser and transport controls from the native media service.
 
 ### Core Technologies
-1. **Enhanced Media Session API** - Rich media controls and metadata
-2. **Progressive Web App (PWA)** - Android Auto compatible web application
-3. **Voice Recognition API** - Web-based voice command processing
-4. **Background Audio Support** - Continuous playback when app is backgrounded
+1. **MediaBrowserServiceCompat** - Required Android Auto entry point for media apps
+2. **MediaSessionCompat** - Rich media controls and playback state
+3. **Native MediaPlayer stream playback** - Plays radio streams directly from Android Auto
+4. **Progressive Web App (PWA)** - Full app UI on the phone
 5. **Trusted Web Activity (TWA)** - Native Android app wrapper
 
 ### Key Features
+- **Native Media Browser** - Lets Android Auto list TC RADIOS in media apps
 - **Media Session Integration** - Full Android Auto media controls
 - **Voice Command Support** - Web Speech API for hands-free control
 - **Automotive UI Optimization** - Large touch targets and simplified interface
@@ -52,7 +53,9 @@ TC RADIOS uses a **web-based approach** to Android Auto integration, which provi
 - **Rich Metadata Display** - Station info, logos, and now playing details
 
 ### Key Files
-- `index.html` - Enhanced with Android Auto voice commands and media session
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/AndroidAutoMediaService.java` - Native Android Auto station browser and playback service
+- `twa/app/src/main/AndroidManifest.xml` - Declares the media browser service and Android Auto metadata
+- `index.html` - Enhanced with media session support for the phone/web player
 - `automotive_app_desc.xml` - Android Auto app descriptor
 - `automotive.xml` - Android Auto metadata and voice command examples
 
@@ -61,14 +64,15 @@ TC RADIOS uses a **web-based approach** to Android Auto integration, which provi
 ### Prerequisites
 1. Android Auto app installed on phone
 2. Compatible car or Android Auto head unit
-3. TC RADIOS app installed
+3. TC RADIOS Android app version 30 or newer installed from the latest APK/AAB build
 
 ### Usage
-1. Connect phone to car via USB or wireless
-2. Android Auto will automatically detect TC RADIOS
-3. Navigate to Media apps in Android Auto
-4. Select TC RADIOS from the app list
-5. Use touch or voice commands to control playback
+1. Install the latest TC RADIOS Android APK/AAB on the phone.
+2. Open TC RADIOS once on the phone so Android registers the app.
+3. Connect phone to car via USB or wireless.
+4. In Android Auto, open the app launcher or media app list.
+5. Select TC RADIOS and choose a station.
+6. Use car touch controls, steering wheel buttons, or Google Assistant transport commands.
 
 ## Voice Command Examples
 
@@ -106,7 +110,7 @@ TC RADIOS uses a **web-based approach** to Android Auto integration, which provi
 ### Common Issues
 
 **Q: TC RADIOS doesn't appear in Android Auto**
-A: Ensure the latest version is installed and Android Auto permissions are granted.
+A: Install a freshly built APK/AAB from version 30 or newer. Web deployment alone cannot update Android Auto because the native media service is inside the Android app.
 
 **Q: Voice commands not working**
 A: Check microphone permissions and ensure Android Auto voice recognition is enabled.
