@@ -598,13 +598,15 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
-.favorite-button,.share-button,.rating-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
-.favorite-button i,.share-button i,.rating-button i{font-size:1.1rem}
+.favorite-button,.share-button,.rating-button,.report-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
+.favorite-button i,.share-button i,.rating-button i,.report-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
 .share-button:hover{color:var(--accent);transform:scale(1.1)}
 .favorite-button:hover{transform:scale(1.1)}
 .rating-button:hover{color:var(--accent);transform:scale(1.1)}
 .rating-button i.rated{color:#ffc107}
+.report-button{color:#ef4444}
+.report-button:hover{color:#f87171;transform:scale(1.1)}
 .station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem}
 .station-rating-display i{font-size:0.7rem}
 #player{background:var(--header);border-top:1px solid var(--border);
@@ -957,6 +959,17 @@ audio{display:none}
 #accountStatus.success{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.5)}
 #accountStatus.error{background:rgba(220,38,38,0.2);color:#dc2626;border:1px solid rgba(220,38,38,0.5)}
 #accountStatus.info{background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.5)}
+#feedbackModal,#radioRequestModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem}
+#feedbackModal>div,#radioRequestModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:420px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow-xl)}
+#feedbackModal h3,#radioRequestModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
+#feedbackModal input,#feedbackModal select,#feedbackModal textarea,#feedbackModal button,
+#radioRequestModal input,#radioRequestModal select,#radioRequestModal textarea,#radioRequestModal button{width:100%;padding:0.75rem;margin:0.5rem 0;border:1px solid var(--border);border-radius:0.5rem;background:var(--bg);color:var(--text);font-size:1rem}
+#feedbackModal textarea,#radioRequestModal textarea{min-height:90px;resize:vertical}
+#feedbackModal button,#radioRequestModal button{background:var(--gradient-primary);color:#fff;cursor:pointer;transition:var(--transition);font-weight:600}
+#feedbackModal button.secondary,#radioRequestModal button.secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+#feedbackStatus,#radioRequestStatus{text-align:center;padding:0.75rem;border-radius:0.5rem;margin-top:0.5rem;display:none}
+#feedbackStatus.success,#radioRequestStatus.success{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.5)}
+#feedbackStatus.error,#radioRequestStatus.error{background:rgba(220,38,38,0.2);color:#dc2626;border:1px solid rgba(220,38,38,0.5)}
 .user-info{text-align:center;padding:1rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
 .user-info .user-email{font-weight:600;color:var(--text);margin-bottom:0.5rem}
 .user-info .sync-status{font-size:0.85rem;color:var(--text-secondary)}
@@ -1124,6 +1137,7 @@ audio{display:none}
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
+    <button id="requestRadioBtn" title="Request Radio" class="header-btn"><i class="fas fa-plus-circle"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
@@ -1132,6 +1146,7 @@ audio{display:none}
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
     <button id="menuAlarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i> Alarm Clock</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
+    <button id="menuRequestRadioBtn" title="Request Radio"><i class="fas fa-plus-circle"></i> Request Radio</button>
     <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
@@ -1395,6 +1410,48 @@ audio{display:none}
       <!-- Login/Register form will be inserted here -->
     </div>
     <div id="accountStatus" style="margin-top:1rem;padding:0.5rem;border-radius:0.3rem;display:none"></div>
+  </div>
+</div>
+<div id="feedbackModal">
+  <div>
+    <h3>Report Stream Problem</h3>
+    <div id="feedbackStationName" style="text-align:center;margin-bottom:1rem;font-weight:600"></div>
+    <select id="feedbackIssueType" title="Problem type">
+      <option value="not_working">Stream not working</option>
+      <option value="buffering">Keeps buffering</option>
+      <option value="wrong_station">Wrong station/audio</option>
+      <option value="metadata">Wrong station info</option>
+      <option value="other">Other problem</option>
+    </select>
+    <textarea id="feedbackMessage" placeholder="Optional details for admin"></textarea>
+    <input id="feedbackContact" type="email" placeholder="Your email (optional)"/>
+    <button id="submitFeedbackBtn">Send to Admin</button>
+    <button id="closeFeedbackModal" class="secondary">Cancel</button>
+    <div id="feedbackStatus"></div>
+  </div>
+</div>
+<div id="radioRequestModal">
+  <div>
+    <h3>Request Radio Station</h3>
+    <input id="requestStationName" type="text" placeholder="Station name" maxlength="120"/>
+    <input id="requestStreamUrl" type="url" placeholder="Stream URL, website, or listen link" maxlength="500"/>
+    <select id="requestLanguage" title="Language">
+      <option value="">Select language (optional)</option>
+      <option value="tamil">Tamil</option>
+      <option value="english">English</option>
+      <option value="malayalam">Malayalam</option>
+      <option value="hindi">Hindi</option>
+      <option value="dutch">Dutch</option>
+      <option value="sinhala">Sinhala</option>
+      <option value="telugu">Telugu</option>
+      <option value="kannada">Kannada</option>
+      <option value="other">Other</option>
+    </select>
+    <textarea id="requestNotes" placeholder="Optional notes for admin"></textarea>
+    <input id="requestContact" type="email" placeholder="Your email (optional)"/>
+    <button id="submitRadioRequestBtn">Send Request</button>
+    <button id="closeRadioRequestModal" class="secondary">Cancel</button>
+    <div id="radioRequestStatus"></div>
   </div>
 </div>
 <audio id="audio"></audio>
@@ -2097,6 +2154,7 @@ function render(list) {
         <div class="rating-button" data-station='${JSON.stringify(st)}' title="Rate">
           <i class="fas fa-star ${stationRatings[st.name] ? 'rated' : ''}"></i>
         </div>
+        <div class="report-button" data-station='${JSON.stringify(st)}' title="Report stream problem"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="share-button" data-station='${JSON.stringify(st)}' title="Share"><i class="fas fa-share-alt"></i></div>
         <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
@@ -2104,7 +2162,7 @@ function render(list) {
     
     div.onclick = e => { 
       if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button') && 
-          !e.target.closest('.rating-button')) {
+          !e.target.closest('.rating-button') && !e.target.closest('.report-button')) {
         play(st, i);
       }
     };
@@ -2119,6 +2177,10 @@ function render(list) {
     div.querySelector('.rating-button').onclick = e => {
       e.stopPropagation();
       showRatingModal(st);
+    };
+    div.querySelector('.report-button').onclick = e => {
+      e.stopPropagation();
+      showStreamReportModal(st);
     };
     stationList.appendChild(div);
   });
@@ -3456,6 +3518,8 @@ const menuSleepBtn = document.getElementById('menuSleepBtn');
 const menuAlarmBtn = document.getElementById('menuAlarmBtn');
 const castBtn = document.getElementById('castBtn');
 const menuCastBtn = document.getElementById('menuCastBtn');
+const requestRadioBtn = document.getElementById('requestRadioBtn');
+const menuRequestRadioBtn = document.getElementById('menuRequestRadioBtn');
 const menuInstallBtn = document.getElementById('menuInstallBtn');
 
 // Menu button toggle
@@ -3506,6 +3570,22 @@ if (castBtn) {
 if (menuCastBtn) {
   menuCastBtn.onclick = () => {
     requestGoogleNestCastSession();
+    headerMenu.classList.remove('active');
+    hapticFeedback('light');
+  };
+}
+
+if (requestRadioBtn) {
+  requestRadioBtn.onclick = (e) => {
+    e.stopPropagation();
+    showRadioRequestModal();
+    hapticFeedback('light');
+  };
+}
+
+if (menuRequestRadioBtn) {
+  menuRequestRadioBtn.onclick = () => {
+    showRadioRequestModal();
     headerMenu.classList.remove('active');
     hapticFeedback('light');
   };
@@ -3864,6 +3944,190 @@ async function shareStation(station, includeNowPlaying = false) {
     }
   }
 }
+
+/* ---- ADMIN FEEDBACK ---- */
+let streamReportStation = null;
+
+function showFeedbackStatus(elementId, message, type = 'success') {
+  const status = document.getElementById(elementId);
+  if (!status) return;
+  status.textContent = message;
+  status.className = type;
+  status.style.display = 'block';
+}
+
+async function ensureSupabaseReady() {
+  if (!supabaseClient) {
+    initSupabase();
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
+  return Boolean(supabaseClient);
+}
+
+function getContactValue(inputId) {
+  const input = document.getElementById(inputId);
+  const value = input ? input.value.trim() : '';
+  return value || (currentUser ? currentUser.email : '');
+}
+
+function showStreamReportModal(station) {
+  streamReportStation = station;
+  const modal = document.getElementById('feedbackModal');
+  const stationName = document.getElementById('feedbackStationName');
+  const issueType = document.getElementById('feedbackIssueType');
+  const message = document.getElementById('feedbackMessage');
+  const contact = document.getElementById('feedbackContact');
+  const status = document.getElementById('feedbackStatus');
+
+  if (stationName) stationName.textContent = station ? station.name : 'Selected station';
+  if (issueType) issueType.value = 'not_working';
+  if (message) message.value = '';
+  if (contact) contact.value = currentUser ? currentUser.email : '';
+  if (status) status.style.display = 'none';
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeStreamReportModal() {
+  const modal = document.getElementById('feedbackModal');
+  if (modal) modal.style.display = 'none';
+  streamReportStation = null;
+}
+
+async function submitStreamReport() {
+  if (!streamReportStation) {
+    showFeedbackStatus('feedbackStatus', 'No station selected to report.', 'error');
+    return;
+  }
+
+  if (!await ensureSupabaseReady()) {
+    showFeedbackStatus('feedbackStatus', 'Unable to contact admin database. Please try again later.', 'error');
+    return;
+  }
+
+  const issueType = document.getElementById('feedbackIssueType')?.value || 'not_working';
+  const message = document.getElementById('feedbackMessage')?.value.trim() || '';
+  const contactEmail = getContactValue('feedbackContact');
+
+  try {
+    const { error } = await supabaseClient
+      .from('stream_reports')
+      .insert([{
+        station_name: streamReportStation.name || 'Unknown station',
+        stream_url: streamReportStation.url || '',
+        station_genre: streamReportStation.genre || '',
+        language: currentLang || '',
+        issue_type: issueType,
+        message: message,
+        contact_email: contactEmail,
+        user_id: currentUser ? currentUser.id : null,
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+        status: 'new'
+      }]);
+
+    if (error) throw error;
+
+    showFeedbackStatus('feedbackStatus', 'Thanks! Admin has received the stream report.', 'success');
+    showNotification('Stream problem sent to admin');
+    hapticFeedback('success');
+    setTimeout(closeStreamReportModal, 1200);
+  } catch (error) {
+    console.error('Failed to submit stream report:', error);
+    showFeedbackStatus('feedbackStatus', 'Could not send report. Please try again later.', 'error');
+  }
+}
+
+function showRadioRequestModal() {
+  const modal = document.getElementById('radioRequestModal');
+  const name = document.getElementById('requestStationName');
+  const url = document.getElementById('requestStreamUrl');
+  const language = document.getElementById('requestLanguage');
+  const notes = document.getElementById('requestNotes');
+  const contact = document.getElementById('requestContact');
+  const status = document.getElementById('radioRequestStatus');
+
+  if (name) name.value = '';
+  if (url) url.value = '';
+  if (language) language.value = currentLang || '';
+  if (notes) notes.value = '';
+  if (contact) contact.value = currentUser ? currentUser.email : '';
+  if (status) status.style.display = 'none';
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeRadioRequestModal() {
+  const modal = document.getElementById('radioRequestModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function isValidHttpUrl(value) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch (error) {
+    return false;
+  }
+}
+
+async function submitRadioRequest() {
+  const stationName = document.getElementById('requestStationName')?.value.trim() || '';
+  const streamUrl = document.getElementById('requestStreamUrl')?.value.trim() || '';
+  const language = document.getElementById('requestLanguage')?.value || '';
+  const notes = document.getElementById('requestNotes')?.value.trim() || '';
+  const contactEmail = getContactValue('requestContact');
+
+  if (!stationName) {
+    showFeedbackStatus('radioRequestStatus', 'Please enter the station name.', 'error');
+    return;
+  }
+
+  if (!streamUrl || !isValidHttpUrl(streamUrl)) {
+    showFeedbackStatus('radioRequestStatus', 'Please enter a valid http or https stream/listen URL.', 'error');
+    return;
+  }
+
+  if (!await ensureSupabaseReady()) {
+    showFeedbackStatus('radioRequestStatus', 'Unable to contact admin database. Please try again later.', 'error');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('radio_requests')
+      .insert([{
+        station_name: stationName,
+        stream_url: streamUrl,
+        language: language,
+        notes: notes,
+        contact_email: contactEmail,
+        user_id: currentUser ? currentUser.id : null,
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+        status: 'new'
+      }]);
+
+    if (error) throw error;
+
+    showFeedbackStatus('radioRequestStatus', 'Thanks! Admin has received your radio request.', 'success');
+    showNotification('Radio request sent to admin');
+    hapticFeedback('success');
+    setTimeout(closeRadioRequestModal, 1200);
+  } catch (error) {
+    console.error('Failed to submit radio request:', error);
+    showFeedbackStatus('radioRequestStatus', 'Could not send request. Please try again later.', 'error');
+  }
+}
+
+document.getElementById('submitFeedbackBtn')?.addEventListener('click', submitStreamReport);
+document.getElementById('closeFeedbackModal')?.addEventListener('click', closeStreamReportModal);
+document.getElementById('feedbackModal')?.addEventListener('click', event => {
+  if (event.target.id === 'feedbackModal') closeStreamReportModal();
+});
+document.getElementById('submitRadioRequestBtn')?.addEventListener('click', submitRadioRequest);
+document.getElementById('closeRadioRequestModal')?.addEventListener('click', closeRadioRequestModal);
+document.getElementById('radioRequestModal')?.addEventListener('click', event => {
+  if (event.target.id === 'radioRequestModal') closeRadioRequestModal();
+});
 
 // Fullscreen player share button - share what you're listening to
 if (fsShare) {

@@ -66,9 +66,48 @@ CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)
 CREATE INDEX IF NOT EXISTS idx_user_ratings_station_name ON user_ratings(station_name);
 CREATE INDEX IF NOT EXISTS idx_user_ratings_user_id ON user_ratings(user_id);
 
+-- Create stream_reports table for "stream not working" reports
+CREATE TABLE IF NOT EXISTS stream_reports (
+  id BIGSERIAL PRIMARY KEY,
+  station_name TEXT NOT NULL,
+  stream_url TEXT NOT NULL,
+  station_genre TEXT,
+  language TEXT,
+  issue_type TEXT NOT NULL DEFAULT 'not_working',
+  message TEXT,
+  contact_email TEXT,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_agent TEXT,
+  page_url TEXT,
+  status TEXT NOT NULL DEFAULT 'new',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create radio_requests table for new station requests
+CREATE TABLE IF NOT EXISTS radio_requests (
+  id BIGSERIAL PRIMARY KEY,
+  station_name TEXT NOT NULL,
+  stream_url TEXT NOT NULL,
+  language TEXT,
+  notes TEXT,
+  contact_email TEXT,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_agent TEXT,
+  page_url TEXT,
+  status TEXT NOT NULL DEFAULT 'new',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_stream_reports_status_created ON stream_reports(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_radio_requests_status_created ON radio_requests(status, created_at DESC);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE user_favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stream_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE radio_requests ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for user_favorites
 CREATE POLICY "Users can view their own favorites"
@@ -95,6 +134,16 @@ CREATE POLICY "Users can insert their own ratings"
 CREATE POLICY "Users can update their own ratings"
   ON user_ratings FOR UPDATE
   USING (auth.uid() = user_id OR user_id IS NULL);
+
+-- Create policies for admin feedback tables
+-- Users and guests can submit reports/requests. Admins review them in Supabase dashboard.
+CREATE POLICY "Anyone can submit stream reports"
+  ON stream_reports FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Anyone can submit radio requests"
+  ON radio_requests FOR INSERT
+  WITH CHECK (true);
 ```
 
 4. Click **Run** (or press Ctrl+Enter)
@@ -124,6 +173,12 @@ CREATE POLICY "Users can update their own ratings"
 - Check that you created the database tables (Step 4)
 - Check browser console for detailed error messages
 - Verify RLS policies are created correctly
+
+### Stream reports or radio requests do not reach admin
+- Check that `stream_reports` and `radio_requests` tables exist
+- Check that the INSERT policies for both tables were created
+- In Supabase dashboard, go to **Table Editor** → `stream_reports` or `radio_requests`
+- New submissions have `status = 'new'`; update status manually after review
 
 ### Can't create account
 - Check Supabase dashboard → Authentication → Providers → Email is enabled
