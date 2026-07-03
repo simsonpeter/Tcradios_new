@@ -356,6 +356,53 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .history-container{margin-top:0.5rem}
 .history-meta{font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem}
 .history-meta i{margin-right:0.25rem;opacity:0.7}
+#offlineBanner{display:none;align-items:center;justify-content:center;gap:0.5rem;
+               padding:0.7rem 1rem;background:rgba(239,68,68,0.18);
+               color:#fecaca;border-bottom:1px solid rgba(239,68,68,0.35);
+               font-size:0.9rem;font-weight:600;text-align:center}
+#offlineBanner.active{display:flex}
+#dailyVerseCard{display:none;background:linear-gradient(135deg,rgba(249,115,22,0.16),rgba(59,130,246,0.12));
+                border:1px solid rgba(249,115,22,0.25);border-radius:1rem;
+                padding:1rem;margin-bottom:0.75rem;box-shadow:var(--shadow-md)}
+#dailyVerseCard.active{display:block}
+.daily-verse-title{display:flex;align-items:center;gap:0.5rem;color:var(--accent);
+                   font-weight:700;margin-bottom:0.35rem}
+#dailyVerseText{font-size:0.95rem;line-height:1.45;margin-bottom:0.35rem}
+#dailyVerseRef{font-size:0.82rem;opacity:0.8}
+#dailyVerseShare{margin-top:0.65rem;border:1px solid rgba(249,115,22,0.35);
+                 background:rgba(249,115,22,0.12);color:var(--accent);
+                 border-radius:999px;padding:0.45rem 0.8rem;cursor:pointer}
+#stationFilterBar{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;
+                  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+                  border-radius:0.8rem;padding:0.6rem;margin:0.5rem 0 0.75rem}
+#stationFilterBar select,#stationFilterBar button{background:var(--card);color:var(--text);
+                  border:1px solid var(--border);border-radius:0.5rem;padding:0.45rem 0.6rem}
+#stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
+#stationFilterBar button{cursor:pointer;color:var(--accent)}
+.station-health-row{display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;margin-top:0.3rem}
+.status-pill{display:inline-flex;align-items:center;gap:0.3rem;border-radius:999px;
+             padding:0.18rem 0.45rem;font-size:0.68rem;font-weight:700;
+             background:rgba(148,163,184,0.16);color:#cbd5e1}
+.status-pill.online{background:rgba(34,197,94,0.18);color:#86efac}
+.status-pill.connecting,.status-pill.buffering{background:rgba(245,158,11,0.18);color:#fcd34d}
+.status-pill.offline{background:rgba(239,68,68,0.18);color:#fca5a5}
+.player-health{display:inline-flex;align-items:center;justify-content:center;gap:0.35rem;
+               border-radius:999px;padding:0.35rem 0.7rem;margin-top:0.65rem;
+               font-size:0.82rem;font-weight:700;background:rgba(148,163,184,0.16);
+               color:#cbd5e1}
+.player-health.online{background:rgba(34,197,94,0.18);color:#86efac}
+.player-health.connecting,.player-health.buffering{background:rgba(245,158,11,0.18);color:#fcd34d}
+.player-health.offline{background:rgba(239,68,68,0.18);color:#fca5a5}
+#fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
+#fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
+.admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
+.admin-row,.request-vote-row{background:rgba(255,255,255,0.05);border:1px solid var(--border);
+                              border-radius:0.65rem;padding:0.65rem}
+.admin-row-title,.request-vote-title{font-weight:700;margin-bottom:0.25rem}
+.admin-row-meta,.request-vote-meta{font-size:0.78rem;opacity:0.75;line-height:1.35}
+.vote-button{margin-top:0.45rem;border:1px solid rgba(249,115,22,0.35);
+             background:rgba(249,115,22,0.12);color:var(--accent);
+             border-radius:999px;padding:0.35rem 0.7rem;cursor:pointer}
 #content,#about-panel{flex:1;overflow-y:auto;padding:.75rem 1rem var(--player-height);
                       display:flex;flex-direction:column}
 #about-panel{
@@ -680,18 +727,19 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fs-prev i,#fs-play i,#fs-next i{font-size:1.5rem}
 #fs-play i{font-size:2rem}
 /* Fullscreen Extra Controls (Timer & Alarm) */
-#fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1.5rem;
+#fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;
                             margin-top:1.5rem}
-#fs-sleep,#fs-alarm,#fs-share,#fs-report{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+#fs-sleep,#fs-alarm,#fs-favorite,#fs-share,#fs-report{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
                      font-size:1.3rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                      transition:var(--transition);min-width:50px;min-height:50px;
                      display:flex;align-items:center;justify-content:center;
                      box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
 #fs-report{background:rgba(239,68,68,0.18);color:#f87171}
-#fs-sleep:hover,#fs-alarm:hover,#fs-share:hover,#fs-report:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-favorite.on{background:rgba(249,115,22,0.28);color:#f97316}
+#fs-sleep:hover,#fs-alarm:hover,#fs-favorite:hover,#fs-share:hover,#fs-report:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
 #fs-report:hover{background:rgba(239,68,68,0.28);color:#fca5a5}
-#fs-sleep:active,#fs-alarm:active,#fs-share:active,#fs-report:active{transform:scale(0.95)}
-#fs-sleep i,#fs-alarm i,#fs-share i,#fs-report i{font-size:1.2rem}
+#fs-sleep:active,#fs-alarm:active,#fs-favorite:active,#fs-share:active,#fs-report:active{transform:scale(0.95)}
+#fs-sleep i,#fs-alarm i,#fs-favorite i,#fs-share i,#fs-report i{font-size:1.2rem}
 #stream-info{margin-top:1rem;padding:0.5rem;font-size:0.85rem;color:rgba(255,255,255,0.7);text-align:center}
 #stream-quality,#stream-bitrate{margin:0.25rem 0}
 /* Fullscreen Volume Control */
@@ -959,14 +1007,15 @@ audio{display:none}
 #accountStatus.success{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.5)}
 #accountStatus.error{background:rgba(220,38,38,0.2);color:#dc2626;border:1px solid rgba(220,38,38,0.5)}
 #accountStatus.info{background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.5)}
-#feedbackModal,#radioRequestModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem}
-#feedbackModal>div,#radioRequestModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:420px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow-xl)}
-#feedbackModal h3,#radioRequestModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
+#feedbackModal,#radioRequestModal,#adminDashboardModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
+#feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow-xl)}
+#feedbackModal h3,#radioRequestModal h3,#adminDashboardModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
 #feedbackModal input,#feedbackModal select,#feedbackModal textarea,#feedbackModal button,
-#radioRequestModal input,#radioRequestModal select,#radioRequestModal textarea,#radioRequestModal button{width:100%;padding:0.75rem;margin:0.5rem 0;border:1px solid var(--border);border-radius:0.5rem;background:var(--bg);color:var(--text);font-size:1rem}
+#radioRequestModal input,#radioRequestModal select,#radioRequestModal textarea,#radioRequestModal button,
+#adminDashboardModal button{width:100%;padding:0.75rem;margin:0.5rem 0;border:1px solid var(--border);border-radius:0.5rem;background:var(--bg);color:var(--text);font-size:1rem}
 #feedbackModal textarea,#radioRequestModal textarea{min-height:90px;resize:vertical}
-#feedbackModal button,#radioRequestModal button{background:var(--gradient-primary);color:#fff;cursor:pointer;transition:var(--transition);font-weight:600}
-#feedbackModal button.secondary,#radioRequestModal button.secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+#feedbackModal button,#radioRequestModal button,#adminDashboardModal button{background:var(--gradient-primary);color:#fff;cursor:pointer;transition:var(--transition);font-weight:600}
+#feedbackModal button.secondary,#radioRequestModal button.secondary,#adminDashboardModal button.secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
 #feedbackStatus,#radioRequestStatus{text-align:center;padding:0.75rem;border-radius:0.5rem;margin-top:0.5rem;display:none}
 #feedbackStatus.success,#radioRequestStatus.success{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.5)}
 #feedbackStatus.error,#radioRequestStatus.error{background:rgba(220,38,38,0.2);color:#dc2626;border:1px solid rgba(220,38,38,0.5)}
@@ -1081,7 +1130,7 @@ audio{display:none}
             text-overflow:ellipsis;margin-bottom:0.2rem}
 #widget-status{font-size:0.75rem;color:var(--accent);white-space:nowrap}
 #widget-controls-mini{display:flex;gap:0.4rem;align-items:center}
-#widget-prev-mini,#widget-play-mini,#widget-next-mini{background:rgba(249,115,22,0.2);
+#widget-prev-mini,#widget-play-mini,#widget-next-mini,#widget-open-mini,#widget-fav-mini,#widget-share-mini,#widget-report-mini{background:rgba(249,115,22,0.2);
                                                       border:none;color:var(--accent);
                                                       font-size:1rem;cursor:pointer;
                                                       padding:0.5rem;border-radius:50%;
@@ -1090,7 +1139,10 @@ audio{display:none}
                                                       display:flex;align-items:center;
                                                       justify-content:center}
 #widget-play-mini{background:var(--gradient-primary);color:#fff;min-width:40px;min-height:40px}
-#widget-prev-mini:hover,#widget-next-mini:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#widget-open-mini,#widget-fav-mini,#widget-share-mini,#widget-report-mini{min-width:32px;min-height:32px;font-size:0.82rem;padding:0.35rem}
+#widget-report-mini{background:rgba(239,68,68,0.18);color:#f87171}
+#widget-fav-mini.on{color:#f97316}
+#widget-prev-mini:hover,#widget-next-mini:hover,#widget-open-mini:hover,#widget-fav-mini:hover,#widget-share-mini:hover,#widget-report-mini:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
 #widget-play-mini:hover{transform:scale(1.1)}
 #widget-close{background:rgba(0,0,0,0.2);border:none;color:var(--text);
              font-size:0.9rem;cursor:pointer;padding:0.4rem;border-radius:50%;
@@ -1136,8 +1188,10 @@ audio{display:none}
   </div>
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
+    <button id="miniPlayerBtn" title="Mini Player" class="header-btn"><i class="fas fa-window-restore"></i></button>
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
     <button id="requestRadioBtn" title="Request Radio" class="header-btn"><i class="fas fa-plus-circle"></i></button>
+    <button id="adminDashboardBtn" title="Admin Dashboard" class="header-btn"><i class="fas fa-chart-line"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
@@ -1145,12 +1199,15 @@ audio{display:none}
   <div id="headerMenu" class="header-menu">
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
     <button id="menuAlarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i> Alarm Clock</button>
+    <button id="menuMiniPlayerBtn" title="Mini Player"><i class="fas fa-window-restore"></i> Mini Player</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
     <button id="menuRequestRadioBtn" title="Request Radio"><i class="fas fa-plus-circle"></i> Request Radio</button>
+    <button id="menuAdminDashboardBtn" title="Admin Dashboard"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
     <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
 </header>
+<div id="offlineBanner"><i class="fas fa-wifi"></i> You are offline. Saved favorites and history still work, but streams need internet.</div>
 <div id="tabs">
   <span id="tab-all" class="active">All</span>
   <span id="tab-fav">Favorites</span>
@@ -1158,7 +1215,28 @@ audio{display:none}
   <span id="tab-about">About</span>
 </div>
 <div id="content" aria-busy="true">
+  <div id="dailyVerseCard">
+    <div class="daily-verse-title"><i class="fas fa-bible"></i> Daily Promise</div>
+    <div id="dailyVerseText"></div>
+    <div id="dailyVerseRef"></div>
+    <button id="dailyVerseShare" type="button"><i class="fas fa-share-alt"></i> Share Verse</button>
+  </div>
   <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
+  <div id="stationFilterBar">
+    <select id="genreFilter" title="Filter by genre">
+      <option value="">All genres</option>
+    </select>
+    <select id="sortFilter" title="Sort stations">
+      <option value="default">Default order</option>
+      <option value="name">Name A-Z</option>
+      <option value="most-played">Most played</option>
+      <option value="top-rated">Top rated</option>
+      <option value="recent">Recently played</option>
+    </select>
+    <label><input type="checkbox" id="favoritesOnlyFilter"/> Favorites only</label>
+    <label><input type="checkbox" id="failedOnlyFilter"/> Needs attention</label>
+    <button id="clearFilters" type="button">Clear</button>
+  </div>
   <div class="station-list"></div>
 </div>
 <div id="about-panel">
@@ -1308,6 +1386,9 @@ audio{display:none}
   <div id="fullscreen-info">
     <div id="fullscreen-name"></div>
     <div id="fullscreen-now">Live</div>
+    <div id="fullscreen-station-meta"></div>
+    <div id="fullscreen-health" class="player-health"><i class="fas fa-circle"></i> Ready</div>
+    <div id="fs-sleep-countdown"></div>
     <div id="fullscreen-metadata" style="display:none;">
       <div id="fullscreen-song"></div>
       <div id="fullscreen-artist"></div>
@@ -1321,6 +1402,7 @@ audio{display:none}
   <div id="fullscreen-extra-controls">
     <button id="fs-sleep" title="Sleep Timer"><i class="fas fa-clock"></i></button>
     <button id="fs-alarm" title="Alarm Clock"><i class="fas fa-bell"></i></button>
+    <button id="fs-favorite" title="Favorite Station"><i class="far fa-heart"></i></button>
     <button id="fs-share" title="Share Station"><i class="fas fa-share-alt"></i></button>
     <button id="fs-report" title="Report stream problem"><i class="fas fa-exclamation-triangle"></i></button>
   </div>
@@ -1345,6 +1427,10 @@ audio{display:none}
       <button id="widget-prev-mini" title="Previous"><i class="fas fa-step-backward"></i></button>
       <button id="widget-play-mini" title="Play/Pause"><i class="fas fa-play"></i></button>
       <button id="widget-next-mini" title="Next"><i class="fas fa-step-forward"></i></button>
+      <button id="widget-open-mini" title="Open Player"><i class="fas fa-expand"></i></button>
+      <button id="widget-fav-mini" title="Favorite"><i class="far fa-heart"></i></button>
+      <button id="widget-share-mini" title="Share"><i class="fas fa-share-alt"></i></button>
+      <button id="widget-report-mini" title="Report"><i class="fas fa-exclamation-triangle"></i></button>
     </div>
     <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
   </div>
@@ -1356,6 +1442,7 @@ audio{display:none}
     <button data-min="45">45 min</button><button data-min="60">60 min</button><br>
     <input type="number" id="customMin" placeholder="min" style="width:70px"/>
     <button id="setCustom">Set</button><br>
+    <div id="sleepStatus" style="font-size:0.85rem;margin:0.5rem 0;color:var(--accent)"></div>
     <button id="cancelSleep">Cancel</button>
   </div>
 </div>
@@ -1369,8 +1456,20 @@ audio{display:none}
     <div style="margin:1rem 0">
       <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
         <input type="checkbox" id="alarmGradual" checked/>
-        <span>Gradual volume increase</span>
+        <span>Fade in volume</span>
       </label>
+    </div>
+    <div style="margin:1rem 0">
+      <label style="display:block;margin-bottom:0.5rem">Repeat days:</label>
+      <div id="alarmRepeatDays" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.35rem;font-size:0.85rem">
+        <label><input type="checkbox" value="0"/> Sun</label>
+        <label><input type="checkbox" value="1"/> Mon</label>
+        <label><input type="checkbox" value="2"/> Tue</label>
+        <label><input type="checkbox" value="3"/> Wed</label>
+        <label><input type="checkbox" value="4"/> Thu</label>
+        <label><input type="checkbox" value="5"/> Fri</label>
+        <label><input type="checkbox" value="6"/> Sat</label>
+      </div>
     </div>
     <div style="margin:1rem 0">
       <label style="display:block;margin-bottom:0.5rem">Station:</label>
@@ -1453,6 +1552,16 @@ audio{display:none}
     <button id="submitRadioRequestBtn">Send Request</button>
     <button id="closeRadioRequestModal" class="secondary">Cancel</button>
     <div id="radioRequestStatus"></div>
+    <div class="request-vote-list" id="radioRequestVotes"></div>
+  </div>
+</div>
+<div id="adminDashboardModal">
+  <div>
+    <h3>Admin Dashboard</h3>
+    <div id="adminDashboardSummary" class="admin-row-meta"></div>
+    <div class="admin-list" id="adminDashboardContent"></div>
+    <button id="refreshAdminDashboardBtn">Refresh</button>
+    <button id="closeAdminDashboardModal" class="secondary">Close</button>
   </div>
 </div>
 <audio id="audio"></audio>
@@ -1547,6 +1656,9 @@ let favoritesOrder  = JSON.parse(localStorage.getItem('tcr-fav-order') || '[]');
 let playbackHistory = JSON.parse(localStorage.getItem('tcr-history') || '[]'); // Playback history with timestamps
 let playCounts      = JSON.parse(localStorage.getItem('tcr-play-counts') || '{}'); // Play counts for most played
 let stationRatings  = JSON.parse(localStorage.getItem('tcr-ratings') || '{}'); // User ratings for stations
+let nowPlayingHistory = JSON.parse(localStorage.getItem('tcr-now-playing-history') || '[]');
+let failedStreams   = JSON.parse(localStorage.getItem('tcr-failed-streams') || '[]');
+let localRadioRequests = JSON.parse(localStorage.getItem('tcr-radio-requests') || '[]');
 let globalRatings   = {}; // Global ratings from server (will be fetched)
 let currentUser     = JSON.parse(localStorage.getItem('tcr-user') || 'null'); // Current logged in user
 let authToken       = localStorage.getItem('tcr-token') || null; // Auth token
@@ -1555,11 +1667,39 @@ let currentTab      = localStorage.getItem('currentTab') || 'all';
 let currentList     = [];
 let idx             = 0;
 let searchTerm      = '';
+let currentGenreFilter = localStorage.getItem('tcr-genre-filter') || '';
+let currentSortFilter = localStorage.getItem('tcr-sort-filter') || 'default';
+let favoritesOnlyFilter = localStorage.getItem('tcr-favorites-only') === 'true';
+let failedOnlyFilter = localStorage.getItem('tcr-failed-only') === 'true';
+let streamHealthState = 'ready';
+let autoSkipInProgress = false;
+let streamStartTimer = null;
+let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
+let sleepCountdownInterval = null;
 let sleepTimer;
 let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
+const DAILY_VERSES = [
+  { text: 'The Lord is my shepherd; I shall not want.', ref: 'Psalm 23:1' },
+  { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
+  { text: 'The joy of the Lord is your strength.', ref: 'Nehemiah 8:10' },
+  { text: 'Cast all your anxiety on him because he cares for you.', ref: '1 Peter 5:7' },
+  { text: 'Your word is a lamp to my feet and a light to my path.', ref: 'Psalm 119:105' },
+  { text: 'Be still, and know that I am God.', ref: 'Psalm 46:10' },
+  { text: 'The Lord will fight for you; you need only to be still.', ref: 'Exodus 14:14' }
+];
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const stationList = document.querySelector('.station-list');
+const offlineBanner = document.getElementById('offlineBanner');
+const dailyVerseCard = document.getElementById('dailyVerseCard');
+const dailyVerseText = document.getElementById('dailyVerseText');
+const dailyVerseRef = document.getElementById('dailyVerseRef');
+const dailyVerseShare = document.getElementById('dailyVerseShare');
+const genreFilter = document.getElementById('genreFilter');
+const sortFilter = document.getElementById('sortFilter');
+const favoritesOnlyFilterInput = document.getElementById('favoritesOnlyFilter');
+const failedOnlyFilterInput = document.getElementById('failedOnlyFilter');
+const clearFiltersBtn = document.getElementById('clearFilters');
 const audio       = document.getElementById('audio');
 const pImg        = document.getElementById('p-img');
 const pName       = document.getElementById('p-name');
@@ -1570,6 +1710,9 @@ const fullscreenClose = document.getElementById('fullscreen-close');
 const fullscreenArtwork = document.getElementById('fullscreen-artwork');
 const fullscreenName = document.getElementById('fullscreen-name');
 const fullscreenNow = document.getElementById('fullscreen-now');
+const fullscreenStationMeta = document.getElementById('fullscreen-station-meta');
+const fullscreenHealth = document.getElementById('fullscreen-health');
+const fsSleepCountdown = document.getElementById('fs-sleep-countdown');
 const fullscreenSong = document.getElementById('fullscreen-song');
 const fullscreenArtist = document.getElementById('fullscreen-artist');
 const fullscreenMetadata = document.getElementById('fullscreen-metadata');
@@ -1578,11 +1721,24 @@ const fsPrev = document.getElementById('fs-prev');
 const fsNext = document.getElementById('fs-next');
 const fsVolumeBtn = document.getElementById('fs-volume-btn');
 const fsVolumeSlider = document.getElementById('fs-volume-slider');
+const fsFavorite = document.getElementById('fs-favorite');
 const fsShare = document.getElementById('fs-share');
 const fsReport = document.getElementById('fs-report');
 const streamInfo = document.getElementById('stream-info');
 const streamQuality = document.getElementById('stream-quality');
 const streamBitrate = document.getElementById('stream-bitrate');
+const floatingWidget = document.getElementById('floating-widget');
+const widgetClose = document.getElementById('widget-close');
+const widgetImg = document.getElementById('widget-img');
+const widgetName = document.getElementById('widget-name');
+const widgetStatus = document.getElementById('widget-status');
+const widgetPlayMini = document.getElementById('widget-play-mini');
+const widgetPrevMini = document.getElementById('widget-prev-mini');
+const widgetNextMini = document.getElementById('widget-next-mini');
+const widgetOpenMini = document.getElementById('widget-open-mini');
+const widgetFavMini = document.getElementById('widget-fav-mini');
+const widgetShareMini = document.getElementById('widget-share-mini');
+const widgetReportMini = document.getElementById('widget-report-mini');
 /* ---- LOAD + INIT ---- */
 function getLanguageKeyFromFileName(fileName) {
   return fileName.replace(/\.json$/i, '').trim().toLowerCase();
@@ -1806,6 +1962,22 @@ function clearAllCacheOnLaunch() {
   const fav = localStorage.getItem('tcr-fav');
   const favOrder = localStorage.getItem('tcr-fav-order');
   const lastPlayed = localStorage.getItem('tcr-last-played');
+  const history = localStorage.getItem('tcr-history');
+  const playCountData = localStorage.getItem('tcr-play-counts');
+  const ratings = localStorage.getItem('tcr-ratings');
+  const user = localStorage.getItem('tcr-user');
+  const token = localStorage.getItem('tcr-token');
+  const nowPlaying = localStorage.getItem('tcr-now-playing-history');
+  const failedStreamData = localStorage.getItem('tcr-failed-streams');
+  const radioRequests = localStorage.getItem('tcr-radio-requests');
+  const genre = localStorage.getItem('tcr-genre-filter');
+  const sort = localStorage.getItem('tcr-sort-filter');
+  const favoritesOnly = localStorage.getItem('tcr-favorites-only');
+  const failedOnly = localStorage.getItem('tcr-failed-only');
+  const sleepUntil = localStorage.getItem('tcr-sleep-deadline');
+  const dailyVerseNotified = localStorage.getItem('tcr-daily-verse-notified');
+  const volume = localStorage.getItem('tcr-volume');
+  const alarm = localStorage.getItem('tcr-alarm');
   const theme = localStorage.getItem('currentTheme');
   const lang = localStorage.getItem('currentLang');
   const tab = localStorage.getItem('currentTab');
@@ -1816,6 +1988,22 @@ function clearAllCacheOnLaunch() {
   if (fav) localStorage.setItem('tcr-fav', fav);
   if (favOrder) localStorage.setItem('tcr-fav-order', favOrder);
   if (lastPlayed) localStorage.setItem('tcr-last-played', lastPlayed);
+  if (history) localStorage.setItem('tcr-history', history);
+  if (playCountData) localStorage.setItem('tcr-play-counts', playCountData);
+  if (ratings) localStorage.setItem('tcr-ratings', ratings);
+  if (user) localStorage.setItem('tcr-user', user);
+  if (token) localStorage.setItem('tcr-token', token);
+  if (nowPlaying) localStorage.setItem('tcr-now-playing-history', nowPlaying);
+  if (failedStreamData) localStorage.setItem('tcr-failed-streams', failedStreamData);
+  if (radioRequests) localStorage.setItem('tcr-radio-requests', radioRequests);
+  if (genre) localStorage.setItem('tcr-genre-filter', genre);
+  if (sort) localStorage.setItem('tcr-sort-filter', sort);
+  if (favoritesOnly) localStorage.setItem('tcr-favorites-only', favoritesOnly);
+  if (failedOnly) localStorage.setItem('tcr-failed-only', failedOnly);
+  if (sleepUntil) localStorage.setItem('tcr-sleep-deadline', sleepUntil);
+  if (dailyVerseNotified) localStorage.setItem('tcr-daily-verse-notified', dailyVerseNotified);
+  if (volume) localStorage.setItem('tcr-volume', volume);
+  if (alarm) localStorage.setItem('tcr-alarm', alarm);
   if (theme) localStorage.setItem('currentTheme', theme);
   if (lang) localStorage.setItem('currentLang', lang);
   if (tab) localStorage.setItem('currentTab', tab);
@@ -1841,6 +2029,10 @@ function clearAllCacheOnLaunch() {
     // Now that data is loaded, populate UI
     populateLangSelect();
     initThemeSystem(); // Initialize theme system
+    initDailyVerse();
+    initFilters();
+    updateConnectivityUi();
+    restoreSleepTimer();
     
     if (tab) {
       currentTab = tab;
@@ -2044,6 +2236,196 @@ function initCacheClearing() {
     sessionStorage.setItem('app_initialized', 'true');
   }
 }
+/* ---- DAILY VERSE, FILTERS + CONNECTIVITY ---- */
+function getDayOfYearForFeatures() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now - start) / 86400000);
+}
+
+function initDailyVerse() {
+  if (!dailyVerseCard || !dailyVerseText || !dailyVerseRef) return;
+  const verse = DAILY_VERSES[getDayOfYearForFeatures() % DAILY_VERSES.length];
+  dailyVerseText.textContent = verse.text;
+  dailyVerseRef.textContent = verse.ref;
+  dailyVerseCard.classList.add('active');
+  const notifyKey = new Date().toISOString().slice(0, 10);
+  if ('Notification' in window && Notification.permission === 'granted' && localStorage.getItem('tcr-daily-verse-notified') !== notifyKey) {
+    showNotification(`Daily Promise: ${verse.ref}`);
+    localStorage.setItem('tcr-daily-verse-notified', notifyKey);
+  }
+  if (dailyVerseShare) {
+    dailyVerseShare.onclick = async () => {
+      const text = `${verse.text}\n- ${verse.ref}\n\nTC RADIOS`;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: 'Daily Promise', text });
+        } else {
+          await navigator.clipboard.writeText(text);
+          showNotification('Verse copied');
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') showNotification('Could not share verse');
+      }
+    };
+  }
+}
+
+function updateConnectivityUi() {
+  const isOnline = navigator.onLine;
+  if (offlineBanner) offlineBanner.classList.toggle('active', !isOnline);
+  if (!isOnline) setStreamHealth('offline', 'Offline');
+}
+
+function getStationKey(station) {
+  return `${station?.name || 'unknown'}|${station?.url || ''}`;
+}
+
+function getRecentFailedStream(station) {
+  const key = getStationKey(station);
+  const cutoff = Date.now() - 24 * 60 * 60000;
+  return failedStreams.find(item => item.key === key && new Date(item.timestamp).getTime() > cutoff);
+}
+
+function getStationHealth(station) {
+  if (lastPlayedStation && getStationKey(lastPlayedStation.station) === getStationKey(station)) {
+    return streamHealthState;
+  }
+  return getRecentFailedStream(station) ? 'offline' : 'ready';
+}
+
+function getHealthLabel(state) {
+  return {
+    ready: 'Ready',
+    connecting: 'Connecting',
+    online: 'Online',
+    buffering: 'Buffering',
+    offline: 'Offline'
+  }[state] || 'Ready';
+}
+
+function setStreamHealth(state, label = getHealthLabel(state)) {
+  streamHealthState = state;
+  const icon = state === 'online' ? 'fa-circle-check'
+    : state === 'offline' ? 'fa-triangle-exclamation'
+    : state === 'buffering' ? 'fa-spinner fa-spin'
+    : 'fa-circle';
+  if (fullscreenHealth) {
+    fullscreenHealth.className = `player-health ${state}`;
+    fullscreenHealth.innerHTML = `<i class="fas ${icon}"></i> ${label}`;
+  }
+  const pNow = document.getElementById('p-now');
+  if (pNow && state !== 'ready') pNow.textContent = label;
+  if (floatingWidget && floatingWidget.classList.contains('active')) {
+    widgetStatus.textContent = label;
+  }
+}
+
+function populateGenreFilter(baseStations = stationsPerLang[currentLang] || []) {
+  if (!genreFilter) return;
+  const currentValue = currentGenreFilter;
+  const genres = [...new Set(baseStations.map(st => (st.genre || 'Other').trim()).filter(Boolean))].sort();
+  genreFilter.innerHTML = '<option value="">All genres</option>';
+  genres.forEach(genre => {
+    const option = document.createElement('option');
+    option.value = genre;
+    option.textContent = genre;
+    genreFilter.appendChild(option);
+  });
+  genreFilter.value = genres.includes(currentValue) ? currentValue : '';
+  currentGenreFilter = genreFilter.value;
+}
+
+function applyStationFilters(base) {
+  let list = [...base];
+  populateGenreFilter(base);
+  if (currentGenreFilter) {
+    list = list.filter(st => (st.genre || 'Other') === currentGenreFilter);
+  }
+  if (favoritesOnlyFilter) {
+    list = list.filter(st => favorites.includes(st.name));
+  }
+  if (failedOnlyFilter) {
+    list = list.filter(st => Boolean(getRecentFailedStream(st)));
+  }
+  if (searchTerm) {
+    list = list.filter(st =>
+      st.name.toLowerCase().includes(searchTerm) ||
+      String(st.genre || '').toLowerCase().includes(searchTerm)
+    );
+  }
+  if (currentSortFilter === 'name') {
+    list.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (currentSortFilter === 'most-played') {
+    list.sort((a, b) => (playCounts[b.name]?.count || 0) - (playCounts[a.name]?.count || 0));
+  } else if (currentSortFilter === 'top-rated') {
+    list.sort((a, b) => (stationRatings[b.name]?.rating || globalRatings[b.name]?.total || 0) - (stationRatings[a.name]?.rating || globalRatings[a.name]?.total || 0));
+  } else if (currentSortFilter === 'recent') {
+    list.sort((a, b) => {
+      const aEntry = playbackHistory.find(item => item.stationName === a.name);
+      const bEntry = playbackHistory.find(item => item.stationName === b.name);
+      return new Date(bEntry?.timestamp || 0) - new Date(aEntry?.timestamp || 0);
+    });
+  }
+  return list;
+}
+
+function initFilters() {
+  if (genreFilter) {
+    genreFilter.value = currentGenreFilter;
+    genreFilter.onchange = () => {
+      currentGenreFilter = genreFilter.value;
+      localStorage.setItem('tcr-genre-filter', currentGenreFilter);
+      switchTab(currentTab);
+    };
+  }
+  if (sortFilter) {
+    sortFilter.value = currentSortFilter;
+    sortFilter.onchange = () => {
+      currentSortFilter = sortFilter.value;
+      localStorage.setItem('tcr-sort-filter', currentSortFilter);
+      switchTab(currentTab);
+    };
+  }
+  if (favoritesOnlyFilterInput) {
+    favoritesOnlyFilterInput.checked = favoritesOnlyFilter;
+    favoritesOnlyFilterInput.onchange = () => {
+      favoritesOnlyFilter = favoritesOnlyFilterInput.checked;
+      localStorage.setItem('tcr-favorites-only', favoritesOnlyFilter);
+      switchTab(currentTab);
+    };
+  }
+  if (failedOnlyFilterInput) {
+    failedOnlyFilterInput.checked = failedOnlyFilter;
+    failedOnlyFilterInput.onchange = () => {
+      failedOnlyFilter = failedOnlyFilterInput.checked;
+      localStorage.setItem('tcr-failed-only', failedOnlyFilter);
+      switchTab(currentTab);
+    };
+  }
+  if (clearFiltersBtn) {
+    clearFiltersBtn.onclick = () => {
+      searchTerm = '';
+      searchBar.value = '';
+      currentGenreFilter = '';
+      currentSortFilter = 'default';
+      favoritesOnlyFilter = false;
+      failedOnlyFilter = false;
+      localStorage.removeItem('tcr-genre-filter');
+      localStorage.setItem('tcr-sort-filter', currentSortFilter);
+      localStorage.setItem('tcr-favorites-only', 'false');
+      localStorage.setItem('tcr-failed-only', 'false');
+      if (sortFilter) sortFilter.value = currentSortFilter;
+      if (favoritesOnlyFilterInput) favoritesOnlyFilterInput.checked = false;
+      if (failedOnlyFilterInput) failedOnlyFilterInput.checked = false;
+      switchTab(currentTab);
+    };
+  }
+}
+
+window.addEventListener('online', updateConnectivityUi);
+window.addEventListener('offline', updateConnectivityUi);
+
 /* ---- TABS + SEARCH ---- */
 document.getElementById('tab-all').onclick   = () => switchTab('all');
 document.getElementById('tab-fav').onclick   = () => switchTab('fav');
@@ -2074,19 +2456,22 @@ function switchTab(tab) {
     document.getElementById('content').style.display = 'none';
     document.getElementById('about-panel').style.display = 'flex';
     searchBar.style.display = 'none';
+    document.getElementById('stationFilterBar').style.display = 'none';
   } else if (tab === 'history') {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
     searchBar.style.display = '';
+    document.getElementById('stationFilterBar').style.display = 'none';
     renderHistory();
   } else {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
     searchBar.style.display = '';
+    document.getElementById('stationFilterBar').style.display = 'flex';
     let base = tab === 'fav'
       ? getFavoritesInOrder()
       : stationsPerLang[currentLang] || [];
-    currentList = base.filter(s => !searchTerm || s.name.toLowerCase().includes(searchTerm));
+    currentList = applyStationFilters(base);
     render(currentList);
   }
 }
@@ -2144,11 +2529,18 @@ function render(list) {
       div.addEventListener('touchend', handleTouchEnd, { passive: false });
     }
     
+    const stationHealth = getStationHealth(st);
+    const healthLabel = getHealthLabel(stationHealth);
+    const playCount = playCounts[st.name]?.count || 0;
     div.innerHTML = `
       <img src="${st.logo}" alt="" class="station-icon">
       <div class="station-info">
         <div class="station-name">${st.name}</div>
         <div class="station-genre">${st.genre}</div>
+        <div class="station-health-row">
+          <span class="status-pill ${stationHealth}"><i class="fas ${stationHealth === 'offline' ? 'fa-triangle-exclamation' : stationHealth === 'online' ? 'fa-circle-check' : 'fa-circle'}"></i> ${healthLabel}</span>
+          ${playCount ? `<span class="status-pill"><i class="fas fa-play-circle"></i> ${playCount}</span>` : ''}
+        </div>
         ${stationRatings[st.name] ? `<div class="station-rating-display"><i class="fas fa-star"></i> ${stationRatings[st.name].rating}/5</div>` : ''}
         ${globalRatings[st.name] ? `<div class="station-rating-display" style="font-size:0.7rem;opacity:0.8">Global: ${globalRatings[st.name].total.toFixed(1)}/5 (${globalRatings[st.name].count})</div>` : ''}
       </div>
@@ -2183,17 +2575,93 @@ function render(list) {
   });
 }
 /* ---- PLAYER ---- */
+function saveFailedStreams() {
+  failedStreams = failedStreams.slice(0, 100);
+  localStorage.setItem('tcr-failed-streams', JSON.stringify(failedStreams));
+}
+
+function recordFailedStream(station, reason = 'playback_error') {
+  if (!station) return;
+  const key = getStationKey(station);
+  failedStreams = failedStreams.filter(item => item.key !== key);
+  failedStreams.unshift({
+    key,
+    stationName: station.name || 'Unknown station',
+    streamUrl: station.url || '',
+    genre: station.genre || '',
+    language: currentLang || '',
+    reason,
+    timestamp: new Date().toISOString()
+  });
+  saveFailedStreams();
+}
+
+async function submitAutoStreamReport(station, reason) {
+  if (!station) return;
+  const throttleKey = `tcr-auto-report-${getStationKey(station)}`;
+  const lastSent = Number(localStorage.getItem(throttleKey) || 0);
+  if (Date.now() - lastSent < 6 * 60 * 60000) return;
+  if (!await ensureSupabaseReady()) return;
+  try {
+    const { error } = await supabaseClient
+      .from('stream_reports')
+      .insert([{
+        station_name: station.name || 'Unknown station',
+        stream_url: station.url || '',
+        station_genre: station.genre || '',
+        language: currentLang || '',
+        issue_type: 'auto_playback_failed',
+        message: `Automatic failure detection: ${reason}`,
+        contact_email: currentUser ? currentUser.email : '',
+        user_id: currentUser ? currentUser.id : null,
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+        status: 'new'
+      }]);
+    if (!error) localStorage.setItem(throttleKey, String(Date.now()));
+  } catch (error) {
+    console.warn('Automatic stream report failed:', error);
+  }
+}
+
+function handleStreamFailure(reason = 'playback_error') {
+  const station = lastPlayedStation?.station;
+  if (!station) return;
+  setStreamHealth('offline', 'Stream not working');
+  recordFailedStream(station, reason);
+  submitAutoStreamReport(station, reason);
+  showNotification('Stream failed. Trying next station...');
+  hapticFeedback('error');
+  if (!autoSkipInProgress && currentList.length > 1) {
+    autoSkipInProgress = true;
+    setTimeout(() => {
+      autoSkipInProgress = false;
+      prevNext(1);
+    }, 1200);
+  }
+  if (currentTab === 'all' || currentTab === 'fav') switchTab(currentTab);
+}
+
 function play(st, i) {
   idx = i;
+  if (streamStartTimer) clearTimeout(streamStartTimer);
+  setStreamHealth('connecting', 'Connecting');
   audio.src = st.url;
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
   player.classList.add('playing');
+  lastPlayedStation = { station: st, index: i, lang: currentLang };
+  localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
   if (isGoogleNestCasting()) {
     loadStationOnGoogleNest(st, true);
   } else {
-    audio.play().catch(()=>{});
+    audio.play().catch(error => handleStreamFailure(error?.message || 'play_rejected'));
   }
+  streamStartTimer = setTimeout(() => {
+    if (!audio.paused && audio.readyState < 2) {
+      setStreamHealth('buffering', 'Buffering');
+    }
+  }, 8000);
   updateMediaSession(st);
   // Update Wear OS media session
   updateWearOSMediaSession(st);
@@ -2203,9 +2671,6 @@ function play(st, i) {
   detectStreamQuality(st);
   // Track playback history
   addToHistory(st);
-  // Save last played station
-  lastPlayedStation = { station: st, index: i, lang: currentLang };
-  localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     updateFullscreenPlayer();
@@ -2257,6 +2722,22 @@ function updateFullscreenPlayer() {
   fullscreenArtwork.src = pImg.src;
   fullscreenName.textContent = pName.textContent.trim() || 'TC RADIOS';
   fullscreenNow.textContent = document.getElementById('p-now').textContent;
+  if (lastPlayedStation && lastPlayedStation.station) {
+    const station = lastPlayedStation.station;
+    if (fullscreenStationMeta) {
+      fullscreenStationMeta.textContent = `${lastPlayedStation.lang || currentLang} • ${station.genre || 'Christian Radio'}`;
+    }
+    if (fsFavorite) {
+      const isFavorite = favorites.includes(station.name);
+      fsFavorite.classList.toggle('on', isFavorite);
+      fsFavorite.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+      fsFavorite.title = isFavorite ? 'Remove from favorites' : 'Add to favorites';
+    }
+  } else if (fullscreenStationMeta) {
+    fullscreenStationMeta.textContent = '';
+  }
+  setStreamHealth(streamHealthState);
+  updateSleepCountdown();
   
   // Update metadata if available
   const songElement = document.getElementById('p-song');
@@ -2370,6 +2851,17 @@ fsNext.onclick = () => {
   prevNext(1);
   hapticFeedback('light');
 };
+if (fsFavorite) {
+  fsFavorite.onclick = () => {
+    if (!lastPlayedStation) {
+      showNotification('No station playing');
+      return;
+    }
+    toggleFav(lastPlayedStation.station.name);
+    updateFullscreenPlayer();
+    updateFloatingWidget();
+  };
+}
 // Volume control functionality
 let previousVolume = 100; // Store volume before muting
 function updateVolumeIcon(volume) {
@@ -2454,6 +2946,8 @@ if (savedVolume !== null) {
 }
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
+  if (streamStartTimer) clearTimeout(streamStartTimer);
+  setStreamHealth('online', 'Online');
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
   player.classList.add('playing'); 
   hapticFeedback('light');
@@ -2501,6 +2995,12 @@ audio.onpause = () => {
   // Refresh display to remove playing state
   switchTab(currentTab);
 };
+audio.onwaiting = () => setStreamHealth('buffering', 'Buffering');
+audio.onstalled = () => setStreamHealth('buffering', 'Buffering');
+audio.oncanplay = () => {
+  if (!audio.paused) setStreamHealth('online', 'Online');
+};
+audio.onerror = () => handleStreamFailure(audio.error?.message || 'audio_error');
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
@@ -2605,6 +3105,7 @@ async function loadStationOnGoogleNest(st, autoplay = true) {
 
   try {
     await session.loadMedia(request);
+    setStreamHealth('online', 'Casting');
     updatePlaybackUiForRemote(autoplay);
     updateGoogleNestCastControls();
     if (autoplay) {
@@ -2633,7 +3134,10 @@ function playActiveStream() {
     return;
   }
 
-  return audio.play().catch(err => console.error('Play error:', err));
+  return audio.play().catch(err => {
+    console.error('Play error:', err);
+    handleStreamFailure(err?.message || 'play_rejected');
+  });
 }
 
 function pauseActiveStream() {
@@ -2815,6 +3319,7 @@ function updateMetadata(song, artist) {
     if (artistElement) artistElement.textContent = artist || '';
     if (metadataContainer) metadataContainer.style.display = 'block';
     currentMetadata = { song, artist };
+    addNowPlayingHistory(song, artist);
     // Update fullscreen player if open
     if (fullscreenPlayer.classList.contains('active')) {
       fullscreenSong.textContent = song;
@@ -2836,6 +3341,26 @@ function updateMetadata(song, artist) {
       fullscreenMetadata.style.display = 'none';
     }
   }
+}
+
+function addNowPlayingHistory(song, artist = '') {
+  if (!song || !lastPlayedStation?.station) return;
+  const entry = {
+    stationName: lastPlayedStation.station.name,
+    stationLogo: lastPlayedStation.station.logo,
+    stationGenre: lastPlayedStation.station.genre,
+    song,
+    artist,
+    lang: lastPlayedStation.lang || currentLang,
+    timestamp: new Date().toISOString()
+  };
+  const duplicateKey = `${entry.stationName}|${entry.song}|${entry.artist}`;
+  if (`${nowPlayingHistory[0]?.stationName}|${nowPlayingHistory[0]?.song}|${nowPlayingHistory[0]?.artist}` === duplicateKey) {
+    return;
+  }
+  nowPlayingHistory.unshift(entry);
+  nowPlayingHistory = nowPlayingHistory.slice(0, 100);
+  localStorage.setItem('tcr-now-playing-history', JSON.stringify(nowPlayingHistory));
 }
 function startMetadataFetching(station) {
   // Clear existing interval
@@ -3140,6 +3665,7 @@ function renderHistory() {
   historyTabs.innerHTML = `
     <button class="history-tab active" data-tab="recent">Recently Played</button>
     <button class="history-tab" data-tab="most">Most Played</button>
+    <button class="history-tab" data-tab="songs">Songs</button>
   `;
   stationList.appendChild(historyTabs);
   
@@ -3160,7 +3686,26 @@ function renderHistory() {
     });
     
     let stations = [];
-    if (tab === 'recent') {
+    if (tab === 'songs') {
+      if (!nowPlayingHistory.length) {
+        historyContainer.innerHTML = '<div class="item" style="text-align:center;padding:2rem;color:var(--text-secondary)">No song metadata captured yet.</div>';
+        return;
+      }
+      nowPlayingHistory.slice(0, 50).forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <img src="${entry.stationLogo || '/icons/default-artwork.jpg'}" alt="" class="station-icon">
+          <div class="station-info">
+            <div class="station-name">${entry.song}</div>
+            <div class="station-genre">${entry.artist || entry.stationName}</div>
+            <div class="history-meta"><i class="fas fa-broadcast-tower"></i> ${entry.stationName} • ${formatTimestamp(entry.timestamp)}</div>
+          </div>
+        `;
+        historyContainer.appendChild(div);
+      });
+      return;
+    } else if (tab === 'recent') {
       stations = getRecentlyPlayed(50);
       if (stations.length === 0) {
         historyContainer.innerHTML = '<div class="item" style="text-align:center;padding:2rem;color:var(--text-secondary)">No recently played stations yet.</div>';
@@ -3605,6 +4150,10 @@ sleepBtn.onclick = () => sleepModal.style.display = 'flex';
 }
 document.getElementById('cancelSleep').onclick = () => {
   clearTimeout(sleepTimer);
+  clearInterval(sleepCountdownInterval);
+  sleepDeadline = 0;
+  localStorage.removeItem('tcr-sleep-deadline');
+  updateSleepCountdown();
   sleepModal.style.display = 'none';
 };
 document.querySelectorAll('#sleepModal button[data-min]').forEach(btn => {
@@ -3616,12 +4165,61 @@ document.getElementById('setCustom').onclick = () => {
 };
 function setSleep(min) {
   clearTimeout(sleepTimer);
+  clearInterval(sleepCountdownInterval);
+  sleepDeadline = Date.now() + min * 60000;
+  localStorage.setItem('tcr-sleep-deadline', String(sleepDeadline));
   sleepTimer = setTimeout(() => {
     pauseActiveStream();
     document.getElementById('p-now').textContent = 'Live';
     sleepModal.style.display = 'none';
+    sleepDeadline = 0;
+    localStorage.removeItem('tcr-sleep-deadline');
+    updateSleepCountdown();
   }, min * 60000);
+  sleepCountdownInterval = setInterval(updateSleepCountdown, 1000);
+  updateSleepCountdown();
   sleepModal.style.display = 'none';
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function updateSleepCountdown() {
+  const remaining = sleepDeadline ? sleepDeadline - Date.now() : 0;
+  const active = remaining > 0;
+  const text = active ? `Sleep timer: ${formatCountdown(remaining)}` : '';
+  const status = document.getElementById('sleepStatus');
+  if (status) status.textContent = text;
+  if (fsSleepCountdown) {
+    fsSleepCountdown.style.display = active ? 'block' : 'none';
+    fsSleepCountdown.textContent = text;
+  }
+  if (!active && sleepCountdownInterval) {
+    clearInterval(sleepCountdownInterval);
+    sleepCountdownInterval = null;
+  }
+}
+
+function restoreSleepTimer() {
+  if (!sleepDeadline || sleepDeadline <= Date.now()) {
+    sleepDeadline = 0;
+    localStorage.removeItem('tcr-sleep-deadline');
+    updateSleepCountdown();
+    return;
+  }
+  clearTimeout(sleepTimer);
+  sleepTimer = setTimeout(() => {
+    pauseActiveStream();
+    sleepDeadline = 0;
+    localStorage.removeItem('tcr-sleep-deadline');
+    updateSleepCountdown();
+  }, sleepDeadline - Date.now());
+  sleepCountdownInterval = setInterval(updateSleepCountdown, 1000);
+  updateSleepCountdown();
 }
 /* ---- ALARM CLOCK ---- */
 let alarmTimer = null;
@@ -3632,6 +4230,32 @@ const alarmTime = document.getElementById('alarmTime');
 const alarmStation = document.getElementById('alarmStation');
 const alarmGradual = document.getElementById('alarmGradual');
 const alarmStatus = document.getElementById('alarmStatus');
+
+function getSelectedAlarmRepeatDays() {
+  return [...document.querySelectorAll('#alarmRepeatDays input:checked')].map(input => Number(input.value));
+}
+
+function setSelectedAlarmRepeatDays(days = []) {
+  document.querySelectorAll('#alarmRepeatDays input').forEach(input => {
+    input.checked = days.includes(Number(input.value));
+  });
+}
+
+function getNextAlarmDate(timeValue, repeatDays = []) {
+  const [hours, minutes] = timeValue.split(':').map(Number);
+  const now = new Date();
+  for (let offset = 0; offset <= 7; offset++) {
+    const candidate = new Date();
+    candidate.setDate(now.getDate() + offset);
+    candidate.setHours(hours, minutes, 0, 0);
+    const repeatsToday = repeatDays.length === 0 || repeatDays.includes(candidate.getDay());
+    if (repeatsToday && candidate > now) return candidate;
+  }
+  const fallback = new Date();
+  fallback.setDate(now.getDate() + 1);
+  fallback.setHours(hours, minutes, 0, 0);
+  return fallback;
+}
 
 // Populate alarm station dropdown
 function populateAlarmStations() {
@@ -3685,15 +4309,9 @@ function setAlarm() {
     return;
   }
   
-  const [hours, minutes] = timeValue.split(':').map(Number);
+  const repeatDays = getSelectedAlarmRepeatDays();
   const now = new Date();
-  const alarmDate = new Date();
-  alarmDate.setHours(hours, minutes, 0, 0);
-  
-  // If alarm time has passed today, set for tomorrow
-  if (alarmDate <= now) {
-    alarmDate.setDate(alarmDate.getDate() + 1);
-  }
+  const alarmDate = getNextAlarmDate(timeValue, repeatDays);
   
   const timeUntilAlarm = alarmDate.getTime() - now.getTime();
   
@@ -3715,13 +4333,14 @@ function setAlarm() {
     time: timeValue,
     station: alarmStation.value,
     gradual: alarmGradual.checked,
+    repeatDays,
     nextAlarm: alarmDate.toISOString()
   };
   localStorage.setItem('tcr-alarm', JSON.stringify(alarmSettings));
   
   // Update status
   alarmStatus.style.display = 'block';
-  alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+  alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleString([], {weekday:'short', hour: '2-digit', minute:'2-digit'})}`;
   alarmStatus.style.background = 'rgba(34, 197, 94, 0.2)';
   alarmStatus.style.color = '#22c55e';
   
@@ -3799,8 +4418,17 @@ function triggerAlarm() {
     }
   }
   
-  // Clear alarm
-  cancelAlarm();
+  if (Array.isArray(alarmSettings.repeatDays) && alarmSettings.repeatDays.length > 0 && alarmSettings.time) {
+    const nextAlarm = getNextAlarmDate(alarmSettings.time, alarmSettings.repeatDays);
+    alarmSettings.nextAlarm = nextAlarm.toISOString();
+    localStorage.setItem('tcr-alarm', JSON.stringify(alarmSettings));
+    if (alarmTimer) clearTimeout(alarmTimer);
+    alarmTimer = setTimeout(triggerAlarm, nextAlarm.getTime() - Date.now());
+    alarmStatus.style.display = 'block';
+    alarmStatus.textContent = `Next alarm ${nextAlarm.toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'})}`;
+  } else {
+    cancelAlarm();
+  }
 }
 
 // Check if alarm time is reached
@@ -3852,11 +4480,12 @@ if (alarmBtn) {
         alarmStation.value = savedAlarm.station;
       }
       alarmGradual.checked = savedAlarm.gradual !== false;
+      setSelectedAlarmRepeatDays(savedAlarm.repeatDays || []);
       
       if (savedAlarm.nextAlarm) {
         const alarmDate = new Date(savedAlarm.nextAlarm);
         alarmStatus.style.display = 'block';
-        alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        alarmStatus.textContent = `Alarm set for ${alarmDate.toLocaleString([], {weekday:'short', hour: '2-digit', minute:'2-digit'})}`;
         alarmStatus.style.background = 'rgba(34, 197, 94, 0.2)';
         alarmStatus.style.color = '#22c55e';
       }
@@ -4049,6 +4678,7 @@ function showRadioRequestModal() {
   if (notes) notes.value = '';
   if (contact) contact.value = currentUser ? currentUser.email : '';
   if (status) status.style.display = 'none';
+  renderRadioRequestVotes();
   if (modal) modal.style.display = 'flex';
 }
 
@@ -4084,7 +4714,8 @@ async function submitRadioRequest() {
   }
 
   if (!await ensureSupabaseReady()) {
-    showFeedbackStatus('radioRequestStatus', 'Unable to contact admin database. Please try again later.', 'error');
+    addLocalRadioRequest({ stationName, streamUrl, language, notes });
+    showFeedbackStatus('radioRequestStatus', 'Saved locally. Admin database is unavailable.', 'success');
     return;
   }
 
@@ -4105,15 +4736,112 @@ async function submitRadioRequest() {
 
     if (error) throw error;
 
+    addLocalRadioRequest({ stationName, streamUrl, language, notes });
     showFeedbackStatus('radioRequestStatus', 'Thanks! Admin has received your radio request.', 'success');
     showNotification('Radio request sent to admin');
     hapticFeedback('success');
     setTimeout(closeRadioRequestModal, 1200);
   } catch (error) {
     console.error('Failed to submit radio request:', error);
-    showFeedbackStatus('radioRequestStatus', 'Could not send request. Please try again later.', 'error');
+    addLocalRadioRequest({ stationName, streamUrl, language, notes });
+    showFeedbackStatus('radioRequestStatus', 'Saved locally. Admin database was unavailable.', 'success');
   }
 }
+
+function addLocalRadioRequest({ stationName, streamUrl, language, notes }) {
+  const existing = localRadioRequests.find(req => req.stationName.toLowerCase() === stationName.toLowerCase());
+  if (existing) {
+    existing.streamUrl = streamUrl || existing.streamUrl;
+    existing.notes = notes || existing.notes;
+    existing.language = language || existing.language;
+    existing.updatedAt = new Date().toISOString();
+  } else {
+    localRadioRequests.unshift({
+      id: `req-${Date.now()}`,
+      stationName,
+      streamUrl,
+      language,
+      notes,
+      votes: 1,
+      createdAt: new Date().toISOString()
+    });
+  }
+  localRadioRequests = localRadioRequests.slice(0, 50);
+  localStorage.setItem('tcr-radio-requests', JSON.stringify(localRadioRequests));
+  renderRadioRequestVotes();
+}
+
+function voteRadioRequest(id) {
+  const request = localRadioRequests.find(item => item.id === id);
+  if (!request) return;
+  const votedKey = `tcr-voted-${id}`;
+  if (localStorage.getItem(votedKey)) {
+    showNotification('Already voted');
+    return;
+  }
+  request.votes = (request.votes || 0) + 1;
+  localStorage.setItem(votedKey, 'true');
+  localStorage.setItem('tcr-radio-requests', JSON.stringify(localRadioRequests));
+  renderRadioRequestVotes();
+}
+
+function renderRadioRequestVotes() {
+  const container = document.getElementById('radioRequestVotes');
+  if (!container) return;
+  if (!localRadioRequests.length) {
+    container.innerHTML = '<div class="request-vote-row"><div class="request-vote-meta">No station requests yet. Add one above.</div></div>';
+    return;
+  }
+  container.innerHTML = '<h4 style="margin-top:1rem;color:var(--accent)">Requested stations</h4>' +
+    localRadioRequests
+      .slice()
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0))
+      .slice(0, 8)
+      .map(req => `
+        <div class="request-vote-row">
+          <div class="request-vote-title">${req.stationName}</div>
+          <div class="request-vote-meta">${req.language || 'Any language'} • ${req.votes || 0} vote${(req.votes || 0) === 1 ? '' : 's'}</div>
+          <button class="vote-button" onclick="voteRadioRequest('${req.id}')"><i class="fas fa-thumbs-up"></i> Vote</button>
+        </div>
+      `).join('');
+}
+
+function renderAdminDashboard() {
+  const modal = document.getElementById('adminDashboardModal');
+  const summary = document.getElementById('adminDashboardSummary');
+  const content = document.getElementById('adminDashboardContent');
+  if (!modal || !summary || !content) return;
+  const totalStations = Object.values(stationsPerLang).flat().length;
+  summary.textContent = `${totalStations} stations • ${failedStreams.length} failed stream events • ${localRadioRequests.length} station requests • ${nowPlayingHistory.length} song history items`;
+  const failedRows = failedStreams.slice(0, 8).map(item => `
+    <div class="admin-row">
+      <div class="admin-row-title"><i class="fas fa-triangle-exclamation"></i> ${item.stationName}</div>
+      <div class="admin-row-meta">${item.language || ''} • ${item.reason || 'playback_error'} • ${formatTimestamp(item.timestamp)}<br>${item.streamUrl || ''}</div>
+    </div>
+  `).join('') || '<div class="admin-row"><div class="admin-row-meta">No failed streams captured yet.</div></div>';
+  const requestRows = localRadioRequests.slice(0, 6).map(req => `
+    <div class="admin-row">
+      <div class="admin-row-title"><i class="fas fa-plus-circle"></i> ${req.stationName}</div>
+      <div class="admin-row-meta">${req.language || 'Any language'} • ${req.votes || 0} votes • ${req.streamUrl || 'No URL'}</div>
+    </div>
+  `).join('') || '<div class="admin-row"><div class="admin-row-meta">No station requests yet.</div></div>';
+  content.innerHTML = `<h4>Failed streams</h4>${failedRows}<h4 style="margin-top:1rem">Station requests</h4>${requestRows}`;
+  modal.style.display = 'flex';
+}
+
+document.getElementById('adminDashboardBtn')?.addEventListener('click', renderAdminDashboard);
+document.getElementById('menuAdminDashboardBtn')?.addEventListener('click', () => {
+  renderAdminDashboard();
+  if (headerMenu) headerMenu.classList.remove('active');
+});
+document.getElementById('refreshAdminDashboardBtn')?.addEventListener('click', renderAdminDashboard);
+document.getElementById('closeAdminDashboardModal')?.addEventListener('click', () => {
+  document.getElementById('adminDashboardModal').style.display = 'none';
+});
+document.getElementById('adminDashboardModal')?.addEventListener('click', event => {
+  if (event.target.id === 'adminDashboardModal') event.target.style.display = 'none';
+});
+window.voteRadioRequest = voteRadioRequest;
 
 document.getElementById('submitFeedbackBtn')?.addEventListener('click', submitStreamReport);
 document.getElementById('closeFeedbackModal')?.addEventListener('click', closeStreamReportModal);
@@ -5020,7 +5748,7 @@ window.addEventListener('load', () => {
       // Update button
       if (alarmBtn) {
         alarmBtn.style.color = 'var(--accent)';
-        alarmBtn.title = `Alarm: ${alarmDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        alarmBtn.title = `Alarm: ${alarmDate.toLocaleString([], {weekday:'short', hour: '2-digit', minute:'2-digit'})}`;
       }
       
       // Check every minute
@@ -5039,22 +5767,17 @@ window.addEventListener('load', () => {
   }
 });
 /* ---- FLOATING WIDGET ---- */
-const floatingWidget = document.getElementById('floating-widget');
-// Widget button removed - widget can still be accessed programmatically if needed
-const widgetClose = document.getElementById('widget-close');
-const widgetImg = document.getElementById('widget-img');
-const widgetName = document.getElementById('widget-name');
-const widgetStatus = document.getElementById('widget-status');
-const widgetPlayMini = document.getElementById('widget-play-mini');
-const widgetPrevMini = document.getElementById('widget-prev-mini');
-const widgetNextMini = document.getElementById('widget-next-mini');
-
 function updateFloatingWidget() {
   if (!floatingWidget || !floatingWidget.classList.contains('active')) return;
   
   widgetImg.src = pImg.src;
   widgetName.textContent = pName.textContent.trim() || 'TC RADIOS';
   widgetStatus.textContent = document.getElementById('p-now').textContent;
+  if (lastPlayedStation && widgetFavMini) {
+    const isFavorite = favorites.includes(lastPlayedStation.station.name);
+    widgetFavMini.classList.toggle('on', isFavorite);
+    widgetFavMini.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+  }
   
   // Update playing state
   if (player.classList.contains('playing')) {
@@ -5083,6 +5806,12 @@ function toggleFloatingWidget() {
 
 // Widget button removed
 
+document.getElementById('miniPlayerBtn')?.addEventListener('click', toggleFloatingWidget);
+document.getElementById('menuMiniPlayerBtn')?.addEventListener('click', () => {
+  toggleFloatingWidget();
+  if (headerMenu) headerMenu.classList.remove('active');
+});
+
 // Widget close button
 if (widgetClose) {
   widgetClose.onclick = () => {
@@ -5109,6 +5838,32 @@ if (widgetNextMini) {
   widgetNextMini.onclick = () => {
     prevNext(1);
     hapticFeedback('light');
+  };
+}
+
+if (widgetOpenMini) {
+  widgetOpenMini.onclick = () => openFullscreenPlayer();
+}
+
+if (widgetFavMini) {
+  widgetFavMini.onclick = () => {
+    if (!lastPlayedStation) return showNotification('No station playing');
+    toggleFav(lastPlayedStation.station.name);
+    updateFloatingWidget();
+  };
+}
+
+if (widgetShareMini) {
+  widgetShareMini.onclick = () => {
+    if (!lastPlayedStation) return showNotification('No station playing');
+    shareStation(lastPlayedStation.station, true);
+  };
+}
+
+if (widgetReportMini) {
+  widgetReportMini.onclick = () => {
+    if (!lastPlayedStation) return showNotification('No station playing');
+    showStreamReportModal(lastPlayedStation.station);
   };
 }
 
@@ -5219,7 +5974,7 @@ function initAndroidAutoVoiceCommands() {
           prevNext(-1);
           showNotification('Previous station');
         } else if (command.includes('favorite') || command.includes('favourite')) {
-          switchTab('favorites');
+          switchTab('fav');
           showNotification('Showing favorites');
         } else {
           playActiveStream();
@@ -5230,7 +5985,7 @@ function initAndroidAutoVoiceCommands() {
         showNotification('Paused');
       } else if (command.includes('favorite') || command.includes('favourite')) {
         if (lastPlayedStation) {
-          toggleFav(lastPlayedStation.station);
+          toggleFav(lastPlayedStation.station.name);
         }
       } else if (command.includes('language') || command.includes('lang')) {
         if (command.includes('tamil')) {
@@ -5338,7 +6093,7 @@ function handleAndroidAutoMessage(data) {
       break;
     case 'toggle-favorite':
       if (lastPlayedStation) {
-        toggleFav(lastPlayedStation.station);
+        toggleFav(lastPlayedStation.station.name);
       }
       break;
     case 'switch-language':

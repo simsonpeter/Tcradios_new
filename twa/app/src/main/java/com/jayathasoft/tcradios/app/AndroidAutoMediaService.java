@@ -23,6 +23,10 @@ import java.util.List;
 public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String ROOT_ID = "tcradios_root";
     private static final String STATION_PREFIX = "station:";
+    private static final String CATEGORY_PREFIX = "category:";
+    private static final String CATEGORY_ALL = CATEGORY_PREFIX + "all";
+    private static final String CATEGORY_KANNADA = CATEGORY_PREFIX + "kannada";
+    private static final String CATEGORY_SINHALA = CATEGORY_PREFIX + "sinhala";
 
     private static final Station[] STATIONS = new Station[] {
             new Station(
@@ -114,25 +118,53 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     public void onLoadChildren(
             @NonNull String parentId,
             @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
-        if (!ROOT_ID.equals(parentId)) {
+        if (ROOT_ID.equals(parentId)) {
+            List<MediaBrowserCompat.MediaItem> categories = new ArrayList<>();
+            categories.add(createCategory(CATEGORY_ALL, "All Stations", "Browse every TC RADIOS station"));
+            categories.add(createCategory(CATEGORY_KANNADA, "Kannada", "Kannada Christian stations"));
+            categories.add(createCategory(CATEGORY_SINHALA, "Sinhala", "Sinhala Christian stations"));
+            result.sendResult(categories);
+            return;
+        }
+
+        if (!parentId.startsWith(CATEGORY_PREFIX)) {
             result.sendResult(new ArrayList<>());
             return;
         }
 
         List<MediaBrowserCompat.MediaItem> items = new ArrayList<>();
         for (Station station : STATIONS) {
-            MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
-                    .setMediaId(STATION_PREFIX + station.id)
-                    .setTitle(station.name)
-                    .setSubtitle(station.genre)
-                    .setIconUri(Uri.parse(station.artworkUrl))
-                    .setMediaUri(Uri.parse(station.streamUrl))
-                    .build();
-            items.add(new MediaBrowserCompat.MediaItem(
-                    description,
-                    MediaBrowserCompat.MediaItem.FLAG_PLAYABLE));
+            if (CATEGORY_ALL.equals(parentId)
+                    || (CATEGORY_KANNADA.equals(parentId) && station.genre.toLowerCase().contains("kannada"))
+                    || (CATEGORY_SINHALA.equals(parentId) && station.genre.toLowerCase().contains("sinhala"))) {
+                items.add(createPlayableStation(station));
+            }
         }
         result.sendResult(items);
+    }
+
+    private MediaBrowserCompat.MediaItem createCategory(String mediaId, String title, String subtitle) {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(mediaId)
+                .setTitle(title)
+                .setSubtitle(subtitle)
+                .build();
+        return new MediaBrowserCompat.MediaItem(
+                description,
+                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+    }
+
+    private MediaBrowserCompat.MediaItem createPlayableStation(Station station) {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(STATION_PREFIX + station.id)
+                .setTitle(station.name)
+                .setSubtitle(station.genre)
+                .setIconUri(Uri.parse(station.artworkUrl))
+                .setMediaUri(Uri.parse(station.streamUrl))
+                .build();
+        return new MediaBrowserCompat.MediaItem(
+                description,
+                MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
     }
 
     @Override
