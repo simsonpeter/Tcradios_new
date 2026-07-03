@@ -598,15 +598,13 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
-.favorite-button,.share-button,.rating-button,.report-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
-.favorite-button i,.share-button i,.rating-button i,.report-button i{font-size:1.1rem}
+.favorite-button,.share-button,.rating-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
+.favorite-button i,.share-button i,.rating-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
 .share-button:hover{color:var(--accent);transform:scale(1.1)}
 .favorite-button:hover{transform:scale(1.1)}
 .rating-button:hover{color:var(--accent);transform:scale(1.1)}
 .rating-button i.rated{color:#ffc107}
-.report-button{color:#ef4444}
-.report-button:hover{color:#f87171;transform:scale(1.1)}
 .station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem}
 .station-rating-display i{font-size:0.7rem}
 #player{background:var(--header);border-top:1px solid var(--border);
@@ -684,14 +682,16 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 /* Fullscreen Extra Controls (Timer & Alarm) */
 #fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1.5rem;
                             margin-top:1.5rem}
-#fs-sleep,#fs-alarm,#fs-share{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+#fs-sleep,#fs-alarm,#fs-share,#fs-report{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
                      font-size:1.3rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                      transition:var(--transition);min-width:50px;min-height:50px;
                      display:flex;align-items:center;justify-content:center;
                      box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
-#fs-sleep:hover,#fs-alarm:hover,#fs-share:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
-#fs-sleep:active,#fs-alarm:active,#fs-share:active{transform:scale(0.95)}
-#fs-sleep i,#fs-alarm i,#fs-share i{font-size:1.2rem}
+#fs-report{background:rgba(239,68,68,0.18);color:#f87171}
+#fs-sleep:hover,#fs-alarm:hover,#fs-share:hover,#fs-report:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-report:hover{background:rgba(239,68,68,0.28);color:#fca5a5}
+#fs-sleep:active,#fs-alarm:active,#fs-share:active,#fs-report:active{transform:scale(0.95)}
+#fs-sleep i,#fs-alarm i,#fs-share i,#fs-report i{font-size:1.2rem}
 #stream-info{margin-top:1rem;padding:0.5rem;font-size:0.85rem;color:rgba(255,255,255,0.7);text-align:center}
 #stream-quality,#stream-bitrate{margin:0.25rem 0}
 /* Fullscreen Volume Control */
@@ -1322,6 +1322,7 @@ audio{display:none}
     <button id="fs-sleep" title="Sleep Timer"><i class="fas fa-clock"></i></button>
     <button id="fs-alarm" title="Alarm Clock"><i class="fas fa-bell"></i></button>
     <button id="fs-share" title="Share Station"><i class="fas fa-share-alt"></i></button>
+    <button id="fs-report" title="Report stream problem"><i class="fas fa-exclamation-triangle"></i></button>
   </div>
   <div id="fullscreen-volume">
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
@@ -1578,6 +1579,7 @@ const fsNext = document.getElementById('fs-next');
 const fsVolumeBtn = document.getElementById('fs-volume-btn');
 const fsVolumeSlider = document.getElementById('fs-volume-slider');
 const fsShare = document.getElementById('fs-share');
+const fsReport = document.getElementById('fs-report');
 const streamInfo = document.getElementById('stream-info');
 const streamQuality = document.getElementById('stream-quality');
 const streamBitrate = document.getElementById('stream-bitrate');
@@ -2154,7 +2156,6 @@ function render(list) {
         <div class="rating-button" data-station='${JSON.stringify(st)}' title="Rate">
           <i class="fas fa-star ${stationRatings[st.name] ? 'rated' : ''}"></i>
         </div>
-        <div class="report-button" data-station='${JSON.stringify(st)}' title="Report stream problem"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="share-button" data-station='${JSON.stringify(st)}' title="Share"><i class="fas fa-share-alt"></i></div>
         <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
@@ -2162,7 +2163,7 @@ function render(list) {
     
     div.onclick = e => { 
       if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button') && 
-          !e.target.closest('.rating-button') && !e.target.closest('.report-button')) {
+          !e.target.closest('.rating-button')) {
         play(st, i);
       }
     };
@@ -2177,10 +2178,6 @@ function render(list) {
     div.querySelector('.rating-button').onclick = e => {
       e.stopPropagation();
       showRatingModal(st);
-    };
-    div.querySelector('.report-button').onclick = e => {
-      e.stopPropagation();
-      showStreamReportModal(st);
     };
     stationList.appendChild(div);
   });
@@ -4138,6 +4135,17 @@ if (fsShare) {
     }
     // Share with "what you're listening to" by default
     await shareStation(lastPlayedStation.station, true);
+  };
+}
+
+// Fullscreen player report button - report the current stream from the spacious player view
+if (fsReport) {
+  fsReport.onclick = () => {
+    if (!lastPlayedStation) {
+      showNotification('No station playing');
+      return;
+    }
+    showStreamReportModal(lastPlayedStation.station);
   };
 }
 
