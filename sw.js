@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v4';
+const CACHE = 'tcr-v5';
 const FILES = [
   '/',
   '/index.html',
