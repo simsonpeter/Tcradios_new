@@ -203,6 +203,15 @@
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:label="@string/appName">
+            <meta-data
+                android:name="android.media.browse.CONTENT_STYLE_SUPPORTED"
+                android:value="true" />
+            <meta-data
+                android:name="android.media.browse.CONTENT_STYLE_BROWSABLE_HINT"
+                android:value="1" />
+            <meta-data
+                android:name="android.media.browse.CONTENT_STYLE_PLAYABLE_HINT"
+                android:value="1" />
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

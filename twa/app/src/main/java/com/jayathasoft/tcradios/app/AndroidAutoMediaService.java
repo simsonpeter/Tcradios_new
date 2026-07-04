@@ -27,6 +27,13 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String CATEGORY_ALL = CATEGORY_PREFIX + "all";
     private static final String CATEGORY_KANNADA = CATEGORY_PREFIX + "kannada";
     private static final String CATEGORY_SINHALA = CATEGORY_PREFIX + "sinhala";
+    private static final String CONTENT_STYLE_SUPPORTED =
+            "android.media.browse.CONTENT_STYLE_SUPPORTED";
+    private static final String CONTENT_STYLE_BROWSABLE_HINT =
+            "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT";
+    private static final String CONTENT_STYLE_PLAYABLE_HINT =
+            "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT";
+    private static final int CONTENT_STYLE_LIST = 1;
 
     private static final Station[] STATIONS = new Station[] {
             new Station(
@@ -111,7 +118,11 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             @NonNull String clientPackageName,
             int clientUid,
             @Nullable Bundle rootHints) {
-        return new BrowserRoot(ROOT_ID, null);
+        Bundle extras = new Bundle();
+        extras.putBoolean(CONTENT_STYLE_SUPPORTED, true);
+        extras.putInt(CONTENT_STYLE_BROWSABLE_HINT, CONTENT_STYLE_LIST);
+        extras.putInt(CONTENT_STYLE_PLAYABLE_HINT, CONTENT_STYLE_LIST);
+        return new BrowserRoot(ROOT_ID, extras);
     }
 
     @Override
@@ -144,10 +155,13 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     }
 
     private MediaBrowserCompat.MediaItem createCategory(String mediaId, String title, String subtitle) {
+        Bundle extras = new Bundle();
+        extras.putInt(CONTENT_STYLE_BROWSABLE_HINT, CONTENT_STYLE_LIST);
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(mediaId)
                 .setTitle(title)
                 .setSubtitle(subtitle)
+                .setExtras(extras)
                 .build();
         return new MediaBrowserCompat.MediaItem(
                 description,
@@ -155,12 +169,15 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     }
 
     private MediaBrowserCompat.MediaItem createPlayableStation(Station station) {
+        Bundle extras = new Bundle();
+        extras.putInt(CONTENT_STYLE_PLAYABLE_HINT, CONTENT_STYLE_LIST);
         MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
                 .setMediaId(STATION_PREFIX + station.id)
                 .setTitle(station.name)
                 .setSubtitle(station.genre)
                 .setIconUri(Uri.parse(station.artworkUrl))
                 .setMediaUri(Uri.parse(station.streamUrl))
+                .setExtras(extras)
                 .build();
         return new MediaBrowserCompat.MediaItem(
                 description,
