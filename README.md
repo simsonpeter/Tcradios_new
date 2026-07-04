@@ -27,7 +27,6 @@ A modern Progressive Web App (PWA) and Android application that brings uplifting
 
 ### ❤️ **Smart Features**
 - **Favorites System** - Save and organize favorite stations
-- **Drag & Drop Reordering** - Customize favorites order (mobile & desktop)
 - **Search Functionality** - Find stations quickly
 - **Sleep Timer** - Auto-stop after set time
 - **Dark/Light Themes** - Choose your preferred theme
@@ -77,8 +76,8 @@ adb install app-release-signed.apk
 
 ### Prerequisites
 - Node.js 16+ (for development)
-- Android Studio (for Android development)
 - Bubblewrap CLI (for TWA builds)
+- Android Studio is optional; GitHub Actions can build the TWA without a local Android environment.
 
 ### Local Development
 ```bash
@@ -105,6 +104,9 @@ cd twa
 # Build APK
 bubblewrap build
 ```
+
+If you do not have Java/Android SDK locally, use the GitHub Actions workflow
+`Build Bubblewrap TWA APK / AAB` to build the Bubblewrap TWA in the cloud.
 
 ## 📁 Project Structure
 

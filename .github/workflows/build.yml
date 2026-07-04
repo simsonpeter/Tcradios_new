@@ -1,4 +1,4 @@
-name: Build TCRadios APK / AAB
+name: Build Bubblewrap TWA APK / AAB
 
 on:
   push:
@@ -30,12 +30,12 @@ jobs:
         run: |
           chmod +x twa/gradlew
 
-      - name: Build TWA APK (debug)
+      - name: Build Bubblewrap TWA APK (debug)
         run: |
           cd twa
           ./gradlew :app:assembleDebug
 
-      - name: Build TWA AAB (debug)
+      - name: Build Bubblewrap TWA AAB (debug)
         run: |
           cd twa
           ./gradlew :app:bundleDebug
