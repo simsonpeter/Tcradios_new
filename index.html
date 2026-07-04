@@ -618,8 +618,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
               background:var(--gradient-primary);opacity:0;transition:var(--transition);
               border-radius:.75rem;z-index:-1}
 .item:hover::before{opacity:0.05}
-/* Remove the ::before overlay for favorite items to prevent light tint */
-.item.drag-handle::before{display:none}
 .item:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);
             border-color:var(--accent)}
 .item.playing{background:var(--gradient-primary);color:#fff;box-shadow:var(--shadow-lg);
@@ -1016,92 +1014,6 @@ audio{display:none}
 .sync-indicator.syncing{background:#f59e0b;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 
-/* Drag and Drop Styles */
-.item.dragging {
-  opacity: 0.5;
-  transform: rotate(5deg);
-  z-index: 1000;
-}
-
-.item.drag-over {
-  border-top: 3px solid var(--accent);
-  transform: translateY(-2px);
-}
-
-.item.drag-handle {
-  cursor: grab;
-  position: relative;
-}
-
-.item.drag-handle:active {
-  cursor: grabbing;
-}
-
-.item.drag-handle::before {
-  content: "⋮⋮";
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--border);
-  font-size: 12px;
-  line-height: 8px;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.item.drag-handle:hover::before {
-  opacity: 1;
-  color: var(--accent);
-}
-
-/* Mobile-specific drag handle styling */
-@media (hover: none) and (pointer: coarse) {
-  .item.drag-handle::before {
-    opacity: 0.9;
-    color: var(--accent);
-    font-size: 16px;
-    font-weight: bold;
-  }
-  
-  .item.drag-handle {
-    padding-left: 45px;
-    position: relative;
-  }
-  
-  .item.drag-handle:active {
-    background-color: rgba(249, 115, 22, 0.1);
-  }
-  
-  .item.dragging {
-    transform: rotate(5deg) scale(1.05);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    border: 2px solid var(--accent);
-  }
-  
-  .item.drag-over {
-    border-top: 3px solid var(--accent);
-    transform: translateY(-2px);
-    background-color: rgba(249, 115, 22, 0.05);
-  }
-}
-
-.favorites-reorder-hint {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  margin: 8px 0;
-  text-align: center;
-  color: var(--text);
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-.favorites-reorder-hint i {
-  color: var(--accent);
-  margin-right: 8px;
-}
 /* Floating Mini Player Widget */
 #floating-widget{position:fixed;bottom:90px;right:20px;z-index:1000;
                  background:var(--card);border-radius:1rem;padding:0.8rem;
@@ -1263,7 +1175,7 @@ audio{display:none}
       <ul>
         <li><i class="fas fa-globe"></i> <strong>Global Reach:</strong> Stations from around the world</li>
         <li><i class="fas fa-language"></i> <strong>Multi-Language:</strong> Tamil, English, Malayalam, Hindi, Dutch, Sinhala & Telugu</li>
-        <li><i class="fas fa-heart"></i> <strong>Favorites:</strong> Save and reorder your preferred stations</li>
+        <li><i class="fas fa-heart"></i> <strong>Favorites:</strong> Save your preferred stations</li>
         <li><i class="fas fa-search"></i> <strong>Search:</strong> Find stations quickly</li>
         <li><i class="fas fa-moon"></i> <strong>Themes:</strong> Dark and light mode support</li>
         <li><i class="fas fa-clock"></i> <strong>Sleep Timer:</strong> Auto-stop after set time</li>
@@ -2407,20 +2319,7 @@ function switchTab(tab) {
 /* ---- RENDER ---- */
 function render(list) {
   stationList.innerHTML = '';
-  
-  // Add reorder hint for favorites tab
-  if (currentTab === 'fav' && list.length > 1) {
-    const hint = document.createElement('div');
-    hint.className = 'favorites-reorder-hint';
-    // Detect if it's a mobile device
-    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    const hintText = isMobile 
-      ? '<i class="fas fa-hand-rock"></i>Touch and hold to reorder your favorites'
-      : '<i class="fas fa-grip-vertical"></i>Hold and drag to reorder your favorites';
-    hint.innerHTML = hintText;
-    stationList.appendChild(hint);
-  }
-  
+
   if (!list || !list.length) {
     stationList.innerHTML = '<div class="item">No stations found.</div>';
     return;
@@ -2438,24 +2337,6 @@ function render(list) {
     
     if (isCurrentlyPlaying) {
       div.className += ' playing';
-    }
-    
-    // Add drag handle class for favorites tab
-    if (currentTab === 'fav') {
-      div.className += ' drag-handle';
-      div.draggable = true;
-      div.dataset.index = i;
-      
-      // Drag and drop event listeners (Desktop)
-      div.addEventListener('dragstart', handleDragStart);
-      div.addEventListener('dragover', handleDragOver);
-      div.addEventListener('drop', handleDrop);
-      div.addEventListener('dragend', handleDragEnd);
-      
-      // Touch event listeners (Mobile)
-      div.addEventListener('touchstart', handleTouchStart, { passive: false });
-      div.addEventListener('touchmove', handleTouchMove, { passive: false });
-      div.addEventListener('touchend', handleTouchEnd, { passive: false });
     }
     
     const stationHealth = getStationHealth(st);
@@ -3775,206 +3656,6 @@ function getFavoritesInOrder() {
   localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
   
   return favoriteStations;
-}
-
-function reorderFavorites(fromIndex, toIndex) {
-  if (fromIndex === toIndex) return;
-  
-  // Move item in favoritesOrder array
-  const item = favoritesOrder.splice(fromIndex, 1)[0];
-  favoritesOrder.splice(toIndex, 0, item);
-  
-  // Save new order
-  localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
-  
-  // Re-render favorites tab if currently active
-  if (currentTab === 'fav') {
-    switchTab('fav');
-  }
-  
-  // Haptic feedback
-  hapticFeedback('success');
-}
-
-// Drag and Drop Variables
-let draggedElement = null;
-let draggedIndex = null;
-let dragTouchStartY = 0;
-let dragTouchCurrentY = 0;
-let isDragging = false;
-let dragThreshold = 5; // Minimum distance to start drag (reduced for better responsiveness)
-
-// Drag and Drop Event Handlers (Desktop)
-function handleDragStart(e) {
-  draggedElement = e.target;
-  draggedIndex = parseInt(e.target.dataset.index);
-  e.target.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', e.target.outerHTML);
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  
-  const afterElement = getDragAfterElement(stationList, e.clientY);
-  const dragging = document.querySelector('.dragging');
-  
-  if (afterElement == null) {
-    stationList.appendChild(dragging);
-  } else {
-    stationList.insertBefore(dragging, afterElement);
-  }
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  
-  if (draggedElement) {
-    const dropIndex = Array.from(stationList.children).indexOf(e.target);
-    
-    // Only reorder if it's a valid drop and we're in favorites tab
-    if (currentTab === 'fav' && dropIndex >= 0 && dropIndex !== draggedIndex) {
-      reorderFavorites(draggedIndex, dropIndex);
-    }
-  }
-}
-
-function handleDragEnd(e) {
-  e.target.classList.remove('dragging');
-  draggedElement = null;
-  draggedIndex = null;
-  
-  // Remove drag-over class from all items
-  document.querySelectorAll('.item').forEach(item => {
-    item.classList.remove('drag-over');
-  });
-}
-
-// Touch Event Handlers (Mobile)
-function handleTouchStart(e) {
-  if (currentTab !== 'fav') return;
-  
-  const item = e.target.closest('.item');
-  if (!item) return;
-  
-  // Stop propagation to prevent conflicts with other touch handlers
-  e.stopPropagation();
-  
-  dragTouchStartY = e.touches[0].clientY;
-  draggedElement = item;
-  draggedIndex = parseInt(item.dataset.index);
-  isDragging = false;
-  
-  // Don't prevent default immediately - let the touch move determine if it's a drag
-  console.log('Touch start on item:', item.dataset.index);
-}
-
-function handleTouchMove(e) {
-  if (!draggedElement || currentTab !== 'fav') return;
-  
-  // Stop propagation to prevent conflicts
-  e.stopPropagation();
-  
-  dragTouchCurrentY = e.touches[0].clientY;
-  const deltaY = Math.abs(dragTouchCurrentY - dragTouchStartY);
-  
-  // Start dragging if moved enough distance
-  if (deltaY > dragThreshold && !isDragging) {
-    isDragging = true;
-    draggedElement.classList.add('dragging');
-    
-    // Add visual feedback
-    draggedElement.style.transform = 'rotate(5deg)';
-    draggedElement.style.opacity = '0.8';
-    draggedElement.style.zIndex = '1000';
-    
-    // Haptic feedback
-    hapticFeedback('light');
-    
-    console.log('Started dragging item:', draggedIndex);
-  }
-  
-  if (isDragging) {
-    e.preventDefault(); // Prevent scrolling only when actually dragging
-    
-    // Find the element after which to insert
-    const afterElement = getDragAfterElement(stationList, dragTouchCurrentY);
-    
-    if (afterElement == null) {
-      stationList.appendChild(draggedElement);
-    } else {
-      stationList.insertBefore(draggedElement, afterElement);
-    }
-    
-    // Add visual feedback to other items
-    document.querySelectorAll('.item:not(.dragging)').forEach(item => {
-      const rect = item.getBoundingClientRect();
-      const itemCenter = rect.top + rect.height / 2;
-      
-      if (Math.abs(dragTouchCurrentY - itemCenter) < rect.height / 2) {
-        item.classList.add('drag-over');
-      } else {
-        item.classList.remove('drag-over');
-      }
-    });
-  }
-}
-
-function handleTouchEnd(e) {
-  if (!draggedElement || currentTab !== 'fav') return;
-  
-  // Stop propagation to prevent conflicts
-  e.stopPropagation();
-  
-  console.log('Touch end, was dragging:', isDragging);
-  
-  if (isDragging) {
-    // Calculate final position
-    const finalIndex = Array.from(stationList.children).indexOf(draggedElement);
-    
-    console.log('Final position:', finalIndex, 'Original position:', draggedIndex);
-    
-    // Only reorder if position changed
-    if (finalIndex !== draggedIndex && finalIndex >= 0) {
-      reorderFavorites(draggedIndex, finalIndex);
-      hapticFeedback('success');
-      console.log('Reordered favorites from', draggedIndex, 'to', finalIndex);
-    }
-    
-    // Clean up
-    draggedElement.classList.remove('dragging');
-    draggedElement.style.transform = '';
-    draggedElement.style.opacity = '';
-    draggedElement.style.zIndex = '';
-    
-    // Remove drag-over class from all items
-    document.querySelectorAll('.item').forEach(item => {
-      item.classList.remove('drag-over');
-    });
-  }
-  
-  // Reset variables
-  draggedElement = null;
-  draggedIndex = null;
-  isDragging = false;
-  dragTouchStartY = 0;
-  dragTouchCurrentY = 0;
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
-  
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 /* ---- THEME ---- */
