@@ -361,17 +361,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                color:#fecaca;border-bottom:1px solid rgba(239,68,68,0.35);
                font-size:0.9rem;font-weight:600;text-align:center}
 #offlineBanner.active{display:flex}
-#dailyVerseCard{display:none;background:linear-gradient(135deg,rgba(249,115,22,0.16),rgba(59,130,246,0.12));
-                border:1px solid rgba(249,115,22,0.25);border-radius:1rem;
-                padding:1rem;margin-bottom:0.75rem;box-shadow:var(--shadow-md)}
-#dailyVerseCard.active{display:block}
-.daily-verse-title{display:flex;align-items:center;gap:0.5rem;color:var(--accent);
-                   font-weight:700;margin-bottom:0.35rem}
-#dailyVerseText{font-size:0.95rem;line-height:1.45;margin-bottom:0.35rem}
-#dailyVerseRef{font-size:0.82rem;opacity:0.8}
-#dailyVerseShare{margin-top:0.65rem;border:1px solid rgba(249,115,22,0.35);
-                 background:rgba(249,115,22,0.12);color:var(--accent);
-                 border-radius:999px;padding:0.45rem 0.8rem;cursor:pointer}
 #stationFilterBar{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;
                   background:rgba(255,255,255,0.04);border:1px solid var(--border);
                   border-radius:0.8rem;padding:0.6rem;margin:0.5rem 0 0.75rem}
@@ -1215,12 +1204,6 @@ audio{display:none}
   <span id="tab-about">About</span>
 </div>
 <div id="content" aria-busy="true">
-  <div id="dailyVerseCard">
-    <div class="daily-verse-title"><i class="fas fa-bible"></i> Daily Promise</div>
-    <div id="dailyVerseText"></div>
-    <div id="dailyVerseRef"></div>
-    <button id="dailyVerseShare" type="button"><i class="fas fa-share-alt"></i> Share Verse</button>
-  </div>
   <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
   <div id="stationFilterBar">
     <select id="genreFilter" title="Filter by genre">
@@ -1678,23 +1661,10 @@ let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
 let sleepTimer;
 let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
-const DAILY_VERSES = [
-  { text: 'The Lord is my shepherd; I shall not want.', ref: 'Psalm 23:1' },
-  { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
-  { text: 'The joy of the Lord is your strength.', ref: 'Nehemiah 8:10' },
-  { text: 'Cast all your anxiety on him because he cares for you.', ref: '1 Peter 5:7' },
-  { text: 'Your word is a lamp to my feet and a light to my path.', ref: 'Psalm 119:105' },
-  { text: 'Be still, and know that I am God.', ref: 'Psalm 46:10' },
-  { text: 'The Lord will fight for you; you need only to be still.', ref: 'Exodus 14:14' }
-];
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const stationList = document.querySelector('.station-list');
 const offlineBanner = document.getElementById('offlineBanner');
-const dailyVerseCard = document.getElementById('dailyVerseCard');
-const dailyVerseText = document.getElementById('dailyVerseText');
-const dailyVerseRef = document.getElementById('dailyVerseRef');
-const dailyVerseShare = document.getElementById('dailyVerseShare');
 const genreFilter = document.getElementById('genreFilter');
 const sortFilter = document.getElementById('sortFilter');
 const favoritesOnlyFilterInput = document.getElementById('favoritesOnlyFilter');
@@ -1979,7 +1949,6 @@ function clearAllCacheOnLaunch() {
     'tcr-favorites-only',
     'tcr-failed-only',
     'tcr-sleep-deadline',
-    'tcr-daily-verse-notified',
     'tcr-volume',
     'tcr-alarm',
     'currentTheme',
@@ -2024,7 +1993,6 @@ function clearAllCacheOnLaunch() {
     // Now that data is loaded, populate UI
     populateLangSelect();
     initThemeSystem(); // Initialize theme system
-    initDailyVerse();
     initFilters();
     updateConnectivityUi();
     restoreSleepTimer();
@@ -2231,41 +2199,7 @@ function initCacheClearing() {
     sessionStorage.setItem('app_initialized', 'true');
   }
 }
-/* ---- DAILY VERSE, FILTERS + CONNECTIVITY ---- */
-function getDayOfYearForFeatures() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  return Math.floor((now - start) / 86400000);
-}
-
-function initDailyVerse() {
-  if (!dailyVerseCard || !dailyVerseText || !dailyVerseRef) return;
-  const verse = DAILY_VERSES[getDayOfYearForFeatures() % DAILY_VERSES.length];
-  dailyVerseText.textContent = verse.text;
-  dailyVerseRef.textContent = verse.ref;
-  dailyVerseCard.classList.add('active');
-  const notifyKey = new Date().toISOString().slice(0, 10);
-  if ('Notification' in window && Notification.permission === 'granted' && localStorage.getItem('tcr-daily-verse-notified') !== notifyKey) {
-    showNotification(`Daily Promise: ${verse.ref}`);
-    localStorage.setItem('tcr-daily-verse-notified', notifyKey);
-  }
-  if (dailyVerseShare) {
-    dailyVerseShare.onclick = async () => {
-      const text = `${verse.text}\n- ${verse.ref}\n\nTC RADIOS`;
-      try {
-        if (navigator.share) {
-          await navigator.share({ title: 'Daily Promise', text });
-        } else {
-          await navigator.clipboard.writeText(text);
-          showNotification('Verse copied');
-        }
-      } catch (error) {
-        if (error.name !== 'AbortError') showNotification('Could not share verse');
-      }
-    };
-  }
-}
-
+/* ---- FILTERS + CONNECTIVITY ---- */
 function updateConnectivityUi() {
   const isOnline = navigator.onLine;
   if (offlineBanner) offlineBanner.classList.toggle('active', !isOnline);
