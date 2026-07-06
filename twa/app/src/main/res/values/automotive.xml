@@ -16,6 +16,8 @@
         <item>Hindi</item>
         <item>Dutch</item>
         <item>Sinhala</item>
+        <item>Telugu</item>
+        <item>Kannada</item>
     </string-array>
     
     <!-- Voice command examples -->

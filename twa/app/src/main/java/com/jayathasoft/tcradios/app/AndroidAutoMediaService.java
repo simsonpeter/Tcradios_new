@@ -17,16 +17,33 @@ import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String ROOT_ID = "tcradios_root";
     private static final String STATION_PREFIX = "station:";
     private static final String CATEGORY_PREFIX = "category:";
     private static final String CATEGORY_ALL = CATEGORY_PREFIX + "all";
-    private static final String CATEGORY_KANNADA = CATEGORY_PREFIX + "kannada";
-    private static final String CATEGORY_SINHALA = CATEGORY_PREFIX + "sinhala";
+    private static final String DATA_BASE_URL =
+            "https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main";
+    private static final String DEFAULT_ARTWORK_URL =
+            "https://tcradios-new.vercel.app/icons/icon-512x512.png";
     private static final String CONTENT_STYLE_SUPPORTED =
             "android.media.browse.CONTENT_STYLE_SUPPORTED";
     private static final String CONTENT_STYLE_BROWSABLE_HINT =
@@ -35,55 +52,54 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT";
     private static final int CONTENT_STYLE_LIST = 1;
 
-    private static final Station[] STATIONS = new Station[] {
-            new Station(
-                    "firstborn-kannada",
-                    "Firstborn Ministries Kannada",
-                    "Kannada Christian",
-                    "https://centova71.instainternet.com/proxy/christianfm?mp=/stream&1745909125962/;stream/1",
+    private static final LanguageCategory[] LANGUAGE_CATEGORIES = new LanguageCategory[] {
+            new LanguageCategory("tamil", "Tamil", "Tamil Christian stations",
+                    DATA_BASE_URL + "/stations.json"),
+            new LanguageCategory("english", "English", "English Christian stations",
+                    DATA_BASE_URL + "/languages/english.json"),
+            new LanguageCategory("malayalam", "Malayalam", "Malayalam Christian stations",
+                    DATA_BASE_URL + "/languages/malayalam.json"),
+            new LanguageCategory("hindi", "Hindi", "Hindi Christian stations",
+                    DATA_BASE_URL + "/languages/hindi.json"),
+            new LanguageCategory("dutch", "Dutch", "Dutch Christian stations",
+                    DATA_BASE_URL + "/languages/dutch.json"),
+            new LanguageCategory("sinhala", "Sinhala", "Sinhala Christian stations",
+                    DATA_BASE_URL + "/languages/sinhala.json"),
+            new LanguageCategory("telugu", "Telugu", "Telugu Christian stations",
+                    DATA_BASE_URL + "/languages/telugu.json"),
+            new LanguageCategory("kannada", "Kannada", "Kannada Christian stations",
+                    DATA_BASE_URL + "/languages/Kannada.json")
+    };
+    private static final Station[] FALLBACK_STATIONS = new Station[] {
+            new Station("kannada", "firstborn-kannada", "Firstborn Ministries Kannada",
+                    "Kannada Christian", "https://centova71.instainternet.com/proxy/christianfm?mp=/stream&1745909125962/;stream/1",
                     "https://tvradiotuner.com/wp-content/uploads/Firstborn-Ministries.jpg"),
-            new Station(
-                    "hoj-kannada",
-                    "HOJ Kannada",
-                    "Kannada Christian",
-                    "https://dc1.serverse.com/proxy/hojkannada/stream",
+            new Station("kannada", "hoj-kannada", "HOJ Kannada",
+                    "Kannada Christian", "https://dc1.serverse.com/proxy/hojkannada/stream",
                     "https://tamilradios.net/webpimg/kerala/radio_39070_Hand-Of-Jesus-%E2%80%93-Telugu.webp"),
-            new Station(
-                    "kannada-bible-radio",
-                    "Kannada Bible Radio",
-                    "Kannada Christian",
-                    "https://gains.reviveradio.net/proxy/kannadabible?mp=/stream",
+            new Station("kannada", "kannada-bible-radio", "Kannada Bible Radio",
+                    "Kannada Christian", "https://gains.reviveradio.net/proxy/kannadabible?mp=/stream",
                     "https://indiabible.radio/wp-content/uploads/2022/05/default-2.png"),
-            new Station(
-                    "dimuthu-handa",
-                    "Dimuthu Handa",
-                    "Sinhala Christian",
-                    "https://cp11.serverse.com/proxy/geethika/stream",
+            new Station("sinhala", "dimuthu-handa", "Dimuthu Handa",
+                    "Sinhala Christian", "https://cp11.serverse.com/proxy/geethika/stream",
                     "https://i.ibb.co/1tKDL1Dg/cropped-site-icon-1.png"),
-            new Station(
-                    "havilah-fm",
-                    "Havilah FM",
-                    "Sinhala Christian",
-                    "https://stream.zeno.fm/434ubnhq638uv",
+            new Station("sinhala", "havilah-fm", "Havilah FM",
+                    "Sinhala Christian", "https://stream.zeno.fm/434ubnhq638uv",
                     "https://listenonlineradio.com/wp-content/uploads/HaVilah-FM.jpg"),
-            new Station(
-                    "jesus-coming-fm",
-                    "Jesus Coming FM",
-                    "Sinhala Christian",
-                    "https://live.jesuscomingfm.com/proxy/sinhala/stream.aac",
+            new Station("sinhala", "jesus-coming-fm", "Jesus Coming FM",
+                    "Sinhala Christian", "https://live.jesuscomingfm.com/proxy/sinhala/stream.aac",
                     "https://static-media.streema.com/media/cache/e0/05/e0055f1d09d7cbe84c6187f1a6e50823.jpg"),
-            new Station(
-                    "judah-sinhala-bible",
-                    "Judah Sinhala Bible",
-                    "Sinhala Christian",
-                    "https://stream-176.zeno.fm/3gw6wa7apy8uv",
+            new Station("sinhala", "judah-sinhala-bible", "Judah Sinhala Bible",
+                    "Sinhala Christian", "https://stream-176.zeno.fm/3gw6wa7apy8uv",
                     "https://zeno.fm/favicon.ico")
     };
 
     private MediaSessionCompat mediaSession;
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
-    private Station currentStation = STATIONS[0];
+    private final ExecutorService stationLoader = Executors.newSingleThreadExecutor();
+    private final Map<String, List<Station>> stationsByLanguage = new LinkedHashMap<>();
+    private Station currentStation = FALLBACK_STATIONS[0];
     private int currentStationIndex = 0;
 
     private final AudioManager.OnAudioFocusChangeListener audioFocusListener = focusChange -> {
@@ -132,8 +148,9 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         if (ROOT_ID.equals(parentId)) {
             List<MediaBrowserCompat.MediaItem> categories = new ArrayList<>();
             categories.add(createCategory(CATEGORY_ALL, "All Stations", "Browse every TC RADIOS station"));
-            categories.add(createCategory(CATEGORY_KANNADA, "Kannada", "Kannada Christian stations"));
-            categories.add(createCategory(CATEGORY_SINHALA, "Sinhala", "Sinhala Christian stations"));
+            for (LanguageCategory category : LANGUAGE_CATEGORIES) {
+                categories.add(createCategory(CATEGORY_PREFIX + category.key, category.title, category.subtitle));
+            }
             result.sendResult(categories);
             return;
         }
@@ -143,15 +160,18 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             return;
         }
 
-        List<MediaBrowserCompat.MediaItem> items = new ArrayList<>();
-        for (Station station : STATIONS) {
-            if (CATEGORY_ALL.equals(parentId)
-                    || (CATEGORY_KANNADA.equals(parentId) && station.genre.toLowerCase().contains("kannada"))
-                    || (CATEGORY_SINHALA.equals(parentId) && station.genre.toLowerCase().contains("sinhala"))) {
-                items.add(createPlayableStation(station));
+        result.detach();
+        stationLoader.execute(() -> {
+            List<MediaBrowserCompat.MediaItem> items = new ArrayList<>();
+            try {
+                for (Station station : getStationsForCategory(parentId)) {
+                    items.add(createPlayableStation(station));
+                }
+            } catch (RuntimeException error) {
+                // Android Auto requires a response; return an empty list instead of hanging browse.
             }
-        }
-        result.sendResult(items);
+            result.sendResult(items);
+        });
     }
 
     private MediaBrowserCompat.MediaItem createCategory(String mediaId, String title, String subtitle) {
@@ -193,6 +213,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     @Override
     public void onDestroy() {
         stopPlayback();
+        stationLoader.shutdownNow();
         if (mediaSession != null) {
             mediaSession.release();
             mediaSession = null;
@@ -204,7 +225,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         @Override
         public void onPlay() {
             if (currentStation == null) {
-                currentStation = STATIONS[0];
+                currentStation = getAllStations().isEmpty() ? FALLBACK_STATIONS[0] : getAllStations().get(0);
                 currentStationIndex = 0;
             }
             playStation(currentStation);
@@ -230,14 +251,18 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
         @Override
         public void onSkipToNext() {
-            currentStationIndex = (currentStationIndex + 1) % STATIONS.length;
-            playStation(STATIONS[currentStationIndex]);
+            List<Station> stations = getAllStations();
+            if (stations.isEmpty()) return;
+            currentStationIndex = (currentStationIndex + 1) % stations.size();
+            playStation(stations.get(currentStationIndex));
         }
 
         @Override
         public void onSkipToPrevious() {
-            currentStationIndex = (currentStationIndex - 1 + STATIONS.length) % STATIONS.length;
-            playStation(STATIONS[currentStationIndex]);
+            List<Station> stations = getAllStations();
+            if (stations.isEmpty()) return;
+            currentStationIndex = (currentStationIndex - 1 + stations.size()) % stations.size();
+            playStation(stations.get(currentStationIndex));
         }
     };
 
@@ -370,7 +395,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
                 ? mediaId.substring(STATION_PREFIX.length())
                 : mediaId;
 
-        for (Station station : STATIONS) {
+        for (Station station : getAllStations()) {
             if (station.id.equals(stationId)) {
                 return station;
             }
@@ -379,22 +404,202 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     }
 
     private int indexOfStation(String stationId) {
-        for (int i = 0; i < STATIONS.length; i++) {
-            if (STATIONS[i].id.equals(stationId)) {
+        List<Station> stations = getAllStations();
+        for (int i = 0; i < stations.size(); i++) {
+            if (stations.get(i).id.equals(stationId)) {
                 return i;
             }
         }
         return 0;
     }
 
+    private List<Station> getStationsForCategory(String categoryId) {
+        if (CATEGORY_ALL.equals(categoryId)) {
+            List<Station> allStations = new ArrayList<>();
+            for (LanguageCategory category : LANGUAGE_CATEGORIES) {
+                allStations.addAll(loadStationsForLanguage(category.key));
+            }
+            return allStations;
+        }
+
+        String languageKey = categoryId.substring(CATEGORY_PREFIX.length());
+        return loadStationsForLanguage(languageKey);
+    }
+
+    private List<Station> getAllStations() {
+        List<Station> allStations = new ArrayList<>();
+        synchronized (stationsByLanguage) {
+            for (List<Station> stations : stationsByLanguage.values()) {
+                allStations.addAll(stations);
+            }
+        }
+        if (allStations.isEmpty()) {
+            Collections.addAll(allStations, FALLBACK_STATIONS);
+        }
+        return allStations;
+    }
+
+    private List<Station> loadStationsForLanguage(String languageKey) {
+        synchronized (stationsByLanguage) {
+            if (stationsByLanguage.containsKey(languageKey)) {
+                return stationsByLanguage.get(languageKey);
+            }
+        }
+
+        LanguageCategory category = findLanguageCategory(languageKey);
+        List<Station> stations = new ArrayList<>();
+        if (category != null) {
+            try {
+                stations.addAll(fetchStations(category));
+            } catch (IOException | JSONException error) {
+                // Keep Android Auto browse usable even if remote station JSON is unavailable.
+            }
+        }
+
+        if (stations.isEmpty()) {
+            for (Station station : FALLBACK_STATIONS) {
+                if (station.languageKey.equals(languageKey)) {
+                    stations.add(station);
+                }
+            }
+        }
+
+        synchronized (stationsByLanguage) {
+            stationsByLanguage.put(languageKey, stations);
+        }
+        return stations;
+    }
+
+    private LanguageCategory findLanguageCategory(String languageKey) {
+        for (LanguageCategory category : LANGUAGE_CATEGORIES) {
+            if (category.key.equals(languageKey)) {
+                return category;
+            }
+        }
+        return null;
+    }
+
+    private List<Station> fetchStations(LanguageCategory category) throws IOException, JSONException {
+        String json = readUrl(category.url);
+        Object parsed = new org.json.JSONTokener(json).nextValue();
+        JSONArray stationArray;
+        if (parsed instanceof JSONArray) {
+            stationArray = (JSONArray) parsed;
+        } else if (parsed instanceof JSONObject) {
+            stationArray = ((JSONObject) parsed).optJSONArray("stations");
+            if (stationArray == null) stationArray = new JSONArray();
+        } else {
+            stationArray = new JSONArray();
+        }
+
+        List<Station> stations = new ArrayList<>();
+        for (int i = 0; i < stationArray.length(); i++) {
+            JSONObject stationJson = stationArray.optJSONObject(i);
+            if (stationJson == null) continue;
+
+            String baseName = stationJson.optString("name", "Station " + (i + 1)).trim();
+            String genre = stationJson.optString("genre", category.title + " Christian").trim();
+            String artwork = firstNonEmpty(
+                    stationJson.optString("logo", ""),
+                    stationJson.optString("image", ""),
+                    stationJson.optString("artwork", ""),
+                    DEFAULT_ARTWORK_URL);
+            List<String> streamUrls = collectStreamUrls(stationJson);
+            for (int streamIndex = 0; streamIndex < streamUrls.size(); streamIndex++) {
+                String name = streamUrls.size() > 1 ? baseName + " (" + (streamIndex + 1) + ")" : baseName;
+                String id = category.key + "-" + slugify(name) + "-" + streamIndex;
+                stations.add(new Station(category.key, id, name, genre, streamUrls.get(streamIndex), artwork));
+            }
+        }
+        return stations;
+    }
+
+    private String readUrl(String urlString) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
+        connection.setConnectTimeout(7000);
+        connection.setReadTimeout(7000);
+        connection.setRequestProperty("Accept", "application/json");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                connection.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+            }
+            return builder.toString();
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private List<String> collectStreamUrls(JSONObject stationJson) {
+        List<String> urls = new ArrayList<>();
+        addUrl(urls, stationJson.optString("url", ""));
+        for (int i = 1; i <= 10; i++) {
+            addUrl(urls, stationJson.optString("url" + i, ""));
+        }
+        addJsonUrlArray(urls, stationJson.optJSONArray("urls"));
+        addJsonUrlArray(urls, stationJson.optJSONArray("streams"));
+        return urls;
+    }
+
+    private void addJsonUrlArray(List<String> urls, JSONArray values) {
+        if (values == null) return;
+        for (int i = 0; i < values.length(); i++) {
+            Object value = values.opt(i);
+            if (value instanceof String) {
+                addUrl(urls, (String) value);
+            } else if (value instanceof JSONObject) {
+                addUrl(urls, ((JSONObject) value).optString("url", ""));
+            }
+        }
+    }
+
+    private void addUrl(List<String> urls, String url) {
+        if (TextUtils.isEmpty(url)) return;
+        String trimmedUrl = url.trim();
+        if (!urls.contains(trimmedUrl)) {
+            urls.add(trimmedUrl);
+        }
+    }
+
+    private String firstNonEmpty(String... values) {
+        for (String value : values) {
+            if (!TextUtils.isEmpty(value)) return value.trim();
+        }
+        return DEFAULT_ARTWORK_URL;
+    }
+
+    private String slugify(String value) {
+        String slug = value.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "-");
+        slug = slug.replaceAll("^-+", "").replaceAll("-+$", "");
+        return TextUtils.isEmpty(slug) ? "station" : slug;
+    }
+
+    private static final class LanguageCategory {
+        final String key;
+        final String title;
+        final String subtitle;
+        final String url;
+
+        LanguageCategory(String key, String title, String subtitle, String url) {
+            this.key = key;
+            this.title = title;
+            this.subtitle = subtitle;
+            this.url = url;
+        }
+    }
+
     private static final class Station {
+        final String languageKey;
         final String id;
         final String name;
         final String genre;
         final String streamUrl;
         final String artworkUrl;
 
-        Station(String id, String name, String genre, String streamUrl, String artworkUrl) {
+        Station(String languageKey, String id, String name, String genre, String streamUrl, String artworkUrl) {
+            this.languageKey = languageKey;
             this.id = id;
             this.name = name;
             this.genre = genre;
