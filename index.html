@@ -632,13 +632,10 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
-.favorite-button,.share-button,.rating-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
-.favorite-button i,.share-button i,.rating-button i{font-size:1.1rem}
+.favorite-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
+.favorite-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
-.share-button:hover{color:var(--accent);transform:scale(1.1)}
 .favorite-button:hover{transform:scale(1.1)}
-.rating-button:hover{color:var(--accent);transform:scale(1.1)}
-.rating-button i.rated{color:#ffc107}
 .station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem}
 .station-rating-display i{font-size:0.7rem}
 #player{background:var(--header);border-top:1px solid var(--border);
@@ -828,7 +825,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   .station-list .item:active{transform:scale(0.98)}
   #p-play,#p-prev,#p-next{min-width:48px;min-height:48px}
   header button{min-width:44px;min-height:44px}
-  .favorite-button,.share-button{min-width:44px;min-height:44px}
+  .favorite-button{min-width:44px;min-height:44px}
 }
 /* Widget mode styles */
 .widget-mode {
@@ -2355,31 +2352,18 @@ function render(list) {
         ${globalRatings[st.name] ? `<div class="station-rating-display" style="font-size:0.7rem;opacity:0.8">Global: ${globalRatings[st.name].total.toFixed(1)}/5 (${globalRatings[st.name].count})</div>` : ''}
       </div>
       <div class="station-actions">
-        <div class="rating-button" data-station='${JSON.stringify(st)}' title="Rate">
-          <i class="fas fa-star ${stationRatings[st.name] ? 'rated' : ''}"></i>
-        </div>
-        <div class="share-button" data-station='${JSON.stringify(st)}' title="Share"><i class="fas fa-share-alt"></i></div>
         <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
     `;
     
     div.onclick = e => { 
-      if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button') && 
-          !e.target.closest('.rating-button')) {
+      if (!e.target.closest('.favorite-button')) {
         play(st, i);
       }
     };
     div.querySelector('.favorite-button').onclick = e => {
       e.stopPropagation(); 
       toggleFav(st.name);
-    };
-    div.querySelector('.share-button').onclick = e => {
-      e.stopPropagation();
-      shareStation(st);
-    };
-    div.querySelector('.rating-button').onclick = e => {
-      e.stopPropagation();
-      showRatingModal(st);
     };
     stationList.appendChild(div);
   });
@@ -3557,13 +3541,12 @@ function renderHistory() {
           </div>
         </div>
         <div class="station-actions">
-          <div class="share-button" data-station='${JSON.stringify(st)}' title="Share"><i class="fas fa-share-alt"></i></div>
           <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
         </div>
       `;
       
       div.onclick = e => {
-        if (!e.target.closest('.favorite-button') && !e.target.closest('.share-button')) {
+        if (!e.target.closest('.favorite-button')) {
           // Find station in current language list
           const allStations = stationsPerLang[currentLang] || [];
           const stationIndex = allStations.findIndex(s => s.name === st.name);
@@ -3581,11 +3564,6 @@ function renderHistory() {
         toggleFav(st.name);
         // Update button state
         div.querySelector('.favorite-button').classList.toggle('on', favorites.includes(st.name));
-      };
-      
-      div.querySelector('.share-button').onclick = e => {
-        e.stopPropagation();
-        shareStation(st);
       };
       
       historyContainer.appendChild(div);
@@ -4710,8 +4688,8 @@ if (document.getElementById('closeRatingModal')) {
 /* ---- SUPABASE CONFIGURATION ---- */
 // TODO: Replace these with your Supabase project credentials
 // Get them from: https://app.supabase.com -> Your Project -> Settings -> API
-const SUPABASE_URL = 'https://ieavylmfyxpccxfwkhvd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYXZ5bG1meXhwY2N4ZndraHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNjA2MDIsImV4cCI6MjA4NDkzNjYwMn0.GUwKUrJiDiuMO4GayNlnY2lnt4HprsXGqJM4K-ktaOM';
+const SUPABASE_URL = 'https://rerzpgrxztaarwecidza.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlcnpwZ3J4enRhYXJ3ZWNpZHphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNjkyOTAsImV4cCI6MjA5OTk0NTI5MH0.HpIroCI67avAyizlrk9Wv05RC3QzYCPV_2JHuM6h5es';
 
 // Initialize Supabase client (wait for script to load)
 let supabaseClient = null;
@@ -4837,8 +4815,22 @@ async function registerUser(email, password) {
     if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.message.includes('User already registered'))) {
       throw new Error('An account with this email already exists. Please login instead.');
     }
-    throw new Error(error.message || 'Registration failed');
+    throw new Error(friendlyAuthError(error, 'Registration failed'));
   }
+}
+
+function friendlyAuthError(error, fallback = 'Login failed') {
+  const message = (error && error.message) || '';
+  const lower = message.toLowerCase();
+  if (
+    lower.includes('failed to fetch') ||
+    lower.includes('networkerror') ||
+    lower.includes('load failed') ||
+    lower.includes('network request failed')
+  ) {
+    return 'Cannot reach the login server. The Supabase project may be paused or deleted. Open supabase.com/dashboard, restore the project, then try again.';
+  }
+  return message || fallback;
 }
 
 async function loginUser(email, password) {
@@ -4877,7 +4869,7 @@ async function loginUser(email, password) {
     
     return { user: currentUser, token: authToken };
   } catch (error) {
-    throw new Error(error.message || 'Login failed');
+    throw new Error(friendlyAuthError(error, 'Login failed'));
   }
 }
 
