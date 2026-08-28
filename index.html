@@ -4189,6 +4189,7 @@ function renderRadioRequestVotes() {
 
 function renderAdminDashboard() {
   if (!isAdminUser()) {
+    closeAdminDashboard();
     showNotification('Admin dashboard is only available for the admin account');
     return;
   }
@@ -4208,16 +4209,19 @@ function renderAdminDashboard() {
   modal.style.display = 'flex';
 }
 
+function closeAdminDashboard() {
+  const modal = document.getElementById('adminDashboardModal');
+  if (modal) modal.style.display = 'none';
+}
+
 document.getElementById('menuAdminDashboardBtn')?.addEventListener('click', () => {
   renderAdminDashboard();
   if (headerMenu) headerMenu.classList.remove('active');
 });
 document.getElementById('refreshAdminDashboardBtn')?.addEventListener('click', renderAdminDashboard);
-document.getElementById('closeAdminDashboardModal')?.addEventListener('click', () => {
-  document.getElementById('adminDashboardModal').style.display = 'none';
-});
+document.getElementById('closeAdminDashboardModal')?.addEventListener('click', closeAdminDashboard);
 document.getElementById('adminDashboardModal')?.addEventListener('click', event => {
-  if (event.target.id === 'adminDashboardModal') event.target.style.display = 'none';
+  if (event.target.id === 'adminDashboardModal') closeAdminDashboard();
 });
 window.voteRadioRequest = voteRadioRequest;
 
@@ -4980,8 +4984,12 @@ function isAdminUser() {
 
 function updateAdminDashboardVisibility() {
   const menuAdminDashboardBtn = document.getElementById('menuAdminDashboardBtn');
+  const isAdmin = isAdminUser();
   if (menuAdminDashboardBtn) {
-    menuAdminDashboardBtn.style.display = isAdminUser() ? 'flex' : 'none';
+    menuAdminDashboardBtn.style.display = isAdmin ? 'flex' : 'none';
+  }
+  if (!isAdmin) {
+    closeAdminDashboard();
   }
 }
 
