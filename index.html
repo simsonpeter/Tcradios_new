@@ -1068,7 +1068,6 @@ audio{display:none}
     <button id="miniPlayerBtn" title="Mini Player" class="header-btn"><i class="fas fa-window-restore"></i></button>
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
     <button id="requestRadioBtn" title="Request Radio" class="header-btn"><i class="fas fa-plus-circle"></i></button>
-    <button id="adminDashboardBtn" title="Admin Dashboard" class="header-btn"><i class="fas fa-chart-line"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
@@ -1079,7 +1078,7 @@ audio{display:none}
     <button id="menuMiniPlayerBtn" title="Mini Player"><i class="fas fa-window-restore"></i> Mini Player</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
     <button id="menuRequestRadioBtn" title="Request Radio"><i class="fas fa-plus-circle"></i> Request Radio</button>
-    <button id="menuAdminDashboardBtn" title="Admin Dashboard"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
+    <button id="menuAdminDashboardBtn" title="Admin Dashboard" style="display:none"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
     <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
@@ -1512,6 +1511,7 @@ const FALLBACK_LANG_URLS = {
   // Keep Kannada pinned to the live branch even if other data is version-pinned.
   kannada: KANNADA_LIVE_URL
 };
+const ADMIN_DASHBOARD_EMAIL = 'simsonpeter@gmail.com';
 let LANG_URLS = { ...FALLBACK_LANG_URLS };
 /* ---- STATE ---- */
 let stationsPerLang = {};
@@ -4188,6 +4188,10 @@ function renderRadioRequestVotes() {
 }
 
 function renderAdminDashboard() {
+  if (!isAdminUser()) {
+    showNotification('Admin dashboard is only available for the admin account');
+    return;
+  }
   const modal = document.getElementById('adminDashboardModal');
   const summary = document.getElementById('adminDashboardSummary');
   const content = document.getElementById('adminDashboardContent');
@@ -4204,7 +4208,6 @@ function renderAdminDashboard() {
   modal.style.display = 'flex';
 }
 
-document.getElementById('adminDashboardBtn')?.addEventListener('click', renderAdminDashboard);
 document.getElementById('menuAdminDashboardBtn')?.addEventListener('click', () => {
   renderAdminDashboard();
   if (headerMenu) headerMenu.classList.remove('active');
@@ -4963,6 +4966,22 @@ function updateAccountUI() {
   } else {
     if (accountBtn) accountBtn.innerHTML = '<i class="fas fa-user"></i>';
     if (menuAccountBtn) menuAccountBtn.innerHTML = '<i class="fas fa-user"></i> Account';
+  }
+  updateAdminDashboardVisibility();
+}
+
+function isAdminUser() {
+  return Boolean(
+    currentUser &&
+    typeof currentUser.email === 'string' &&
+    currentUser.email.trim().toLowerCase() === ADMIN_DASHBOARD_EMAIL
+  );
+}
+
+function updateAdminDashboardVisibility() {
+  const menuAdminDashboardBtn = document.getElementById('menuAdminDashboardBtn');
+  if (menuAdminDashboardBtn) {
+    menuAdminDashboardBtn.style.display = isAdminUser() ? 'flex' : 'none';
   }
 }
 
