@@ -1396,8 +1396,8 @@ audio{display:none}
 <div id="radioRequestModal">
   <div>
     <h3>Request Radio Station</h3>
-    <input id="requestStationName" type="text" placeholder="Station name" maxlength="120"/>
-    <input id="requestStreamUrl" type="url" placeholder="Stream URL, website, or listen link" maxlength="500"/>
+    <input id="requestStationName" type="text" placeholder="Station title (required)" maxlength="120"/>
+    <input id="requestStreamUrl" type="url" placeholder="Radio URL, website, or listen link (optional)" maxlength="500"/>
     <select id="requestLanguage" title="Language">
       <option value="">Select language (optional)</option>
       <option value="tamil">Tamil</option>
@@ -4085,12 +4085,12 @@ async function submitRadioRequest() {
   const contactEmail = getContactValue('requestContact');
 
   if (!stationName) {
-    showFeedbackStatus('radioRequestStatus', 'Please enter the station name.', 'error');
+    showFeedbackStatus('radioRequestStatus', 'Please enter the station title.', 'error');
     return;
   }
 
-  if (!streamUrl || !isValidHttpUrl(streamUrl)) {
-    showFeedbackStatus('radioRequestStatus', 'Please enter a valid http or https stream/listen URL.', 'error');
+  if (streamUrl && !isValidHttpUrl(streamUrl)) {
+    showFeedbackStatus('radioRequestStatus', 'Please enter a valid http or https URL, or leave it empty.', 'error');
     return;
   }
 
