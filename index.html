@@ -356,11 +356,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .history-container{margin-top:0.5rem}
 .history-meta{font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem}
 .history-meta i{margin-right:0.25rem;opacity:0.7}
-#offlineBanner{display:none;align-items:center;justify-content:center;gap:0.5rem;
-               padding:0.7rem 1rem;background:rgba(239,68,68,0.18);
-               color:#fecaca;border-bottom:1px solid rgba(239,68,68,0.35);
-               font-size:0.9rem;font-weight:600;text-align:center}
-#offlineBanner.active{display:flex}
 #stationFilterBar{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;
                   background:rgba(255,255,255,0.04);border:1px solid var(--border);
                   border-radius:0.8rem;padding:0.6rem;margin:0.5rem 0 0.75rem}
@@ -368,20 +363,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                   border:1px solid var(--border);border-radius:0.5rem;padding:0.45rem 0.6rem}
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
-.station-health-row{display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;margin-top:0.3rem}
-.status-pill{display:inline-flex;align-items:center;gap:0.3rem;border-radius:999px;
-             padding:0.18rem 0.45rem;font-size:0.68rem;font-weight:700;
-             background:rgba(148,163,184,0.16);color:#cbd5e1}
-.status-pill.online{background:rgba(34,197,94,0.18);color:#86efac}
-.status-pill.connecting,.status-pill.buffering{background:rgba(245,158,11,0.18);color:#fcd34d}
-.status-pill.offline{background:rgba(239,68,68,0.18);color:#fca5a5}
-.player-health{display:inline-flex;align-items:center;justify-content:center;gap:0.35rem;
-               border-radius:999px;padding:0.35rem 0.7rem;margin-top:0.65rem;
-               font-size:0.82rem;font-weight:700;background:rgba(148,163,184,0.16);
-               color:#cbd5e1}
-.player-health.online{background:rgba(34,197,94,0.18);color:#86efac}
-.player-health.connecting,.player-health.buffering{background:rgba(245,158,11,0.18);color:#fcd34d}
-.player-health.offline{background:rgba(239,68,68,0.18);color:#fca5a5}
 #fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
 #fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
 .admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
@@ -724,8 +705,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fs-report:hover{background:rgba(239,68,68,0.28);color:#fca5a5}
 #fs-sleep:active,#fs-alarm:active,#fs-favorite:active,#fs-share:active,#fs-report:active{transform:scale(0.95)}
 #fs-sleep i,#fs-alarm i,#fs-favorite i,#fs-share i,#fs-report i{font-size:1.2rem}
-#stream-info{margin-top:1rem;padding:0.5rem;font-size:0.85rem;color:rgba(255,255,255,0.7);text-align:center}
-#stream-quality,#stream-bitrate{margin:0.25rem 0}
 /* Fullscreen Volume Control */
 #fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
                    margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
@@ -1105,7 +1084,6 @@ audio{display:none}
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
 </header>
-<div id="offlineBanner"><i class="fas fa-wifi"></i> You are offline. Saved favorites and history still work, but streams need internet.</div>
 <div id="tabs">
   <span id="tab-all" class="active">All</span>
   <span id="tab-fav">Favorites</span>
@@ -1126,7 +1104,6 @@ audio{display:none}
       <option value="recent">Recently played</option>
     </select>
     <label><input type="checkbox" id="favoritesOnlyFilter"/> Favorites only</label>
-    <label><input type="checkbox" id="failedOnlyFilter"/> Needs attention</label>
     <button id="clearFilters" type="button">Clear</button>
   </div>
   <div class="station-list"></div>
@@ -1279,7 +1256,6 @@ audio{display:none}
     <div id="fullscreen-name"></div>
     <div id="fullscreen-now">Live</div>
     <div id="fullscreen-station-meta"></div>
-    <div id="fullscreen-health" class="player-health"><i class="fas fa-circle"></i> Ready</div>
     <div id="fs-sleep-countdown"></div>
     <div id="fullscreen-metadata" style="display:none;">
       <div id="fullscreen-song"></div>
@@ -1301,10 +1277,6 @@ audio{display:none}
   <div id="fullscreen-volume">
     <button id="fs-volume-btn" title="Volume"><i class="fas fa-volume-up"></i></button>
     <input type="range" id="fs-volume-slider" min="0" max="100" value="100" title="Volume">
-  </div>
-  <div id="stream-info" style="display:none;text-align:center;margin-top:1rem;font-size:0.85rem;color:rgba(255,255,255,0.7);">
-    <div id="stream-quality"></div>
-    <div id="stream-bitrate"></div>
   </div>
 </div>
 <!-- Floating Mini Player Widget -->
@@ -1549,7 +1521,6 @@ let playbackHistory = JSON.parse(localStorage.getItem('tcr-history') || '[]'); /
 let playCounts      = JSON.parse(localStorage.getItem('tcr-play-counts') || '{}'); // Play counts for most played
 let stationRatings  = JSON.parse(localStorage.getItem('tcr-ratings') || '{}'); // User ratings for stations
 let nowPlayingHistory = JSON.parse(localStorage.getItem('tcr-now-playing-history') || '[]');
-let failedStreams   = JSON.parse(localStorage.getItem('tcr-failed-streams') || '[]');
 let localRadioRequests = JSON.parse(localStorage.getItem('tcr-radio-requests') || '[]');
 let globalRatings   = {}; // Global ratings from server (will be fetched)
 let currentUser     = JSON.parse(localStorage.getItem('tcr-user') || 'null'); // Current logged in user
@@ -1562,10 +1533,6 @@ let searchTerm      = '';
 let currentGenreFilter = localStorage.getItem('tcr-genre-filter') || '';
 let currentSortFilter = localStorage.getItem('tcr-sort-filter') || 'default';
 let favoritesOnlyFilter = localStorage.getItem('tcr-favorites-only') === 'true';
-let failedOnlyFilter = localStorage.getItem('tcr-failed-only') === 'true';
-let streamHealthState = 'ready';
-let autoSkipInProgress = false;
-let streamStartTimer = null;
 let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
 let sleepTimer;
@@ -1573,11 +1540,9 @@ let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'n
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const stationList = document.querySelector('.station-list');
-const offlineBanner = document.getElementById('offlineBanner');
 const genreFilter = document.getElementById('genreFilter');
 const sortFilter = document.getElementById('sortFilter');
 const favoritesOnlyFilterInput = document.getElementById('favoritesOnlyFilter');
-const failedOnlyFilterInput = document.getElementById('failedOnlyFilter');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const audio       = document.getElementById('audio');
 const pImg        = document.getElementById('p-img');
@@ -1590,7 +1555,6 @@ const fullscreenArtwork = document.getElementById('fullscreen-artwork');
 const fullscreenName = document.getElementById('fullscreen-name');
 const fullscreenNow = document.getElementById('fullscreen-now');
 const fullscreenStationMeta = document.getElementById('fullscreen-station-meta');
-const fullscreenHealth = document.getElementById('fullscreen-health');
 const fsSleepCountdown = document.getElementById('fs-sleep-countdown');
 const fullscreenSong = document.getElementById('fullscreen-song');
 const fullscreenArtist = document.getElementById('fullscreen-artist');
@@ -1603,9 +1567,6 @@ const fsVolumeSlider = document.getElementById('fs-volume-slider');
 const fsFavorite = document.getElementById('fs-favorite');
 const fsShare = document.getElementById('fs-share');
 const fsReport = document.getElementById('fs-report');
-const streamInfo = document.getElementById('stream-info');
-const streamQuality = document.getElementById('stream-quality');
-const streamBitrate = document.getElementById('stream-bitrate');
 const floatingWidget = document.getElementById('floating-widget');
 const widgetClose = document.getElementById('widget-close');
 const widgetImg = document.getElementById('widget-img');
@@ -1851,12 +1812,10 @@ function clearAllCacheOnLaunch() {
     'tcr-token',
     'tcr-fav-synced',
     'tcr-now-playing-history',
-    'tcr-failed-streams',
     'tcr-radio-requests',
     'tcr-genre-filter',
     'tcr-sort-filter',
     'tcr-favorites-only',
-    'tcr-failed-only',
     'tcr-sleep-deadline',
     'tcr-volume',
     'tcr-alarm',
@@ -1903,7 +1862,6 @@ function clearAllCacheOnLaunch() {
     populateLangSelect();
     initThemeSystem(); // Initialize theme system
     initFilters();
-    updateConnectivityUi();
     restoreSleepTimer();
     
     if (tab) {
@@ -2108,57 +2066,7 @@ function initCacheClearing() {
     sessionStorage.setItem('app_initialized', 'true');
   }
 }
-/* ---- FILTERS + CONNECTIVITY ---- */
-function updateConnectivityUi() {
-  const isOnline = navigator.onLine;
-  if (offlineBanner) offlineBanner.classList.toggle('active', !isOnline);
-  if (!isOnline) setStreamHealth('offline', 'Offline');
-}
-
-function getStationKey(station) {
-  return `${station?.name || 'unknown'}|${station?.url || ''}`;
-}
-
-function getRecentFailedStream(station) {
-  const key = getStationKey(station);
-  const cutoff = Date.now() - 24 * 60 * 60000;
-  return failedStreams.find(item => item.key === key && new Date(item.timestamp).getTime() > cutoff);
-}
-
-function getStationHealth(station) {
-  if (lastPlayedStation && getStationKey(lastPlayedStation.station) === getStationKey(station)) {
-    return streamHealthState;
-  }
-  return getRecentFailedStream(station) ? 'offline' : 'ready';
-}
-
-function getHealthLabel(state) {
-  return {
-    ready: 'Ready',
-    connecting: 'Connecting',
-    online: 'Online',
-    buffering: 'Buffering',
-    offline: 'Offline'
-  }[state] || 'Ready';
-}
-
-function setStreamHealth(state, label = getHealthLabel(state)) {
-  streamHealthState = state;
-  const icon = state === 'online' ? 'fa-circle-check'
-    : state === 'offline' ? 'fa-triangle-exclamation'
-    : state === 'buffering' ? 'fa-spinner fa-spin'
-    : 'fa-circle';
-  if (fullscreenHealth) {
-    fullscreenHealth.className = `player-health ${state}`;
-    fullscreenHealth.innerHTML = `<i class="fas ${icon}"></i> ${label}`;
-  }
-  const pNow = document.getElementById('p-now');
-  if (pNow && state !== 'ready') pNow.textContent = label;
-  if (floatingWidget && floatingWidget.classList.contains('active')) {
-    widgetStatus.textContent = label;
-  }
-}
-
+/* ---- FILTERS ---- */
 function populateGenreFilter(baseStations = stationsPerLang[currentLang] || []) {
   if (!genreFilter) return;
   const currentValue = currentGenreFilter;
@@ -2182,9 +2090,6 @@ function applyStationFilters(base) {
   }
   if (favoritesOnlyFilter) {
     list = list.filter(st => favorites.includes(st.name));
-  }
-  if (failedOnlyFilter) {
-    list = list.filter(st => Boolean(getRecentFailedStream(st)));
   }
   if (searchTerm) {
     list = list.filter(st =>
@@ -2233,14 +2138,6 @@ function initFilters() {
       switchTab(currentTab);
     };
   }
-  if (failedOnlyFilterInput) {
-    failedOnlyFilterInput.checked = failedOnlyFilter;
-    failedOnlyFilterInput.onchange = () => {
-      failedOnlyFilter = failedOnlyFilterInput.checked;
-      localStorage.setItem('tcr-failed-only', failedOnlyFilter);
-      switchTab(currentTab);
-    };
-  }
   if (clearFiltersBtn) {
     clearFiltersBtn.onclick = () => {
       searchTerm = '';
@@ -2248,21 +2145,15 @@ function initFilters() {
       currentGenreFilter = '';
       currentSortFilter = 'default';
       favoritesOnlyFilter = false;
-      failedOnlyFilter = false;
       localStorage.removeItem('tcr-genre-filter');
       localStorage.setItem('tcr-sort-filter', currentSortFilter);
       localStorage.setItem('tcr-favorites-only', 'false');
-      localStorage.setItem('tcr-failed-only', 'false');
       if (sortFilter) sortFilter.value = currentSortFilter;
       if (favoritesOnlyFilterInput) favoritesOnlyFilterInput.checked = false;
-      if (failedOnlyFilterInput) failedOnlyFilterInput.checked = false;
       switchTab(currentTab);
     };
   }
 }
-
-window.addEventListener('online', updateConnectivityUi);
-window.addEventListener('offline', updateConnectivityUi);
 
 /* ---- TABS + SEARCH ---- */
 document.getElementById('tab-all').onclick   = () => switchTab('all');
@@ -2336,18 +2227,11 @@ function render(list) {
       div.className += ' playing';
     }
     
-    const stationHealth = getStationHealth(st);
-    const healthLabel = getHealthLabel(stationHealth);
-    const playCount = playCounts[st.name]?.count || 0;
     div.innerHTML = `
       <img src="${st.logo}" alt="" class="station-icon">
       <div class="station-info">
         <div class="station-name">${st.name}</div>
         <div class="station-genre">${st.genre}</div>
-        <div class="station-health-row">
-          <span class="status-pill ${stationHealth}"><i class="fas ${stationHealth === 'offline' ? 'fa-triangle-exclamation' : stationHealth === 'online' ? 'fa-circle-check' : 'fa-circle'}"></i> ${healthLabel}</span>
-          ${playCount ? `<span class="status-pill"><i class="fas fa-play-circle"></i> ${playCount}</span>` : ''}
-        </div>
         ${stationRatings[st.name] ? `<div class="station-rating-display"><i class="fas fa-star"></i> ${stationRatings[st.name].rating}/5</div>` : ''}
         ${globalRatings[st.name] ? `<div class="station-rating-display" style="font-size:0.7rem;opacity:0.8">Global: ${globalRatings[st.name].total.toFixed(1)}/5 (${globalRatings[st.name].count})</div>` : ''}
       </div>
@@ -2369,77 +2253,8 @@ function render(list) {
   });
 }
 /* ---- PLAYER ---- */
-function saveFailedStreams() {
-  failedStreams = failedStreams.slice(0, 100);
-  localStorage.setItem('tcr-failed-streams', JSON.stringify(failedStreams));
-}
-
-function recordFailedStream(station, reason = 'playback_error') {
-  if (!station) return;
-  const key = getStationKey(station);
-  failedStreams = failedStreams.filter(item => item.key !== key);
-  failedStreams.unshift({
-    key,
-    stationName: station.name || 'Unknown station',
-    streamUrl: station.url || '',
-    genre: station.genre || '',
-    language: currentLang || '',
-    reason,
-    timestamp: new Date().toISOString()
-  });
-  saveFailedStreams();
-}
-
-async function submitAutoStreamReport(station, reason) {
-  if (!station) return;
-  const throttleKey = `tcr-auto-report-${getStationKey(station)}`;
-  const lastSent = Number(localStorage.getItem(throttleKey) || 0);
-  if (Date.now() - lastSent < 6 * 60 * 60000) return;
-  if (!await ensureSupabaseReady()) return;
-  try {
-    const { error } = await supabaseClient
-      .from('stream_reports')
-      .insert([{
-        station_name: station.name || 'Unknown station',
-        stream_url: station.url || '',
-        station_genre: station.genre || '',
-        language: currentLang || '',
-        issue_type: 'auto_playback_failed',
-        message: `Automatic failure detection: ${reason}`,
-        contact_email: currentUser ? currentUser.email : '',
-        user_id: currentUser ? currentUser.id : null,
-        user_agent: navigator.userAgent,
-        page_url: window.location.href,
-        status: 'new'
-      }]);
-    if (!error) localStorage.setItem(throttleKey, String(Date.now()));
-  } catch (error) {
-    console.warn('Automatic stream report failed:', error);
-  }
-}
-
-function handleStreamFailure(reason = 'playback_error') {
-  const station = lastPlayedStation?.station;
-  if (!station) return;
-  setStreamHealth('offline', 'Stream not working');
-  recordFailedStream(station, reason);
-  submitAutoStreamReport(station, reason);
-  showNotification('Stream failed. Trying next station...');
-  hapticFeedback('error');
-  if (!autoSkipInProgress && currentList.length > 1) {
-    autoSkipInProgress = true;
-    setTimeout(() => {
-      autoSkipInProgress = false;
-      prevNext(1);
-    }, 1200);
-  }
-  if (currentTab === 'all' || currentTab === 'fav') switchTab(currentTab);
-}
-
 function play(st, i) {
   idx = i;
-  if (streamStartTimer) clearTimeout(streamStartTimer);
-  setStreamHealth('connecting', 'Connecting');
   audio.src = st.url;
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
@@ -2449,20 +2264,16 @@ function play(st, i) {
   if (isGoogleNestCasting()) {
     loadStationOnGoogleNest(st, true);
   } else {
-    audio.play().catch(error => handleStreamFailure(error?.message || 'play_rejected'));
+    audio.play().catch(error => {
+      console.error('Play error:', error);
+      showNotification('Unable to play this station');
+    });
   }
-  streamStartTimer = setTimeout(() => {
-    if (!audio.paused && audio.readyState < 2) {
-      setStreamHealth('buffering', 'Buffering');
-    }
-  }, 8000);
   updateMediaSession(st);
   // Update Wear OS media session
   updateWearOSMediaSession(st);
   // Start metadata fetching (will show only if metadata is available)
   startMetadataFetching(st);
-  // Start stream quality detection
-  detectStreamQuality(st);
   // Track playback history
   addToHistory(st);
   // Update fullscreen player if open
@@ -2530,7 +2341,6 @@ function updateFullscreenPlayer() {
   } else if (fullscreenStationMeta) {
     fullscreenStationMeta.textContent = '';
   }
-  setStreamHealth(streamHealthState);
   updateSleepCountdown();
   
   // Update metadata if available
@@ -2740,8 +2550,6 @@ if (savedVolume !== null) {
 }
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
-  if (streamStartTimer) clearTimeout(streamStartTimer);
-  setStreamHealth('online', 'Online');
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
   player.classList.add('playing'); 
   hapticFeedback('light');
@@ -2784,17 +2592,9 @@ audio.onpause = () => {
   }
   // Stop metadata fetching when paused
   stopMetadataFetching();
-  // Stop stream quality detection when paused
-  stopStreamQualityDetection();
   // Refresh display to remove playing state
   switchTab(currentTab);
 };
-audio.onwaiting = () => setStreamHealth('buffering', 'Buffering');
-audio.onstalled = () => setStreamHealth('buffering', 'Buffering');
-audio.oncanplay = () => {
-  if (!audio.paused) setStreamHealth('online', 'Online');
-};
-audio.onerror = () => handleStreamFailure(audio.error?.message || 'audio_error');
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
@@ -2899,7 +2699,6 @@ async function loadStationOnGoogleNest(st, autoplay = true) {
 
   try {
     await session.loadMedia(request);
-    setStreamHealth('online', 'Casting');
     updatePlaybackUiForRemote(autoplay);
     updateGoogleNestCastControls();
     if (autoplay) {
@@ -2930,7 +2729,7 @@ function playActiveStream() {
 
   return audio.play().catch(err => {
     console.error('Play error:', err);
-    handleStreamFailure(err?.message || 'play_rejected');
+    showNotification('Unable to play this station');
   });
 }
 
@@ -2941,7 +2740,6 @@ function pauseActiveStream() {
       media.pause(new chrome.cast.media.PauseRequest(), () => {
         updatePlaybackUiForRemote(false);
         stopMetadataFetching();
-        stopStreamQualityDetection();
       }, error => {
         console.error('Google Nest pause failed:', error);
       });
@@ -2965,7 +2763,6 @@ function stopActiveStream() {
       updatePlaybackUiForRemote(false);
     }
     stopMetadataFetching();
-    stopStreamQualityDetection();
     return;
   }
 
@@ -4396,20 +4193,14 @@ function renderAdminDashboard() {
   const content = document.getElementById('adminDashboardContent');
   if (!modal || !summary || !content) return;
   const totalStations = Object.values(stationsPerLang).flat().length;
-  summary.textContent = `${totalStations} stations • ${failedStreams.length} failed stream events • ${localRadioRequests.length} station requests • ${nowPlayingHistory.length} song history items`;
-  const failedRows = failedStreams.slice(0, 8).map(item => `
-    <div class="admin-row">
-      <div class="admin-row-title"><i class="fas fa-triangle-exclamation"></i> ${item.stationName}</div>
-      <div class="admin-row-meta">${item.language || ''} • ${item.reason || 'playback_error'} • ${formatTimestamp(item.timestamp)}<br>${item.streamUrl || ''}</div>
-    </div>
-  `).join('') || '<div class="admin-row"><div class="admin-row-meta">No failed streams captured yet.</div></div>';
+  summary.textContent = `${totalStations} stations • ${localRadioRequests.length} station requests • ${nowPlayingHistory.length} song history items`;
   const requestRows = localRadioRequests.slice(0, 6).map(req => `
     <div class="admin-row">
       <div class="admin-row-title"><i class="fas fa-plus-circle"></i> ${req.stationName}</div>
       <div class="admin-row-meta">${req.language || 'Any language'} • ${req.votes || 0} votes • ${req.streamUrl || 'No URL'}</div>
     </div>
   `).join('') || '<div class="admin-row"><div class="admin-row-meta">No station requests yet.</div></div>';
-  content.innerHTML = `<h4>Failed streams</h4>${failedRows}<h4 style="margin-top:1rem">Station requests</h4>${requestRows}`;
+  content.innerHTML = `<h4>Station requests</h4>${requestRows}`;
   modal.style.display = 'flex';
 }
 
@@ -4459,104 +4250,6 @@ if (fsReport) {
     }
     showStreamReportModal(lastPlayedStation.station);
   };
-}
-
-// Stream quality and bitrate detection
-let streamQualityInterval;
-function detectStreamQuality(station) {
-  if (!audio.src || !streamInfo) return;
-  
-  // Clear existing interval
-  if (streamQualityInterval) {
-    clearInterval(streamQualityInterval);
-  }
-  
-  // Try to detect stream quality from headers
-  fetch(station.url, { method: 'HEAD', mode: 'no-cors' })
-    .catch(() => {
-      // CORS might block, try alternative method
-      detectStreamQualityFromAudio();
-    });
-  
-  // Monitor audio element for quality info
-  detectStreamQualityFromAudio();
-  
-  // Update periodically
-  streamQualityInterval = setInterval(() => {
-    detectStreamQualityFromAudio();
-  }, 5000);
-}
-
-function detectStreamQualityFromAudio() {
-  if (!audio.src || !streamInfo || !streamQuality || !streamBitrate) return;
-  
-  try {
-    // Try to get bitrate from audio element
-    // Note: Most browsers don't expose this directly, so we estimate
-    const audioElement = audio;
-    
-    // Check if we can get any quality info
-    // For radio streams, we typically see:
-    // - MP3: 64kbps, 128kbps, 192kbps, 320kbps
-    // - AAC: 48kbps, 64kbps, 96kbps, 128kbps
-    
-    // Estimate based on stream URL patterns
-    const url = audioElement.src;
-    let estimatedBitrate = '';
-    let quality = '';
-    
-    // Check URL for bitrate indicators
-    if (url.match(/64|64k|64kb/i)) {
-      estimatedBitrate = '64 kbps';
-      quality = 'Low';
-    } else if (url.match(/96|96k|96kb/i)) {
-      estimatedBitrate = '96 kbps';
-      quality = 'Medium';
-    } else if (url.match(/128|128k|128kb/i)) {
-      estimatedBitrate = '128 kbps';
-      quality = 'High';
-    } else if (url.match(/192|192k|192kb/i)) {
-      estimatedBitrate = '192 kbps';
-      quality = 'High';
-    } else if (url.match(/320|320k|320kb/i)) {
-      estimatedBitrate = '320 kbps';
-      quality = 'Very High';
-    } else {
-      // Default estimate for radio streams
-      estimatedBitrate = '~128 kbps';
-      quality = 'Standard';
-    }
-    
-    // Check codec from URL
-    let codec = '';
-    if (url.includes('.mp3') || url.includes('mp3')) {
-      codec = 'MP3';
-    } else if (url.includes('.aac') || url.includes('aac')) {
-      codec = 'AAC';
-    } else if (url.includes('.ogg') || url.includes('ogg')) {
-      codec = 'OGG';
-    } else {
-      codec = 'Stream';
-    }
-    
-    // Update display
-    streamQuality.textContent = `Quality: ${quality} (${codec})`;
-    streamBitrate.textContent = `Bitrate: ${estimatedBitrate}`;
-    streamInfo.style.display = 'block';
-    
-  } catch (error) {
-    console.log('Stream quality detection error:', error);
-  }
-}
-
-function stopStreamQualityDetection() {
-  if (streamQualityInterval) {
-    clearInterval(streamQualityInterval);
-    streamQualityInterval = null;
-  }
-  if (streamInfo) {
-    streamInfo.style.display = 'none';
-  }
 }
 
 if (document.getElementById('setAlarm')) {
