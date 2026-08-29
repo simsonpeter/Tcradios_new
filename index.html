@@ -980,6 +980,20 @@ audio{display:none}
 #accountStatus.success{background:rgba(34,197,94,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.5)}
 #accountStatus.error{background:rgba(220,38,38,0.2);color:#dc2626;border:1px solid rgba(220,38,38,0.5)}
 #accountStatus.info{background:rgba(59,130,246,0.2);color:#3b82f6;border:1px solid rgba(59,130,246,0.5)}
+#startupGreeting{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-140%);
+                 z-index:3000;max-width:min(92vw,24rem);width:max-content;pointer-events:none;
+                 opacity:0;transition:transform .45s ease,opacity .45s ease}
+#startupGreeting.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+#startupGreeting .greeting-card{display:flex;align-items:center;gap:0.75rem;
+                 background:var(--card);color:var(--text);border:1px solid var(--border);
+                 border-radius:1rem;padding:0.85rem 1.1rem;box-shadow:var(--shadow-xl);
+                 backdrop-filter:blur(10px)}
+#startupGreeting .greeting-icon{width:2.4rem;height:2.4rem;border-radius:50%;
+                 display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                 background:rgba(249,115,22,0.18);color:var(--accent);font-size:1.15rem}
+#startupGreeting .greeting-text{font-size:1.05rem;font-weight:700;line-height:1.25;
+                 letter-spacing:0.01em}
+#startupGreeting .greeting-sub{font-size:0.78rem;opacity:0.7;font-weight:500;margin-top:0.15rem}
 #feedbackModal,#radioRequestModal,#adminDashboardModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
 #feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow-xl)}
 #feedbackModal h3,#radioRequestModal h3,#adminDashboardModal h3{margin-bottom:1rem;color:var(--accent);text-align:center}
@@ -1373,6 +1387,15 @@ audio{display:none}
     <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem">
       <button id="saveRating">Save Rating</button>
       <button id="closeRatingModal">Close</button>
+    </div>
+  </div>
+</div>
+<div id="startupGreeting" aria-live="polite" aria-atomic="true" hidden>
+  <div class="greeting-card">
+    <div class="greeting-icon"><i class="fas fa-hand-sparkles"></i></div>
+    <div>
+      <div class="greeting-text" id="startupGreetingText">Good morning</div>
+      <div class="greeting-sub">Welcome to TC RADIOS</div>
     </div>
   </div>
 </div>
@@ -1825,6 +1848,7 @@ function clearAllCacheOnLaunch() {
     'tcr-ratings',
     'tcr-user',
     'tcr-token',
+    'tcr-display-name',
     'tcr-fav-synced',
     'tcr-now-playing-history',
     'tcr-known-stations',
@@ -4681,11 +4705,7 @@ async function registerUser(email, password) {
     
     // User is immediately logged in (if email confirmation is disabled)
     if (data.user && data.session) {
-      currentUser = {
-        id: data.user.id,
-        email: data.user.email,
-        createdAt: data.user.created_at
-      };
+      currentUser = buildUserRecord(data.user);
       authToken = data.session.access_token;
       
       localStorage.setItem('tcr-user', JSON.stringify(currentUser));
@@ -4731,11 +4751,7 @@ async function loginUser(email, password) {
     
     if (error) throw error;
     
-    currentUser = {
-      id: data.user.id,
-      email: data.user.email,
-      createdAt: data.user.created_at
-    };
+    currentUser = buildUserRecord(data.user);
     authToken = data.session.access_token;
     
     localStorage.setItem('tcr-user', JSON.stringify(currentUser));
@@ -4962,11 +4978,7 @@ async function checkSupabaseSession() {
     
     if (session) {
       const { data: { user } } = await supabaseClient.auth.getUser();
-      currentUser = {
-        id: user.id,
-        email: user.email,
-        createdAt: user.created_at
-      };
+      currentUser = buildUserRecord(user);
       authToken = session.access_token;
       localStorage.setItem('tcr-user', JSON.stringify(currentUser));
       localStorage.setItem('tcr-token', authToken);
@@ -4995,6 +5007,88 @@ async function checkSupabaseSession() {
   }
 }
 
+/* ---- STARTUP GREETING ---- */
+let startupGreetingShown = false;
+let startupGreetingTimer = null;
+
+function deriveNameFromEmail(email) {
+  if (!email || typeof email !== 'string') return '';
+  const local = email.split('@')[0] || '';
+  const cleaned = local
+    .replace(/[._-]+/g, ' ')
+    .replace(/\d+/g, ' ')
+    .trim();
+  const first = (cleaned.split(/\s+/).filter(Boolean)[0] || local).trim();
+  if (!first) return '';
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+function getStoredDisplayName() {
+  const stored = (localStorage.getItem('tcr-display-name') || '').trim();
+  if (stored) return stored;
+  if (currentUser && currentUser.name) return String(currentUser.name).trim();
+  return '';
+}
+
+function setStoredDisplayName(name) {
+  const cleaned = String(name || '').trim().replace(/\s+/g, ' ');
+  if (cleaned) localStorage.setItem('tcr-display-name', cleaned);
+  else localStorage.removeItem('tcr-display-name');
+  if (currentUser) {
+    currentUser.name = cleaned;
+    localStorage.setItem('tcr-user', JSON.stringify(currentUser));
+  }
+  return cleaned;
+}
+
+function getUserDisplayName() {
+  const stored = getStoredDisplayName();
+  if (stored) return stored;
+  if (currentUser && currentUser.email) return deriveNameFromEmail(currentUser.email);
+  return '';
+}
+
+function getTimeOfDayGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function buildUserRecord(user) {
+  const existingName = getStoredDisplayName() || deriveNameFromEmail(user && user.email);
+  if (existingName) localStorage.setItem('tcr-display-name', existingName);
+  return {
+    id: user.id,
+    email: user.email,
+    createdAt: user.created_at,
+    name: existingName
+  };
+}
+
+function showStartupGreeting(force = false) {
+  if (startupGreetingShown && !force) return;
+  const el = document.getElementById('startupGreeting');
+  const textEl = document.getElementById('startupGreetingText');
+  if (!el || !textEl) return;
+
+  const name = getUserDisplayName();
+  const period = getTimeOfDayGreeting();
+  textEl.textContent = name ? `${period}, ${name}` : `${period}!`;
+
+  startupGreetingShown = true;
+  el.hidden = false;
+  // Restart animation cleanly when forcing a second greeting (e.g. after login)
+  el.classList.remove('show');
+  requestAnimationFrame(() => el.classList.add('show'));
+
+  if (startupGreetingTimer) clearTimeout(startupGreetingTimer);
+  startupGreetingTimer = setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => { el.hidden = true; }, 450);
+  }, 4200);
+}
+
 /* ---- ACCOUNT MODAL UI ---- */
 function showAccountModal() {
   const accountModal = document.getElementById('accountModal');
@@ -5003,19 +5097,32 @@ function showAccountModal() {
   
   if (currentUser) {
     // Show logged in UI
+    const displayName = getUserDisplayName();
     accountModalTitle.textContent = 'Account';
     accountContent.innerHTML = `
       <div class="user-info">
-        <div class="user-email">${currentUser.email}</div>
+        <label for="displayNameInput" style="display:block;font-size:0.85rem;margin-bottom:0.35rem;opacity:0.8">Your name</label>
+        <input type="text" id="displayNameInput" placeholder="e.g. Simson" maxlength="40" value="${displayName.replace(/"/g, '&quot;')}">
+        <div class="user-email" style="margin-top:0.75rem">${currentUser.email}</div>
         <div class="sync-status">
           <span class="sync-indicator synced"></span>
           Synced across devices
         </div>
       </div>
+      <button id="saveDisplayNameBtn" class="secondary">Save Name</button>
       <button id="syncFavoritesBtn" class="secondary">Sync Favorites Now</button>
       <button id="logoutBtn">Logout</button>
     `;
     
+    document.getElementById('saveDisplayNameBtn').onclick = () => {
+      const value = document.getElementById('displayNameInput').value.trim();
+      if (!value) {
+        showAccountStatus('Please enter your name', 'error');
+        return;
+      }
+      setStoredDisplayName(value);
+      showAccountStatus(`Saved. Next launch: “${getTimeOfDayGreeting()}, ${value}”`, 'success');
+    };
     document.getElementById('syncFavoritesBtn').onclick = async () => {
       await syncFavoritesToServer();
     };
@@ -5037,6 +5144,7 @@ function showAccountModal() {
         <button id="showRegisterBtn" class="secondary">Create Account</button>
       </div>
       <div id="registerForm" style="display:none">
+        <input type="text" id="registerName" placeholder="Your name (e.g. Simson)" maxlength="40">
         <input type="email" id="registerEmail" placeholder="Email" required>
         <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required>
         <button id="registerBtn">Create Account</button>
@@ -5059,6 +5167,7 @@ function showAccountModal() {
         showAccountStatus('Logged in successfully!', 'success');
         setTimeout(() => {
           showAccountModal();
+          showStartupGreeting(true);
         }, 1000);
       } catch (error) {
         showAccountStatus(error.message || 'Login failed', 'error');
@@ -5067,6 +5176,7 @@ function showAccountModal() {
     
     // Register form handlers
     document.getElementById('registerBtn').onclick = async () => {
+      const name = document.getElementById('registerName').value.trim();
       const email = document.getElementById('registerEmail').value.trim();
       const password = document.getElementById('registerPassword').value;
       
@@ -5079,6 +5189,8 @@ function showAccountModal() {
         showAccountStatus('Password must be at least 6 characters', 'error');
         return;
       }
+
+      if (name) setStoredDisplayName(name);
       
       try {
         const result = await registerUser(email, password);
@@ -5100,6 +5212,7 @@ function showAccountModal() {
           showAccountStatus('Account created and logged in! Favorites synced.', 'success');
           setTimeout(() => {
             showAccountModal();
+            showStartupGreeting(true);
           }, 1500);
         } else {
           showAccountStatus('Account created! Please check your email to confirm.', 'success');
@@ -5229,9 +5342,13 @@ window.addEventListener('load', async () => {
     } catch (error) {
       console.error('Failed to fetch global ratings:', error);
     }
+
+    // Personal greeting every time the app starts
+    setTimeout(() => showStartupGreeting(), 600);
   } catch (error) {
     console.error('Account initialization error:', error);
     // Don't block the app if account features fail
+    setTimeout(() => showStartupGreeting(), 600);
   }
 });
 
