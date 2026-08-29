@@ -4,11 +4,11 @@
         <categories android:name='android.intent.category.LAUNCHER' />
     </shortcut>
     <shortcut android:shortcutId='shortcut1' android:enabled='true' android:icon='@drawable/shortcut_1' android:shortcutShortLabel='@string/shortcut_short_name_1' android:shortcutLongLabel='@string/shortcut_name_1'>
-        <intent android:action='android.intent.action.MAIN' android:targetPackage='com.jayathasoft.tcradios.app' android:targetClass='com.jayathasoft.tcradios.app.LauncherActivity' android:data='https://tcradios-new.vercel.app/?tab=fav' />
+        <intent android:action='android.intent.action.MAIN' android:targetPackage='com.jayathasoft.tcradios.app' android:targetClass='com.jayathasoft.tcradios.app.LauncherActivity' android:data='https://tcradios-new.vercel.app/?action=playfav' />
         <categories android:name='android.intent.category.LAUNCHER' />
     </shortcut>
     <shortcut android:shortcutId='shortcut2' android:enabled='true' android:icon='@drawable/shortcut_2' android:shortcutShortLabel='@string/shortcut_short_name_2' android:shortcutLongLabel='@string/shortcut_name_2'>
-        <intent android:action='android.intent.action.MAIN' android:targetPackage='com.jayathasoft.tcradios.app' android:targetClass='com.jayathasoft.tcradios.app.LauncherActivity' android:data='https://tcradios-new.vercel.app/?action=quickplay' />
+        <intent android:action='android.intent.action.MAIN' android:targetPackage='com.jayathasoft.tcradios.app' android:targetClass='com.jayathasoft.tcradios.app.LauncherActivity' android:data='https://tcradios-new.vercel.app/?action=playlang&amp;lang=tamil' />
         <categories android:name='android.intent.category.LAUNCHER' />
     </shortcut>
 </shortcuts>

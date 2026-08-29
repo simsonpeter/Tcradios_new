@@ -46,16 +46,22 @@ TC RADIOS exposes a native `MediaBrowserServiceCompat` from the Android app so A
 
 ### Key Features
 - **Native Media Browser** - Lets Android Auto list TC RADIOS in media apps
+- **Recents + Favorites from your account** - PWA favorites/history sync into native prefs (`tcradios://sync`) and Android Auto can also refresh Favorites from Supabase when logged in
 - **Media Session Integration** - Full Android Auto media controls
-- **Voice Command Support** - Web Speech API for hands-free control
+- **Voice Command Support** - `onPlayFromSearch` for Tamil / language / favorites
 - **Automotive UI Optimization** - Large touch targets and simplified interface
 - **Background Playback** - Continues playing when Android Auto interface changes
 - **Rich Metadata Display** - Station info, logos, and now playing details
+- **Home screen widgets** - 1×1 Play Last + 2×2 Favorites grid (same synced library)
 
 ### Key Files
 - `twa/app/src/main/java/com/jayathasoft/tcradios/app/AndroidAutoMediaService.java` - Native Android Auto station browser and playback service
-- `twa/app/src/main/AndroidManifest.xml` - Declares the media browser service and Android Auto metadata
-- `index.html` - Enhanced with media session support for the phone/web player
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/StationSyncStore.java` - Shared favorites/recents/auth prefs + Supabase pull
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/NativeSyncActivity.java` - Receives `tcradios://sync` from the PWA
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/PlayLastWidgetProvider.java` - 1×1 play-last widget
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/FavoritesGridWidgetProvider.java` - 2×2 favorites widget
+- `twa/app/src/main/AndroidManifest.xml` - Declares the media browser service, widgets, and Android Auto metadata
+- `index.html` - PWA player + `syncLibraryToNativeApp()` bridge
 - `automotive_app_desc.xml` - Android Auto app descriptor
 - `automotive.xml` - Android Auto metadata and voice command examples
 
@@ -64,15 +70,20 @@ TC RADIOS exposes a native `MediaBrowserServiceCompat` from the Android app so A
 ### Prerequisites
 1. Android Auto app installed on phone
 2. Compatible car or Android Auto head unit
-3. TC RADIOS Android app version 30 or newer installed from the latest APK/AAB build
+3. TC RADIOS Android app version **31** or newer installed from the latest APK/AAB build
 
 ### Usage
 1. Install the latest TC RADIOS Android APK/AAB on the phone.
-2. Open TC RADIOS once on the phone so Android registers the app.
+2. Open TC RADIOS once on the phone **while logged in** so Favorites and Recents sync to Android Auto / widgets.
 3. Connect phone to car via USB or wireless.
 4. In Android Auto, open the app launcher or media app list.
-5. Select TC RADIOS and choose a station.
+5. Select TC RADIOS → **Recents** or **Favorites** (or Tamil / other languages).
 6. Use car touch controls, steering wheel buttons, or Google Assistant transport commands.
+
+### Home screen widgets
+1. Long-press the home screen → Widgets → TC RADIOS.
+2. Add **Play Last** (1×1) or **Favorites** (2×2).
+3. Tap a tile to start native playback.
 
 ## Voice Command Examples
 

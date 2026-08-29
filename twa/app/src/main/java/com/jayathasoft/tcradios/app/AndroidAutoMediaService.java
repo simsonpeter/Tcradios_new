@@ -44,14 +44,21 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String CATEGORY_FAVORITES = CATEGORY_PREFIX + "favorites";
     private static final String CATEGORY_ALL = CATEGORY_PREFIX + "all";
     private static final String DEFAULT_LANGUAGE_KEY = "tamil";
-    private static final String PREFS_NAME = "android_auto_media";
-    private static final String PREF_LAST_ID = "last_station_id";
-    private static final String PREF_LAST_LANGUAGE = "last_station_language";
-    private static final String PREF_LAST_NAME = "last_station_name";
-    private static final String PREF_LAST_GENRE = "last_station_genre";
-    private static final String PREF_LAST_URL = "last_station_url";
-    private static final String PREF_LAST_ARTWORK = "last_station_artwork";
-    private static final String PREF_FAVORITE_IDS = "favorite_station_ids";
+    private static final String PREFS_NAME = StationSyncStore.PREFS_NAME;
+    private static final String PREF_LAST_ID = StationSyncStore.PREF_LAST_ID;
+    private static final String PREF_LAST_LANGUAGE = StationSyncStore.PREF_LAST_LANGUAGE;
+    private static final String PREF_LAST_NAME = StationSyncStore.PREF_LAST_NAME;
+    private static final String PREF_LAST_GENRE = StationSyncStore.PREF_LAST_GENRE;
+    private static final String PREF_LAST_URL = StationSyncStore.PREF_LAST_URL;
+    private static final String PREF_LAST_ARTWORK = StationSyncStore.PREF_LAST_ARTWORK;
+    private static final String PREF_FAVORITE_IDS = StationSyncStore.PREF_FAVORITE_IDS;
+    public static final String ACTION_PLAY_LAST = "com.jayathasoft.tcradios.app.action.PLAY_LAST";
+    public static final String ACTION_PLAY_FAVORITE = "com.jayathasoft.tcradios.app.action.PLAY_FAVORITE";
+    public static final String ACTION_PLAY_LANGUAGE = "com.jayathasoft.tcradios.app.action.PLAY_LANGUAGE";
+    public static final String ACTION_PLAY_STATION = "com.jayathasoft.tcradios.app.action.PLAY_STATION";
+    public static final String EXTRA_STATION_NAME = "station_name";
+    public static final String EXTRA_STATION_INDEX = "station_index";
+    public static final String EXTRA_LANGUAGE = "language";
     private static final String DATA_BASE_URL =
             "https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main";
     private static final String DEFAULT_ARTWORK_URL =
@@ -172,10 +179,10 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
         if (ROOT_ID.equals(parentId)) {
             List<MediaBrowserCompat.MediaItem> categories = new ArrayList<>();
-            if (getSavedStation() != null) {
-                categories.add(createCategory(CATEGORY_LAST_PLAYED, "Last Played", "Resume your last Android Auto station"));
-            }
-            categories.add(createCategory(CATEGORY_FAVORITES, "Favorites", "Saved Android Auto favorites"));
+            categories.add(createCategory(CATEGORY_LAST_PLAYED, "Recents",
+                    "Recently played stations from your account"));
+            categories.add(createCategory(CATEGORY_FAVORITES, "Favorites",
+                    "Synced favorites from your TC RADIOS account"));
             addLanguageCategory(categories, DEFAULT_LANGUAGE_KEY);
             categories.add(createCategory(CATEGORY_ALL, "All Stations", "Browse every TC RADIOS station"));
             for (LanguageCategory category : LANGUAGE_CATEGORIES) {
@@ -245,8 +252,51 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && intent.getAction() != null) {
+            handlePlaybackAction(intent);
+        }
         MediaButtonReceiverCompat.handleIntent(mediaSession, intent);
         return START_STICKY;
+    }
+
+    private void handlePlaybackAction(Intent intent) {
+        String action = intent.getAction();
+        if (ACTION_PLAY_LAST.equals(action)) {
+            Station station = getSavedStation();
+            if (station == null) {
+                List<Station> recents = getRecentStations();
+                station = recents.isEmpty() ? getDefaultStation() : recents.get(0);
+            }
+            playStation(station);
+            return;
+        }
+        if (ACTION_PLAY_FAVORITE.equals(action)) {
+            List<Station> favorites = getFavoriteStations();
+            int index = intent.getIntExtra(EXTRA_STATION_INDEX, 0);
+            if (!favorites.isEmpty()) {
+                if (index < 0 || index >= favorites.size()) index = 0;
+                playStation(favorites.get(index));
+            } else {
+                playStation(getDefaultStation());
+            }
+            return;
+        }
+        if (ACTION_PLAY_LANGUAGE.equals(action)) {
+            String language = intent.getStringExtra(EXTRA_LANGUAGE);
+            if (TextUtils.isEmpty(language)) language = DEFAULT_LANGUAGE_KEY;
+            List<Station> stations = loadStationsForLanguage(language.toLowerCase(Locale.US));
+            if (!stations.isEmpty()) {
+                playStation(stations.get(0));
+            }
+            return;
+        }
+        if (ACTION_PLAY_STATION.equals(action)) {
+            String name = intent.getStringExtra(EXTRA_STATION_NAME);
+            Station station = findStationByName(name);
+            if (station != null) {
+                playStation(station);
+            }
+        }
     }
 
     @Override
@@ -303,7 +353,37 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             currentStationIndex = (currentStationIndex - 1 + stations.size()) % stations.size();
             playStation(stations.get(currentStationIndex));
         }
+
+        @Override
+        public void onPlayFromSearch(String query, Bundle extras) {
+            Station station = resolveSearchQuery(query);
+            if (station != null) {
+                playStation(station);
+            } else {
+                onPlay();
+            }
+        }
     };
+
+    private Station resolveSearchQuery(String query) {
+        String normalized = query == null ? "" : query.trim().toLowerCase(Locale.US);
+        if (TextUtils.isEmpty(normalized) || normalized.contains("tamil")) {
+            List<Station> tamil = loadStationsForLanguage(DEFAULT_LANGUAGE_KEY);
+            return tamil.isEmpty() ? getDefaultStation() : tamil.get(0);
+        }
+        for (LanguageCategory category : LANGUAGE_CATEGORIES) {
+            if (normalized.contains(category.key) || normalized.contains(category.title.toLowerCase(Locale.US))) {
+                List<Station> stations = loadStationsForLanguage(category.key);
+                if (!stations.isEmpty()) return stations.get(0);
+            }
+        }
+        if (normalized.contains("favorite") || normalized.contains("favourite")) {
+            List<Station> favorites = getFavoriteStations();
+            if (!favorites.isEmpty()) return favorites.get(0);
+        }
+        Station byName = findStationByName(query);
+        return byName != null ? byName : getDefaultStation();
+    }
 
     private void playStation(Station station) {
         if (station == null) return;
@@ -460,10 +540,13 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
     private List<Station> getStationsForCategory(String categoryId) {
         if (CATEGORY_FAVORITES.equals(categoryId)) {
+            StationSyncStore.refreshFavoritesFromCloud(this);
             return getFavoriteStations();
         }
 
         if (CATEGORY_LAST_PLAYED.equals(categoryId)) {
+            List<Station> recents = getRecentStations();
+            if (!recents.isEmpty()) return recents;
             Station savedStation = getSavedStation();
             if (savedStation == null) {
                 return Collections.singletonList(getDefaultStation());
@@ -483,21 +566,74 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         return loadStationsForLanguage(languageKey);
     }
 
-    private List<Station> getFavoriteStations() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String favoriteIds = prefs.getString(PREF_FAVORITE_IDS, "");
-        if (TextUtils.isEmpty(favoriteIds)) {
-            return new ArrayList<>();
+    private List<Station> getRecentStations() {
+        List<Station> recents = new ArrayList<>();
+        JSONArray recentJson = StationSyncStore.getRecentStationsJson(this);
+        for (int i = 0; i < recentJson.length(); i++) {
+            JSONObject item = recentJson.optJSONObject(i);
+            if (item == null) continue;
+            String name = item.optString("name", "").trim();
+            Station matched = findStationByName(name);
+            if (matched != null) {
+                recents.add(matched);
+                continue;
+            }
+            String url = item.optString("url", "");
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(url)) continue;
+            String lang = item.optString("lang", DEFAULT_LANGUAGE_KEY);
+            recents.add(new Station(
+                    lang,
+                    item.optString("id", lang + "-" + StationSyncStore.slugify(name)),
+                    name,
+                    item.optString("genre", "Christian Radio"),
+                    url,
+                    firstNonEmpty(item.optString("logo", ""), DEFAULT_ARTWORK_URL)));
         }
+        return recents;
+    }
 
+    private List<Station> getFavoriteStations() {
+        List<String> favoriteNames = StationSyncStore.getFavoriteNames(this);
         List<Station> favorites = new ArrayList<>();
-        for (String id : favoriteIds.split(",")) {
-            Station station = findStation(STATION_PREFIX + id.trim());
+        for (String nameOrId : favoriteNames) {
+            Station station = findStationByName(nameOrId);
+            if (station == null) {
+                station = findStation(STATION_PREFIX + nameOrId.trim());
+            }
             if (station != null) {
                 favorites.add(station);
             }
         }
+
+        // Legacy ID-only fallback
+        if (favorites.isEmpty()) {
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String favoriteIds = prefs.getString(PREF_FAVORITE_IDS, "");
+            if (!TextUtils.isEmpty(favoriteIds)) {
+                for (String id : favoriteIds.split(",")) {
+                    Station station = findStation(STATION_PREFIX + id.trim());
+                    if (station != null) {
+                        favorites.add(station);
+                    }
+                }
+            }
+        }
         return favorites;
+    }
+
+    private Station findStationByName(String name) {
+        if (TextUtils.isEmpty(name)) return null;
+        String needle = name.trim().toLowerCase(Locale.US);
+        for (LanguageCategory category : LANGUAGE_CATEGORIES) {
+            for (Station station : loadStationsForLanguage(category.key)) {
+                if (station.name.toLowerCase(Locale.US).equals(needle)
+                        || station.id.toLowerCase(Locale.US).equals(needle)
+                        || StationSyncStore.slugify(station.name).equals(StationSyncStore.slugify(name))) {
+                    return station;
+                }
+            }
+        }
+        return null;
     }
 
     private Station getDefaultStation() {

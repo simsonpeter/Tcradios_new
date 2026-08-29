@@ -20,8 +20,8 @@
     "path": "jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "Android Auto Native Media",
-  "appVersionCode": 30,
+  "appVersionName": "Android Auto Cloud Sync Widgets",
+  "appVersionCode": 31,
   "shortcuts": [
     {
       "name": "Play Last Station",
@@ -30,15 +30,15 @@
       "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
     },
     {
-      "name": "Favorites",
-      "shortName": "Favorites",
-      "url": "https://tcradios-new.vercel.app/?tab=fav",
+      "name": "Play Favorite",
+      "shortName": "Favorite",
+      "url": "https://tcradios-new.vercel.app/?action=playfav",
       "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
     },
     {
-      "name": "Quick Play",
-      "shortName": "Play",
-      "url": "https://tcradios-new.vercel.app/?action=quickplay",
+      "name": "Play Tamil",
+      "shortName": "Tamil",
+      "url": "https://tcradios-new.vercel.app/?action=playlang&lang=tamil",
       "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
     }
   ],

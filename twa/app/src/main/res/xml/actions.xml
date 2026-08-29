@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App Actions / Assistant entry points for TC RADIOS media -->
+<actions>
+    <action intentName="actions.intent.PLAY_MEDIA">
+        <fulfillment urlTemplate="https://tcradios-new.vercel.app/{?action,lang}">
+            <parameter-mapping intentParameter="action" urlParameter="action" required="true" />
+            <parameter-mapping intentParameter="lang" urlParameter="lang" />
+        </fulfillment>
+        <fulfillment urlTemplate="https://tcradios-new.vercel.app/?action=playlang&amp;lang=tamil" />
+        <fulfillment urlTemplate="https://tcradios-new.vercel.app/?action=playfav" />
+    </action>
+</actions>

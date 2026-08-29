@@ -215,8 +215,53 @@
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.jayathasoft.tcradios.app.action.PLAY_LAST" />
+                <action android:name="com.jayathasoft.tcradios.app.action.PLAY_FAVORITE" />
+                <action android:name="com.jayathasoft.tcradios.app.action.PLAY_LANGUAGE" />
+                <action android:name="com.jayathasoft.tcradios.app.action.PLAY_STATION" />
+            </intent-filter>
         </service>
 
+        <activity
+            android:name=".NativeSyncActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tcradios" android:host="sync" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".PlayLastWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_play_last_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_play_last_info" />
+        </receiver>
+
+        <receiver
+            android:name=".FavoritesGridWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_favorites_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_favorites_grid_info" />
+        </receiver>
+
+        <meta-data
+            android:name="com.google.android.actions"
+            android:resource="@xml/actions" />
 
         
             <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />

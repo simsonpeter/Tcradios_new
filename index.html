@@ -1952,15 +1952,98 @@ function clearAllCacheOnLaunch() {
         play(stations[0], 0);
         return;
       }
+    } else if (action === 'playfav') {
+      // Wear / shortcut: one-tap first favorite
+      if (playFirstFavorite()) return;
+    } else if (action === 'playlang') {
+      const lang = (urlParams.get('lang') || 'tamil').toLowerCase();
+      if (playFirstStationInLanguage(lang)) return;
     }
     autoPlayLastOrFirst();
   }, 500); // Small delay to ensure UI is ready
   
   // Initialize Android Auto integration
   initAndroidAutoIntegration();
+  // Push favorites/recents to native Auto + widgets (Android TWA)
+  syncLibraryToNativeApp();
   
   console.log('TC RADIOS app initialized with Android Auto support');
 })();
+
+function playFirstFavorite() {
+  const favStations = getFavoritesInOrder();
+  if (!favStations.length) return false;
+  const station = favStations[0];
+  const lang = station.language || Object.keys(stationsPerLang).find(l =>
+    (stationsPerLang[l] || []).some(s => s.name === station.name)
+  ) || currentLang;
+  if (lang && lang !== currentLang) {
+    currentLang = lang;
+    localStorage.setItem('currentLang', currentLang);
+    const sel = document.getElementById('langSelect');
+    if (sel) sel.value = currentLang;
+  }
+  const list = stationsPerLang[currentLang] || [];
+  const index = Math.max(0, list.findIndex(s => s.name === station.name));
+  play(station, index >= 0 ? index : 0);
+  return true;
+}
+
+function playFirstStationInLanguage(lang) {
+  if (!LANG_URLS[lang]) return false;
+  currentLang = lang;
+  localStorage.setItem('currentLang', currentLang);
+  const sel = document.getElementById('langSelect');
+  if (sel) sel.value = currentLang;
+  switchTab(currentTab === 'about' ? 'all' : currentTab);
+  const stations = stationsPerLang[lang] || [];
+  if (!stations.length) return false;
+  play(stations[0], 0);
+  return true;
+}
+
+/** Bridge PWA library → native Android Auto / home widgets via tcradios://sync */
+function syncLibraryToNativeApp() {
+  try {
+    const isAndroid = /Android/i.test(navigator.userAgent || '');
+    if (!isAndroid) return;
+
+    const orderedFavorites = (favoritesOrder.length ? favoritesOrder : favorites)
+      .filter(name => favorites.includes(name));
+    const recents = getRecentlyPlayed(20).map(entry => ({
+      name: entry.station?.name || entry.stationName,
+      url: entry.station?.url || entry.stationUrl,
+      logo: entry.station?.logo || entry.stationLogo || '',
+      genre: entry.station?.genre || entry.stationGenre || '',
+      lang: entry.lang || currentLang
+    })).filter(item => item.name && item.url);
+
+    const last = lastPlayedStation?.station ? {
+      name: lastPlayedStation.station.name,
+      url: lastPlayedStation.station.url,
+      logo: lastPlayedStation.station.logo || '',
+      genre: lastPlayedStation.station.genre || '',
+      lang: lastPlayedStation.lang || currentLang
+    } : null;
+
+    const payload = {
+      favorites: orderedFavorites,
+      recents,
+      lastPlayed: last,
+      token: authToken || localStorage.getItem('tcr-token') || '',
+      userId: currentUser?.id || ''
+    };
+
+    const url = 'tcradios://sync?data=' + encodeURIComponent(JSON.stringify(payload));
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    setTimeout(() => iframe.remove(), 2500);
+  } catch (error) {
+    console.warn('Native library sync skipped:', error);
+  }
+}
 function autoPlayLastOrFirst() {
   // Check if there's a last played station
   if (lastPlayedStation && lastPlayedStation.lang === currentLang) {
@@ -3324,6 +3407,7 @@ function addToHistory(station) {
   // Save to localStorage
   localStorage.setItem('tcr-history', JSON.stringify(playbackHistory));
   localStorage.setItem('tcr-play-counts', JSON.stringify(playCounts));
+  syncLibraryToNativeApp();
 }
 
 function getRecentlyPlayed(limit = 20) {
@@ -3537,6 +3621,7 @@ function toggleFav(name) {
   switchTab(currentTab);
   // Haptic feedback for favorite toggle
   hapticFeedback(favorites.includes(name) ? 'success' : 'light');
+  syncLibraryToNativeApp();
   
   // Auto-sync to server if logged in
   if (currentUser) {
@@ -4819,6 +4904,7 @@ async function syncFavoritesToServer() {
     
     localStorage.setItem('tcr-fav-synced', 'true');
     showNotification('Favorites synced!');
+    syncLibraryToNativeApp();
     return true;
   } catch (error) {
     console.error('Failed to sync favorites:', error);
@@ -4858,6 +4944,7 @@ async function syncFavoritesFromServer() {
       localStorage.setItem('tcr-fav', JSON.stringify(favorites));
       localStorage.setItem('tcr-fav-order', JSON.stringify(favoritesOrder));
       localStorage.setItem('tcr-fav-synced', 'true');
+      syncLibraryToNativeApp();
       
       // Refresh UI
       switchTab(currentTab);
@@ -5397,10 +5484,13 @@ window.addEventListener('load', async () => {
 
     // Personal greeting every time the app starts
     setTimeout(() => showStartupGreeting(), 600);
+    // Re-sync native Auto/widgets after account session is known
+    setTimeout(() => syncLibraryToNativeApp(), 900);
   } catch (error) {
     console.error('Account initialization error:', error);
     // Don't block the app if account features fail
     setTimeout(() => showStartupGreeting(), 600);
+    setTimeout(() => syncLibraryToNativeApp(), 900);
   }
 });
 

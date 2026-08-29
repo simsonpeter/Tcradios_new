@@ -32,5 +32,10 @@
         }
     }]
     
-  </string>  
+  </string>
+  <string name="widget_play_last_cd">Play last station</string>
+  <string name="widget_play_last_description">1x1 widget to resume your last TC RADIOS station</string>
+  <string name="widget_favorites_description">2x2 favorites grid — tap to play a synced favorite</string>
+  <string name="widget_favorites_label">Favorites</string>
+  <string name="widget_play_last_label">Play Last</string>
 </resources>

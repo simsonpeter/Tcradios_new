@@ -3,7 +3,7 @@ class TCRadiosSmartwatch {
     constructor() {
         this.currentLanguage = 'tamil';
         this.stations = {};
-        this.favorites = JSON.parse(localStorage.getItem('tcr-smartwatch-favorites') || '[]');
+        this.favorites = JSON.parse(localStorage.getItem('tcr-fav') || localStorage.getItem('tcr-smartwatch-favorites') || '[]');
         this.currentStation = null;
         this.audio = null;
         this.isPlaying = false;
@@ -28,10 +28,35 @@ class TCRadiosSmartwatch {
             this.renderFavorites();
             this.updateTime();
             this.hideLoadingScreen();
+            this.handleLaunchAction();
         } catch (error) {
             console.error('Initialization error:', error);
             this.showErrorScreen();
         }
+    }
+
+    handleLaunchAction() {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get('action');
+        if (action === 'playfav') {
+            this.playFirstFavorite();
+        } else if (action === 'playlang') {
+            const lang = (params.get('lang') || 'tamil').toLowerCase();
+            this.selectLanguage(lang);
+            const stations = this.stations[lang] || [];
+            if (stations[0]) this.playStation(stations[0].name);
+        }
+    }
+
+    playFirstFavorite() {
+        const favoriteStations = this.getFavoriteStations();
+        if (!favoriteStations.length) {
+            this.switchScreen('favorites');
+            return false;
+        }
+        this.playStation(favoriteStations[0].name);
+        this.switchScreen('nowPlaying');
+        return true;
     }
 
     async loadStations() {
@@ -160,7 +185,9 @@ class TCRadiosSmartwatch {
             'play malayalam music': () => this.selectLanguage('malayalam'),
             'play hindi music': () => this.selectLanguage('hindi'),
             'play dutch music': () => this.selectLanguage('dutch'),
-            'play favorites': () => this.switchScreen('favorites'),
+            'play favorites': () => this.playFirstFavorite(),
+            'play favourite': () => this.playFirstFavorite(),
+            'play my favorite': () => this.playFirstFavorite(),
             'next station': () => this.nextStation(),
             'previous station': () => this.previousStation(),
             'volume up': () => this.setVolume(Math.min(100, this.volume + 10)),
@@ -586,6 +613,7 @@ class TCRadiosSmartwatch {
         }
 
         localStorage.setItem('tcr-smartwatch-favorites', JSON.stringify(this.favorites));
+        localStorage.setItem('tcr-fav', JSON.stringify(this.favorites));
         this.renderStations();
         this.renderFavorites();
         this.updateFavoriteButton();
