@@ -41,6 +41,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String STATION_PREFIX = "station:";
     private static final String CATEGORY_PREFIX = "category:";
     private static final String CATEGORY_LAST_PLAYED = CATEGORY_PREFIX + "last_played";
+    private static final String CATEGORY_FAVORITES = CATEGORY_PREFIX + "favorites";
     private static final String CATEGORY_ALL = CATEGORY_PREFIX + "all";
     private static final String DEFAULT_LANGUAGE_KEY = "tamil";
     private static final String PREFS_NAME = "android_auto_media";
@@ -50,6 +51,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private static final String PREF_LAST_GENRE = "last_station_genre";
     private static final String PREF_LAST_URL = "last_station_url";
     private static final String PREF_LAST_ARTWORK = "last_station_artwork";
+    private static final String PREF_FAVORITE_IDS = "favorite_station_ids";
     private static final String DATA_BASE_URL =
             "https://raw.githubusercontent.com/simsonpeter/Tcradios/refs/heads/main";
     private static final String DEFAULT_ARTWORK_URL =
@@ -173,6 +175,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             if (getSavedStation() != null) {
                 categories.add(createCategory(CATEGORY_LAST_PLAYED, "Last Played", "Resume your last Android Auto station"));
             }
+            categories.add(createCategory(CATEGORY_FAVORITES, "Favorites", "Saved Android Auto favorites"));
             addLanguageCategory(categories, DEFAULT_LANGUAGE_KEY);
             categories.add(createCategory(CATEGORY_ALL, "All Stations", "Browse every TC RADIOS station"));
             for (LanguageCategory category : LANGUAGE_CATEGORIES) {
@@ -456,6 +459,10 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     }
 
     private List<Station> getStationsForCategory(String categoryId) {
+        if (CATEGORY_FAVORITES.equals(categoryId)) {
+            return getFavoriteStations();
+        }
+
         if (CATEGORY_LAST_PLAYED.equals(categoryId)) {
             Station savedStation = getSavedStation();
             if (savedStation == null) {
@@ -474,6 +481,23 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
         String languageKey = categoryId.substring(CATEGORY_PREFIX.length());
         return loadStationsForLanguage(languageKey);
+    }
+
+    private List<Station> getFavoriteStations() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String favoriteIds = prefs.getString(PREF_FAVORITE_IDS, "");
+        if (TextUtils.isEmpty(favoriteIds)) {
+            return new ArrayList<>();
+        }
+
+        List<Station> favorites = new ArrayList<>();
+        for (String id : favoriteIds.split(",")) {
+            Station station = findStation(STATION_PREFIX + id.trim());
+            if (station != null) {
+                favorites.add(station);
+            }
+        }
+        return favorites;
     }
 
     private Station getDefaultStation() {
