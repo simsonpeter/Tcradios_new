@@ -16,6 +16,10 @@ Use the repository workflow from GitHub:
 
 This is the best path when you do not have an Android environment locally.
 
+This workflow builds the **single TC RADIOS Android package**. Do not generate a
+separate Wear OS APK; watch support is included through the main APK's responsive
+UI and Android Media Session controls.
+
 ## Local Bubblewrap Build
 
 Only use this if your machine already has Java and Android SDK command-line
@@ -92,6 +96,9 @@ zipalign -v 4 \
 After building, the signed APK will be at:
 - `app/build/outputs/apk/release/app-release-signed.apk` (if signed during build)
 - Or manually signed: `app-release-signed.apk`
+
+There is no separate Wear OS output. Use the same radio APK/AAB for Android
+phone, Android Auto, and Wear OS media controls.
 
 ## Version Information
 
