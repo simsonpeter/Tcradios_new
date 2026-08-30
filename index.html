@@ -414,9 +414,44 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   font-size:1.2rem;
   color:var(--text);
   opacity:0.8;
-  margin-bottom:2rem;
+  margin-bottom:1.25rem;
   font-weight:300;
 }
+
+.about-share-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.55rem;
+  background:var(--gradient-primary);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:0.75rem 1.45rem;
+  font-size:1rem;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(249,115,22,0.3);
+  transition:var(--transition);
+  margin-bottom:2rem;
+}
+.about-share-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(249,115,22,0.42);
+}
+.about-share-btn:active{transform:scale(0.97)}
+.about-share-btn i{color:#fff;font-size:1rem}
+
+#shareAppModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
+#shareAppModal>div{background:var(--card);padding:1.5rem;border-radius:.75rem;max-width:420px;width:100%;box-shadow:var(--shadow-xl)}
+#shareAppModal h3{margin-bottom:0.4rem;color:var(--accent);text-align:center}
+#shareAppModal .share-app-copy{text-align:center;font-size:0.92rem;opacity:0.8;margin-bottom:1rem}
+#shareAppModal .share-app-options{display:flex;flex-direction:column;gap:0.65rem}
+#shareAppModal .share-app-option{display:flex;align-items:center;gap:0.85rem;width:100%;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:0.65rem;background:var(--bg);color:var(--text);cursor:pointer;text-align:left;font-size:0.95rem;font-weight:600;transition:var(--transition)}
+#shareAppModal .share-app-option:hover{background:var(--gradient-primary);color:#fff;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+#shareAppModal .share-app-option i{width:22px;text-align:center;font-size:1.2rem}
+#shareAppModal .share-app-option small{display:block;font-weight:400;opacity:0.75;margin-top:0.15rem;font-size:0.78rem}
+#shareAppModal .share-app-close{width:100%;margin-top:0.85rem;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:0.5rem;background:var(--card);color:var(--text);cursor:pointer;font-weight:600}
 
 .about-grid{
   display:grid;
@@ -1101,6 +1136,7 @@ audio{display:none}
     <button id="miniPlayerBtn" title="Mini Player" class="header-btn"><i class="fas fa-window-restore"></i></button>
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
     <button id="requestRadioBtn" title="Request Radio" class="header-btn"><i class="fas fa-plus-circle"></i></button>
+    <button id="shareAppBtn" title="Share this App" class="header-btn"><i class="fas fa-share-alt"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
@@ -1111,6 +1147,7 @@ audio{display:none}
     <button id="menuMiniPlayerBtn" title="Mini Player"><i class="fas fa-window-restore"></i> Mini Player</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
     <button id="menuRequestRadioBtn" title="Request Radio"><i class="fas fa-plus-circle"></i> Request Radio</button>
+    <button id="menuShareAppBtn" title="Share this App"><i class="fas fa-share-alt"></i> Share this App</button>
     <button id="menuAdminDashboardBtn" title="Admin Dashboard" style="display:none"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
     <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
@@ -1146,6 +1183,9 @@ audio{display:none}
     <img src="/icons/icon-512x512.png" alt="TC RADIOS Logo"/>
     <h1>TC RADIOS</h1>
     <p class="tagline">Uplifting Christian Music & Messages Worldwide</p>
+    <button id="aboutShareAppBtn" class="about-share-btn" type="button" title="Share this App">
+      <i class="fas fa-share-alt"></i> Share this App
+    </button>
   </div>
 
   <!-- Main Content Grid -->
@@ -1186,6 +1226,7 @@ audio{display:none}
         <li><i class="fas fa-moon"></i> <strong>Themes:</strong> Dark and light mode support</li>
         <li><i class="fas fa-clock"></i> <strong>Sleep Timer:</strong> Auto-stop after set time</li>
         <li><i class="fas fa-download"></i> <strong>PWA:</strong> Install as native app</li>
+        <li><i class="fas fa-share-alt"></i> <strong>Share this App:</strong> Invite friends on Android or iOS</li>
         <li><i class="fas fa-mobile-alt"></i> <strong>Responsive:</strong> Works on all devices</li>
       </ul>
   </div>
@@ -1329,6 +1370,23 @@ audio{display:none}
       <button id="widget-report-mini" title="Report"><i class="fas fa-exclamation-triangle"></i></button>
     </div>
     <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
+  </div>
+</div>
+<div id="shareAppModal" role="dialog" aria-labelledby="shareAppTitle" aria-modal="true">
+  <div>
+    <h3 id="shareAppTitle">Share this App</h3>
+    <p class="share-app-copy">Send TC RADIOS to friends on the platform they use.</p>
+    <div class="share-app-options">
+      <button type="button" class="share-app-option" data-share-platform="android">
+        <i class="fab fa-google-play"></i>
+        <span>Android<small>Google Play Store</small></span>
+      </button>
+      <button type="button" class="share-app-option" data-share-platform="ios">
+        <i class="fab fa-apple"></i>
+        <span>iOS &amp; Web<small>tcradios-new.vercel.app</small></span>
+      </button>
+    </div>
+    <button type="button" class="share-app-close" id="closeShareAppModal">Close</button>
   </div>
 </div>
 <div id="sleepModal">
@@ -3746,6 +3804,29 @@ if (menuRequestRadioBtn) {
   };
 }
 
+if (document.getElementById('shareAppBtn')) {
+  document.getElementById('shareAppBtn').onclick = (e) => {
+    e.stopPropagation();
+    shareThisApp();
+    hapticFeedback('light');
+  };
+}
+
+if (document.getElementById('menuShareAppBtn')) {
+  document.getElementById('menuShareAppBtn').onclick = () => {
+    if (headerMenu) headerMenu.classList.remove('active');
+    shareThisApp();
+    hapticFeedback('light');
+  };
+}
+
+if (document.getElementById('aboutShareAppBtn')) {
+  document.getElementById('aboutShareAppBtn').onclick = () => {
+    shareThisApp();
+    hapticFeedback('light');
+  };
+}
+
 if (menuInstallBtn) {
   menuInstallBtn.onclick = () => {
     const installBtn = document.getElementById('installBtn');
@@ -4261,6 +4342,106 @@ async function shareStation(station, includeNowPlaying = false) {
       }
     }
   }
+}
+
+const APP_SHARE_LINKS = {
+  android: {
+    label: 'Android',
+    url: 'https://play.google.com/store/apps/details?id=com.jayathasoft.tcradios.app',
+    text: 'Download TC RADIOS on Google Play — uplifting Christian music and messages worldwide.'
+  },
+  ios: {
+    label: 'iOS',
+    url: 'https://tcradios-new.vercel.app/',
+    text: 'Listen to TC RADIOS — uplifting Christian music and messages worldwide.'
+  }
+};
+
+function isAndroidDevice() {
+  return /Android/i.test(navigator.userAgent || '');
+}
+
+function isIOSDevice() {
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function getPreferredAppSharePlatform() {
+  if (isAndroidDevice()) return 'android';
+  if (isIOSDevice()) return 'ios';
+  return null;
+}
+
+function openShareAppModal() {
+  const modal = document.getElementById('shareAppModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeShareAppModal() {
+  const modal = document.getElementById('shareAppModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function shareAppLink(platform) {
+  const target = APP_SHARE_LINKS[platform];
+  if (!target) return;
+
+  const shareData = {
+    title: 'TC RADIOS',
+    text: target.text,
+    url: target.url
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      closeShareAppModal();
+      hapticFeedback('light');
+      return;
+    }
+    await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+    closeShareAppModal();
+    showNotification('App link copied to clipboard!');
+    hapticFeedback('light');
+  } catch (error) {
+    if (error && error.name === 'AbortError') return;
+    try {
+      await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+      closeShareAppModal();
+      showNotification('App link copied to clipboard!');
+      hapticFeedback('light');
+    } catch (clipboardError) {
+      prompt('Copy this link:', shareData.url);
+    }
+  }
+}
+
+async function shareThisApp() {
+  const preferred = getPreferredAppSharePlatform();
+  if (preferred && navigator.share) {
+    await shareAppLink(preferred);
+    return;
+  }
+  openShareAppModal();
+}
+
+const shareAppModal = document.getElementById('shareAppModal');
+if (shareAppModal) {
+  shareAppModal.querySelectorAll('[data-share-platform]').forEach(button => {
+    button.onclick = () => shareAppLink(button.dataset.sharePlatform);
+  });
+  const closeShareAppBtn = document.getElementById('closeShareAppModal');
+  if (closeShareAppBtn) {
+    closeShareAppBtn.onclick = () => closeShareAppModal();
+  }
+  shareAppModal.addEventListener('click', (event) => {
+    if (event.target === shareAppModal) closeShareAppModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && shareAppModal.style.display === 'flex') {
+      closeShareAppModal();
+    }
+  });
 }
 
 /* ---- ADMIN FEEDBACK ---- */
