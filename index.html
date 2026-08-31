@@ -1439,7 +1439,7 @@ audio{display:none}
       <div class="share-app-hero-glow" aria-hidden="true"></div>
       <img src="/icons/icon-512x512.png" alt="" class="share-app-logo" width="96" height="96"/>
       <h3 id="shareAppTitle">Share this App</h3>
-      <p class="share-app-copy">Send TC RADIOS to friends on the platform they use.</p>
+      <p class="share-app-copy">Share uplifting Christian radio — songs, messages, programmes, and more in many languages.</p>
     </div>
     <div class="share-app-body">
       <div class="share-app-options">
@@ -4415,21 +4415,31 @@ async function shareStation(station, includeNowPlaying = false) {
   }
 }
 
+const APP_SHARE_COPY = {
+  pitch: 'Download TC RADIOS to listen to uplifting Christian radio — songs, messages, programmes, and more.',
+  languages: 'Now in Tamil, English, Dutch, Hindi, Malayalam, Telugu, Kannada, Sinhala, and more languages.',
+  cardTagline: 'Christian Radio — Songs, Messages & Programmes',
+  cardLanguages: 'Tamil • English • Dutch • Hindi • Malayalam • Telugu • Kannada • Sinhala',
+  get intro() {
+    return `${this.pitch}\n\n${this.languages}`;
+  }
+};
+
 const APP_SHARE_LINKS = {
   android: {
     label: 'Android',
     url: 'https://play.google.com/store/apps/details?id=com.jayathasoft.tcradios.app',
-    text: 'Download TC RADIOS on Google Play — uplifting Christian music and messages worldwide.'
+    text: `${APP_SHARE_COPY.intro}\n\nGet it on Google Play:`
   },
   ios: {
     label: 'iOS',
     url: 'https://tcradios-new.vercel.app/',
-    text: 'Listen to TC RADIOS — uplifting Christian music and messages worldwide.'
+    text: `${APP_SHARE_COPY.intro}\n\nListen on iOS & Web:`
   },
   both: {
     label: 'All platforms',
     url: 'https://tcradios-new.vercel.app/',
-    text: 'Listen to TC RADIOS — uplifting Christian music and messages worldwide.\n\n' +
+    text: `${APP_SHARE_COPY.intro}\n\n` +
       'Android (Google Play): https://play.google.com/store/apps/details?id=com.jayathasoft.tcradios.app\n' +
       'iOS & Web: https://tcradios-new.vercel.app/'
   }
@@ -4509,22 +4519,25 @@ async function createAppShareCard(platform) {
 
   ctx.font = '500 34px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.88)';
-  drawWrappedText(ctx, 'Uplifting Christian Music & Messages Worldwide', canvas.width / 2, 690, 820, 44, 2);
+  drawWrappedText(ctx, APP_SHARE_COPY.cardTagline, canvas.width / 2, 670, 820, 44, 2);
+  ctx.font = '500 28px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.78)';
+  drawWrappedText(ctx, APP_SHARE_COPY.cardLanguages, canvas.width / 2, 760, 820, 36, 2);
 
   ctx.font = '600 36px system-ui, sans-serif';
   ctx.fillStyle = '#fed7aa';
   if (platform === 'both') {
-    ctx.fillText('Android & iOS / Web', canvas.width / 2, 800);
+    ctx.fillText('Android & iOS / Web', canvas.width / 2, 860);
     ctx.font = '500 28px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.88)';
-    ctx.fillText('Google Play  •  tcradios-new.vercel.app', canvas.width / 2, 860);
+    ctx.fillText('Google Play  •  tcradios-new.vercel.app', canvas.width / 2, 920);
   } else {
     const platformLine = platform === 'android' ? 'Get it on Google Play' : 'Listen on iOS & Web';
-    ctx.fillText(platformLine, canvas.width / 2, 820);
+    ctx.fillText(platformLine, canvas.width / 2, 880);
     ctx.font = '500 28px system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.72)';
     const host = target.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    ctx.fillText(host, canvas.width / 2, 900);
+    ctx.fillText(host, canvas.width / 2, 960);
   }
   ctx.textAlign = 'start';
 
