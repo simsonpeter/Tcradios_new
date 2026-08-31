@@ -31,8 +31,8 @@
         <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
         <uses-permission android:name="android.permission.WAKE_LOCK"/>
         
-        <!-- Android Auto support -->
-        <uses-feature android:name="android.hardware.type.automotive" android:required="false"/>
+        <!-- Android Auto (phone projection). Do NOT declare automotive hardware —
+             Play rejects that alongside com.google.android.gms.car.application. -->
         <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
         
     

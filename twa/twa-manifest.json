@@ -20,8 +20,8 @@
     "path": "jayathasoft.keystore",
     "alias": "jayathasoft-keystore"
   },
-  "appVersionName": "Android Auto Cloud Sync Widgets",
-  "appVersionCode": 31,
+  "appVersionName": "Target API 36 + Android Auto fix",
+  "appVersionCode": 37,
   "shortcuts": [
     {
       "name": "Play Last Station",

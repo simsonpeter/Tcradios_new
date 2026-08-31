@@ -56,9 +56,9 @@ android {
     defaultConfig {
         applicationId "com.jayathasoft.tcradios.app"
         minSdkVersion 21
-        targetSdkVersion 35
-        versionCode 31
-        versionName "Auto Cloud Sync + Widgets"
+        targetSdkVersion 36
+        versionCode 37
+        versionName "Target API 36 + Android Auto fix"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

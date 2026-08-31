@@ -441,6 +441,29 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 }
 .about-share-btn:active{transform:scale(0.97)}
 .about-share-btn i{color:#fff;font-size:1rem}
+.about-cta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.65rem;
+  justify-content:center;
+  margin-bottom:2rem;
+}
+.about-cta-row .about-share-btn{margin-bottom:0}
+.about-rate-btn{
+  background:transparent;
+  color:var(--text);
+  border:1px solid rgba(249,115,22,0.45);
+  box-shadow:none;
+}
+.about-rate-btn:hover{
+  background:rgba(249,115,22,0.12);
+  border-color:var(--accent);
+  box-shadow:0 8px 20px rgba(249,115,22,0.18);
+}
+.about-rate-btn i{color:var(--accent)}
+@media (prefers-color-scheme: dark){
+  .about-rate-btn{border-color:rgba(249,115,22,0.55);color:#fff}
+}
 
 #shareAppModal{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
 #shareAppModal .share-app-panel{
@@ -1209,6 +1232,7 @@ audio{display:none}
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
     <button id="menuRequestRadioBtn" title="Request Radio"><i class="fas fa-plus-circle"></i> Request Radio</button>
     <button id="menuShareAppBtn" title="Share this App"><i class="fas fa-share-alt"></i> Share this App</button>
+    <button id="menuRateAppBtn" title="Rate us on Play Store"><i class="fas fa-star"></i> Rate us on Play Store</button>
     <button id="menuAdminDashboardBtn" title="Admin Dashboard" style="display:none"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
     <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
@@ -1244,9 +1268,14 @@ audio{display:none}
     <img src="/icons/icon-512x512.png" alt="TC RADIOS Logo"/>
     <h1>TC RADIOS</h1>
     <p class="tagline">Uplifting Christian Music & Messages Worldwide</p>
-    <button id="aboutShareAppBtn" class="about-share-btn" type="button" title="Share this App">
-      <i class="fas fa-share-alt"></i> Share this App
-    </button>
+    <div class="about-cta-row">
+      <button id="aboutShareAppBtn" class="about-share-btn" type="button" title="Share this App">
+        <i class="fas fa-share-alt"></i> Share this App
+      </button>
+      <button id="aboutRateAppBtn" class="about-share-btn about-rate-btn" type="button" title="Rate us on Play Store">
+        <i class="fas fa-star"></i> Rate us on Play Store
+      </button>
+    </div>
   </div>
 
   <!-- Main Content Grid -->
@@ -1288,6 +1317,7 @@ audio{display:none}
         <li><i class="fas fa-clock"></i> <strong>Sleep Timer:</strong> Auto-stop after set time</li>
         <li><i class="fas fa-download"></i> <strong>PWA:</strong> Install as native app</li>
         <li><i class="fas fa-share-alt"></i> <strong>Share this App:</strong> Invite friends on Android or iOS</li>
+        <li><i class="fas fa-star"></i> <strong>Rate us:</strong> Leave a review on Google Play</li>
         <li><i class="fas fa-mobile-alt"></i> <strong>Responsive:</strong> Works on all devices</li>
       </ul>
   </div>
@@ -3898,6 +3928,21 @@ if (document.getElementById('aboutShareAppBtn')) {
   };
 }
 
+if (document.getElementById('menuRateAppBtn')) {
+  document.getElementById('menuRateAppBtn').onclick = () => {
+    if (headerMenu) headerMenu.classList.remove('active');
+    rateUsOnPlayStore();
+    hapticFeedback('light');
+  };
+}
+
+if (document.getElementById('aboutRateAppBtn')) {
+  document.getElementById('aboutRateAppBtn').onclick = () => {
+    rateUsOnPlayStore();
+    hapticFeedback('light');
+  };
+}
+
 if (menuInstallBtn) {
   menuInstallBtn.onclick = () => {
     const installBtn = document.getElementById('installBtn');
@@ -4542,6 +4587,12 @@ async function createAppShareCard(platform) {
   ctx.textAlign = 'start';
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+function rateUsOnPlayStore() {
+  const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.jayathasoft.tcradios.app&showAllReviews=true';
+  window.open(playStoreUrl, '_blank', 'noopener,noreferrer');
+  showNotification('Opening Play Store…');
 }
 
 function openShareAppModal() {
