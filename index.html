@@ -2233,8 +2233,12 @@ function populateLangSelect() {
   sel.onchange = () => {
     currentLang = sel.value;
     localStorage.setItem('currentLang', currentLang);
-    switchTab(currentTab);
-    // Auto-play last played station or first station when language changes
+    // Show only this language's stations (not every language on one page)
+    if (currentTab === 'about' || currentTab === 'history') {
+      switchTab('all');
+    } else {
+      switchTab(currentTab);
+    }
     setTimeout(() => {
       autoPlayLastOrFirst();
     }, 100);
@@ -2567,9 +2571,9 @@ function switchTab(tab) {
     else setStationFiltersVisible(stationFiltersExpanded);
     let base = tab === 'fav'
       ? getFavoritesInOrder()
-      : getAllStationsByLanguage();
+      : (stationsPerLang[currentLang] || []);
     currentList = applyStationFilters(base);
-    render(currentList, { groupByLanguage: tab === 'all' });
+    render(currentList);
   }
 }
 /* ---- RENDER ---- */
