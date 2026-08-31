@@ -4,33 +4,91 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:gravity="center"
+    android:gravity="center_vertical"
     android:orientation="vertical"
     android:padding="10dp">
 
-    <ImageView
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:contentDescription="@string/widget_play_last_cd"
-        android:src="@mipmap/ic_launcher" />
-
-    <TextView
-        android:id="@+id/widget_play_last_title"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/widget_now_playing"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="TC RADIOS"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/widget_play_last_subtitle"
-        android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/widget_play_last_art"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="@string/widget_play_last_cd"
+            android:src="@mipmap/ic_launcher" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_play_last_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="TC RADIOS"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_play_last_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Tap play"
+                android:textColor="#F97316"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Tap to play"
-        android:textColor="#F97316"
-        android:textSize="11sp" />
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/widget_btn_prev"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/widget_control_bg"
+            android:contentDescription="@string/widget_prev_cd"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_widget_prev" />
+
+        <ImageButton
+            android:id="@+id/widget_btn_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/widget_play_bg"
+            android:contentDescription="@string/widget_play_cd"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_widget_play" />
+
+        <ImageButton
+            android:id="@+id/widget_btn_next"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/widget_control_bg"
+            android:contentDescription="@string/widget_next_cd"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_widget_next" />
+    </LinearLayout>
 </LinearLayout>

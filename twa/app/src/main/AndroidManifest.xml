@@ -220,6 +220,9 @@
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_FAVORITE" />
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_LANGUAGE" />
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_STATION" />
+                <action android:name="com.jayathasoft.tcradios.app.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.jayathasoft.tcradios.app.action.SKIP_NEXT" />
+                <action android:name="com.jayathasoft.tcradios.app.action.SKIP_PREVIOUS" />
             </intent-filter>
         </service>
 

@@ -52,13 +52,13 @@ TC RADIOS exposes a native `MediaBrowserServiceCompat` from the Android app so A
 - **Automotive UI Optimization** - Large touch targets and simplified interface
 - **Background Playback** - Continues playing when Android Auto interface changes
 - **Rich Metadata Display** - Station info, logos, and now playing details
-- **Home screen widgets** - 1×1 Play Last + 2×2 Favorites grid (same synced library)
+- **Home screen widgets** - Mini Player (station name + play/pause/previous/next) and 2×2 Favorites grid (same synced library)
 
 ### Key Files
 - `twa/app/src/main/java/com/jayathasoft/tcradios/app/AndroidAutoMediaService.java` - Native Android Auto station browser and playback service
 - `twa/app/src/main/java/com/jayathasoft/tcradios/app/StationSyncStore.java` - Shared favorites/recents/auth prefs + Supabase pull
 - `twa/app/src/main/java/com/jayathasoft/tcradios/app/NativeSyncActivity.java` - Receives `tcradios://sync` from the PWA
-- `twa/app/src/main/java/com/jayathasoft/tcradios/app/PlayLastWidgetProvider.java` - 1×1 play-last widget
+- `twa/app/src/main/java/com/jayathasoft/tcradios/app/PlayLastWidgetProvider.java` - Mini player widget (name + transport controls)
 - `twa/app/src/main/java/com/jayathasoft/tcradios/app/FavoritesGridWidgetProvider.java` - 2×2 favorites widget
 - `twa/app/src/main/AndroidManifest.xml` - Declares the media browser service, widgets, and Android Auto metadata
 - `index.html` - PWA player + `syncLibraryToNativeApp()` bridge
@@ -82,8 +82,9 @@ TC RADIOS exposes a native `MediaBrowserServiceCompat` from the Android app so A
 
 ### Home screen widgets
 1. Long-press the home screen → Widgets → TC RADIOS.
-2. Add **Play Last** (1×1) or **Favorites** (2×2).
-3. Tap a tile to start native playback.
+2. Add **Mini Player** (4×2 compact player) or **Favorites** (2×2).
+3. Mini Player shows the current station name with play/pause, previous, and next.
+4. Favorites tiles start native playback of a synced favorite.
 
 ## Voice Command Examples
 
