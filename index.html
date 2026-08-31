@@ -442,16 +442,71 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .about-share-btn:active{transform:scale(0.97)}
 .about-share-btn i{color:#fff;font-size:1rem}
 
-#shareAppModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
-#shareAppModal>div{background:var(--card);padding:1.5rem;border-radius:.75rem;max-width:420px;width:100%;box-shadow:var(--shadow-xl)}
-#shareAppModal h3{margin-bottom:0.4rem;color:var(--accent);text-align:center}
-#shareAppModal .share-app-copy{text-align:center;font-size:0.92rem;opacity:0.8;margin-bottom:1rem}
+#shareAppModal{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
+#shareAppModal .share-app-panel{
+  max-width:420px;width:100%;border-radius:1.25rem;overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08);
+  animation:shareAppIn .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes shareAppIn{
+  from{opacity:0;transform:translateY(18px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+#shareAppModal .share-app-hero{
+  position:relative;text-align:center;padding:2rem 1.5rem 1.75rem;overflow:hidden;
+  background:linear-gradient(135deg,#f97316 0%,#ea580c 38%,#9a3412 72%,#111827 100%);
+}
+#shareAppModal .share-app-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.22),transparent 42%),
+             radial-gradient(circle at 85% 100%,rgba(255,255,255,.08),transparent 50%);
+  pointer-events:none;
+}
+#shareAppModal .share-app-hero-glow{
+  position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.35),transparent 70%);
+  pointer-events:none;
+}
+#shareAppModal .share-app-logo{
+  position:relative;z-index:1;width:96px;height:96px;border-radius:50%;object-fit:cover;
+  border:4px solid rgba(255,255,255,.9);
+  box-shadow:0 12px 36px rgba(0,0,0,.35),0 0 0 8px rgba(255,255,255,.12);
+  margin-bottom:1rem;
+}
+#shareAppModal .share-app-hero h3{
+  position:relative;z-index:1;margin:0 0 .45rem;color:#fff;font-size:1.55rem;font-weight:800;
+  text-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+#shareAppModal .share-app-copy{
+  position:relative;z-index:1;text-align:center;font-size:.92rem;color:rgba(255,255,255,.88);
+  margin:0;line-height:1.45;max-width:280px;margin-inline:auto;
+}
+#shareAppModal .share-app-body{
+  background:var(--card);padding:1.15rem 1.25rem 1.25rem;
+}
 #shareAppModal .share-app-options{display:flex;flex-direction:column;gap:0.65rem}
-#shareAppModal .share-app-option{display:flex;align-items:center;gap:0.85rem;width:100%;padding:0.85rem 1rem;border:1px solid var(--border);border-radius:0.65rem;background:var(--bg);color:var(--text);cursor:pointer;text-align:left;font-size:0.95rem;font-weight:600;transition:var(--transition)}
-#shareAppModal .share-app-option:hover{background:var(--gradient-primary);color:#fff;transform:translateY(-1px);box-shadow:var(--shadow-md)}
-#shareAppModal .share-app-option i{width:22px;text-align:center;font-size:1.2rem}
-#shareAppModal .share-app-option small{display:block;font-weight:400;opacity:0.75;margin-top:0.15rem;font-size:0.78rem}
-#shareAppModal .share-app-close{width:100%;margin-top:0.85rem;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:0.5rem;background:var(--bg);color:var(--text);cursor:pointer;font-weight:600;transition:var(--transition)}
+#shareAppModal .share-app-option{
+  display:flex;align-items:center;gap:0.85rem;width:100%;padding:0.9rem 1rem;
+  border:1px solid var(--border);border-radius:0.75rem;background:var(--bg);color:var(--text);
+  cursor:pointer;text-align:left;font-size:0.95rem;font-weight:600;transition:var(--transition);
+}
+#shareAppModal .share-app-option:hover{
+  background:var(--gradient-primary);color:#fff;border-color:transparent;
+  transform:translateY(-2px);box-shadow:0 8px 24px rgba(249,115,22,.35);
+}
+#shareAppModal .share-app-option:hover small{color:rgba(255,255,255,.82)}
+#shareAppModal .share-app-option i{
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  border-radius:0.65rem;background:rgba(249,115,22,.12);font-size:1.15rem;flex-shrink:0;
+}
+#shareAppModal .share-app-option:hover i{background:rgba(255,255,255,.18);color:#fff}
+#shareAppModal .share-app-option small{display:block;font-weight:400;opacity:0.72;margin-top:0.15rem;font-size:0.78rem}
+#shareAppModal .share-app-close{
+  width:100%;margin-top:0.85rem;padding:0.75rem 1rem;border:1px solid var(--border);
+  border-radius:0.65rem;background:var(--bg);color:var(--text);cursor:pointer;
+  font-weight:600;transition:var(--transition);
+}
 #shareAppModal .share-app-close:hover{background:var(--hover)}
 
 .about-grid{
@@ -1374,20 +1429,26 @@ audio{display:none}
   </div>
 </div>
 <div id="shareAppModal" role="dialog" aria-labelledby="shareAppTitle" aria-modal="true">
-  <div>
-    <h3 id="shareAppTitle">Share this App</h3>
-    <p class="share-app-copy">Send TC RADIOS to friends on the platform they use.</p>
-    <div class="share-app-options">
-      <button type="button" class="share-app-option" data-share-platform="android">
-        <i class="fab fa-google-play"></i>
-        <span>Android<small>Google Play Store</small></span>
-      </button>
-      <button type="button" class="share-app-option" data-share-platform="ios">
-        <i class="fab fa-apple"></i>
-        <span>iOS &amp; Web<small>tcradios-new.vercel.app</small></span>
-      </button>
+  <div class="share-app-panel">
+    <div class="share-app-hero">
+      <div class="share-app-hero-glow" aria-hidden="true"></div>
+      <img src="/icons/icon-512x512.png" alt="" class="share-app-logo" width="96" height="96"/>
+      <h3 id="shareAppTitle">Share this App</h3>
+      <p class="share-app-copy">Send TC RADIOS to friends on the platform they use.</p>
     </div>
-    <button type="button" class="share-app-close" id="closeShareAppModal">Close</button>
+    <div class="share-app-body">
+      <div class="share-app-options">
+        <button type="button" class="share-app-option" data-share-platform="android">
+          <i class="fab fa-google-play"></i>
+          <span>Android<small>Google Play Store</small></span>
+        </button>
+        <button type="button" class="share-app-option" data-share-platform="ios">
+          <i class="fab fa-apple"></i>
+          <span>iOS &amp; Web<small>tcradios-new.vercel.app</small></span>
+        </button>
+      </div>
+      <button type="button" class="share-app-close" id="closeShareAppModal">Close</button>
+    </div>
   </div>
 </div>
 <div id="sleepModal">
@@ -4373,6 +4434,96 @@ function getPreferredAppSharePlatform() {
   return null;
 }
 
+function loadShareImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function createAppShareCard(platform) {
+  const target = APP_SHARE_LINKS[platform];
+  if (!target) return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, '#f97316');
+  gradient.addColorStop(0.38, '#ea580c');
+  gradient.addColorStop(0.72, '#9a3412');
+  gradient.addColorStop(1, '#111827');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath();
+  ctx.arc(180, 160, 220, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(920, 920, 280, 0, Math.PI * 2);
+  ctx.fill();
+
+  try {
+    const logo = await loadShareImage('/icons/icon-512x512.png');
+    const logoSize = 300;
+    const logoX = (canvas.width - logoSize) / 2;
+    const logoY = 210;
+    const centerX = logoX + logoSize / 2;
+    const centerY = logoY + logoSize / 2;
+    const radius = logoSize / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 14, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+  } catch {
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath();
+    ctx.arc(540, 360, 150, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = '800 76px system-ui, sans-serif';
+  ctx.fillText('TC RADIOS', canvas.width / 2, 620);
+
+  ctx.font = '500 34px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.88)';
+  drawWrappedText(ctx, 'Uplifting Christian Music & Messages Worldwide', canvas.width / 2, 690, 820, 44, 2);
+
+  ctx.font = '600 36px system-ui, sans-serif';
+  ctx.fillStyle = '#fed7aa';
+  const platformLine = platform === 'android' ? 'Get it on Google Play' : 'Listen on iOS & Web';
+  ctx.fillText(platformLine, canvas.width / 2, 820);
+
+  ctx.font = '500 28px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  const host = target.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  ctx.fillText(host, canvas.width / 2, 900);
+  ctx.textAlign = 'start';
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
 function openShareAppModal() {
   const modal = document.getElementById('shareAppModal');
   if (modal) modal.style.display = 'flex';
@@ -4394,9 +4545,22 @@ async function shareAppLink(platform) {
   };
 
   try {
+    const cardBlob = await createAppShareCard(platform);
+    if (cardBlob && navigator.canShare && window.File) {
+      const file = new File([cardBlob], 'tc-radios-app.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ ...shareData, files: [file] });
+        closeShareAppModal();
+        showNotification('App card shared!');
+        hapticFeedback('light');
+        return;
+      }
+    }
+
     if (navigator.share) {
       await navigator.share(shareData);
       closeShareAppModal();
+      showNotification('Shared!');
       hapticFeedback('light');
       return;
     }
