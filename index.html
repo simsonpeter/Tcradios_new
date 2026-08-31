@@ -1184,7 +1184,7 @@ audio{display:none}
                  box-shadow:0 8px 24px rgba(0,0,0,0.4);backdrop-filter:blur(20px);
                  border:1px solid var(--border);min-width:280px;max-width:340px;
                  animation:slideInUp 0.3s ease;display:none}
-#floating-widget.active{display:block}
+#floating-widget.active{display:block !important}
 @keyframes slideInUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
 #widget-content{display:flex;align-items:center;gap:0.75rem;min-width:0;padding-right:1.6rem;cursor:pointer}
 #widget-img{width:52px;height:52px;border-radius:50%;object-fit:cover;
@@ -1477,7 +1477,7 @@ audio{display:none}
   </div>
 </div>
 <!-- Floating Mini Player Widget -->
-<div id="floating-widget" style="display:none;">
+<div id="floating-widget">
   <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
   <div id="widget-content">
     <img id="widget-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
@@ -6074,9 +6074,11 @@ function toggleFloatingWidget() {
     const isActive = floatingWidget.classList.contains('active');
     if (isActive) {
       floatingWidget.classList.remove('active');
+      floatingWidget.style.display = 'none';
       localStorage.setItem('tcr-widget-visible', 'false');
     } else {
       floatingWidget.classList.add('active');
+      floatingWidget.style.display = 'block';
       updateFloatingWidget();
       localStorage.setItem('tcr-widget-visible', 'true');
     }
@@ -6133,6 +6135,7 @@ const originalAudioOnPause = audio.onpause;
 const widgetVisible = localStorage.getItem('tcr-widget-visible');
 if (widgetVisible === 'true' && floatingWidget) {
   floatingWidget.classList.add('active');
+  floatingWidget.style.display = 'block';
   // Update after a short delay to ensure elements are ready
   setTimeout(updateFloatingWidget, 100);
 }
