@@ -730,7 +730,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .item:hover .station-icon{border-color:var(--accent);transform:scale(1.05)}
 .item.playing .station-icon{border-color:#fff;transform:scale(1.05);box-shadow:var(--shadow-md)}
 .station-info{flex:1;display:flex;flex-direction:column;text-align:left}
-.station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3}
+.station-name{font-weight:600;margin-bottom:.25rem;font-size:1rem;line-height:1.3;
+              display:flex;align-items:center;flex-wrap:wrap;gap:0.4rem}
 .station-genre{font-size:.85rem;color:var(--accent);margin-bottom:.25rem;font-weight:500}
 .station-actions{display:flex;align-items:center;gap:0.5rem}
 .language-section-title{display:flex;align-items:center;justify-content:space-between;
@@ -739,9 +740,17 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                         border:1px solid rgba(249,115,22,0.25);color:var(--accent);
                         font-weight:800}
 .language-section-title span:last-child{font-size:0.78rem;opacity:0.8;font-weight:600}
-.new-badge{display:inline-flex;align-items:center;margin-left:0.45rem;padding:0.12rem 0.45rem;
-           border-radius:999px;background:rgba(34,197,94,0.18);color:#86efac;
-           font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.03em}
+.new-badge{display:inline-flex;align-items:center;justify-content:center;gap:0.22rem;
+           flex:0 0 auto;width:max-content;max-width:max-content;align-self:center;
+           margin:0;padding:0.16rem 0.62rem 0.16rem 0.38rem;
+           background:#e11d48;color:#fff;font-size:0.58rem;font-weight:800;
+           text-transform:uppercase;letter-spacing:0.05em;line-height:1;
+           border-radius:2px 0 0 2px;
+           clip-path:polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%);
+           box-shadow:0 1px 3px rgba(225,29,72,0.35)}
+.new-badge i{font-size:0.55rem;color:#fff}
+.item.playing .new-badge{background:#fff;color:#e11d48;box-shadow:none}
+.item.playing .new-badge i{color:#e11d48}
 .favorite-button{font-size:1.3rem;color:var(--heart);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
 .favorite-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
@@ -2654,8 +2663,7 @@ function appendStationItem(st, i) {
     div.innerHTML = `
       <img src="${st.logo}" alt="" class="station-icon">
       <div class="station-info">
-        <div class="station-name">${st.name}</div>
-        ${isNewStation(st) ? '<span class="new-badge">New</span>' : ''}
+        <div class="station-name">${st.name}${isNewStation(st) ? ' <span class="new-badge" title="Newly added station"><i class="fas fa-flag"></i> NEW</span>' : ''}</div>
         <div class="station-genre">${st.genre}</div>
         ${stationRatings[st.name] ? `<div class="station-rating-display"><i class="fas fa-star"></i> ${stationRatings[st.name].rating}/5</div>` : ''}
         ${globalRatings[st.name] ? `<div class="station-rating-display" style="font-size:0.7rem;opacity:0.8">Global: ${globalRatings[st.name].total.toFixed(1)}/5 (${globalRatings[st.name].count})</div>` : ''}
