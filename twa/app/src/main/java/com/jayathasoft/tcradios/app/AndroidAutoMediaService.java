@@ -56,6 +56,9 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     public static final String ACTION_PLAY_FAVORITE = "com.jayathasoft.tcradios.app.action.PLAY_FAVORITE";
     public static final String ACTION_PLAY_LANGUAGE = "com.jayathasoft.tcradios.app.action.PLAY_LANGUAGE";
     public static final String ACTION_PLAY_STATION = "com.jayathasoft.tcradios.app.action.PLAY_STATION";
+    public static final String ACTION_TOGGLE_PLAYBACK = "com.jayathasoft.tcradios.app.action.TOGGLE_PLAYBACK";
+    public static final String ACTION_SKIP_NEXT = "com.jayathasoft.tcradios.app.action.SKIP_NEXT";
+    public static final String ACTION_SKIP_PREVIOUS = "com.jayathasoft.tcradios.app.action.SKIP_PREVIOUS";
     public static final String EXTRA_STATION_NAME = "station_name";
     public static final String EXTRA_STATION_INDEX = "station_index";
     public static final String EXTRA_LANGUAGE = "language";
@@ -296,6 +299,29 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
             if (station != null) {
                 playStation(station);
             }
+            return;
+        }
+        if (ACTION_TOGGLE_PLAYBACK.equals(action)) {
+            if (isCurrentlyPlaying()) {
+                pausePlayback();
+            } else if (mediaPlayer != null && currentStation != null) {
+                resumePlayback();
+            } else {
+                Station station = currentStation != null ? currentStation : getSavedStation();
+                if (station == null) {
+                    List<Station> recents = getRecentStations();
+                    station = recents.isEmpty() ? getDefaultStation() : recents.get(0);
+                }
+                playStation(station);
+            }
+            return;
+        }
+        if (ACTION_SKIP_NEXT.equals(action)) {
+            mediaSessionCallback.onSkipToNext();
+            return;
+        }
+        if (ACTION_SKIP_PREVIOUS.equals(action)) {
+            mediaSessionCallback.onSkipToPrevious();
         }
     }
 
@@ -340,17 +366,19 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
         @Override
         public void onSkipToNext() {
-            List<Station> stations = getAllStations();
+            List<Station> stations = getSkipList();
             if (stations.isEmpty()) return;
-            currentStationIndex = (currentStationIndex + 1) % stations.size();
+            int index = indexInList(stations, currentStation);
+            currentStationIndex = (index + 1) % stations.size();
             playStation(stations.get(currentStationIndex));
         }
 
         @Override
         public void onSkipToPrevious() {
-            List<Station> stations = getAllStations();
+            List<Station> stations = getSkipList();
             if (stations.isEmpty()) return;
-            currentStationIndex = (currentStationIndex - 1 + stations.size()) % stations.size();
+            int index = indexInList(stations, currentStation);
+            currentStationIndex = (index - 1 + stations.size()) % stations.size();
             playStation(stations.get(currentStationIndex));
         }
 
@@ -487,6 +515,10 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         mediaSession.setMetadata(metadata);
     }
 
+    private boolean isCurrentlyPlaying() {
+        return mediaPlayer != null && mediaPlayer.isPlaying();
+    }
+
     private void updatePlaybackState(int state) {
         if (mediaSession == null) return;
 
@@ -507,6 +539,15 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         }
 
         mediaSession.setPlaybackState(builder.build());
+        if (state == PlaybackStateCompat.STATE_PLAYING
+                || state == PlaybackStateCompat.STATE_BUFFERING
+                || state == PlaybackStateCompat.STATE_PAUSED
+                || state == PlaybackStateCompat.STATE_STOPPED
+                || state == PlaybackStateCompat.STATE_ERROR) {
+            StationSyncStore.setPlaying(this,
+                    state == PlaybackStateCompat.STATE_PLAYING
+                            || state == PlaybackStateCompat.STATE_BUFFERING);
+        }
     }
 
     private Station findStation(String mediaId) {
@@ -532,6 +573,30 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         List<Station> stations = getAllStations();
         for (int i = 0; i < stations.size(); i++) {
             if (stations.get(i).id.equals(stationId)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private List<Station> getSkipList() {
+        List<Station> stations = getAllStations();
+        if (currentStation != null) {
+            List<Station> sameLanguage = new ArrayList<>();
+            for (Station station : stations) {
+                if (currentStation.languageKey.equals(station.languageKey)) {
+                    sameLanguage.add(station);
+                }
+            }
+            if (!sameLanguage.isEmpty()) return sameLanguage;
+        }
+        return stations;
+    }
+
+    private int indexInList(List<Station> stations, Station station) {
+        if (station == null) return 0;
+        for (int i = 0; i < stations.size(); i++) {
+            if (stations.get(i).id.equals(station.id) || stations.get(i).name.equals(station.name)) {
                 return i;
             }
         }

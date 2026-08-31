@@ -950,14 +950,19 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   background: transparent;
 }
 .widget-mode header,
-.widget-mode .tabs,
-.widget-mode .station-list {
-  display: none;
+.widget-mode #tabs,
+.widget-mode #content,
+.widget-mode #about-panel,
+.widget-mode #startupGreeting,
+.widget-mode #blessPrompt,
+.widget-mode #floating-widget {
+  display: none !important;
 }
 .widget-mode #player {
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
   margin: 8px;
+  width: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 audio{display:none}
@@ -1175,48 +1180,45 @@ audio{display:none}
 
 /* Floating Mini Player Widget */
 #floating-widget{position:fixed;bottom:90px;right:20px;z-index:1000;
-                 background:var(--card);border-radius:1rem;padding:0.8rem;
+                 background:var(--card);border-radius:1rem;padding:0.85rem 1rem 0.95rem;
                  box-shadow:0 8px 24px rgba(0,0,0,0.4);backdrop-filter:blur(20px);
-                 border:1px solid var(--border);min-width:280px;max-width:320px;
+                 border:1px solid var(--border);min-width:280px;max-width:340px;
                  animation:slideInUp 0.3s ease;display:none}
 #floating-widget.active{display:block}
 @keyframes slideInUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
-#widget-content{display:flex;align-items:center;gap:0.8rem}
-#widget-img{width:50px;height:50px;border-radius:50%;object-fit:cover;
-           box-shadow:0 2px 8px rgba(0,0,0,0.2);animation:spin 3s linear infinite paused}
+#widget-content{display:flex;align-items:center;gap:0.75rem;min-width:0;padding-right:1.6rem;cursor:pointer}
+#widget-img{width:52px;height:52px;border-radius:50%;object-fit:cover;
+           box-shadow:0 2px 8px rgba(0,0,0,0.2);animation:spin 3s linear infinite paused;flex-shrink:0}
 #floating-widget.playing #widget-img{animation-play-state:running}
-#widget-info{flex:1;min-width:0}
-#widget-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;
-            text-overflow:ellipsis;margin-bottom:0.2rem}
-#widget-status{font-size:0.75rem;color:var(--accent);white-space:nowrap}
-#widget-controls-mini{display:flex;gap:0.4rem;align-items:center}
-#widget-prev-mini,#widget-play-mini,#widget-next-mini,#widget-open-mini,#widget-fav-mini,#widget-share-mini,#widget-report-mini{background:rgba(249,115,22,0.2);
+#widget-info{flex:1;min-width:0;text-align:left}
+#widget-name{font-size:0.95rem;font-weight:700;white-space:nowrap;overflow:hidden;
+            text-overflow:ellipsis;margin-bottom:0.15rem}
+#widget-status{font-size:0.75rem;color:var(--accent);white-space:nowrap;font-weight:500}
+#widget-controls-mini{display:flex;gap:0.7rem;align-items:center;justify-content:center;margin-top:0.7rem}
+#widget-prev-mini,#widget-play-mini,#widget-next-mini{background:rgba(249,115,22,0.15);
                                                       border:none;color:var(--accent);
-                                                      font-size:1rem;cursor:pointer;
-                                                      padding:0.5rem;border-radius:50%;
+                                                      font-size:1.1rem;cursor:pointer;
+                                                      padding:0.55rem;border-radius:50%;
                                                       transition:var(--transition);
-                                                      min-width:36px;min-height:36px;
+                                                      min-width:44px;min-height:44px;
                                                       display:flex;align-items:center;
                                                       justify-content:center}
-#widget-play-mini{background:var(--gradient-primary);color:#fff;min-width:40px;min-height:40px}
-#widget-open-mini,#widget-fav-mini,#widget-share-mini,#widget-report-mini{min-width:32px;min-height:32px;font-size:0.82rem;padding:0.35rem}
-#widget-report-mini{background:rgba(239,68,68,0.18);color:#f87171}
-#widget-fav-mini.on{color:#f97316}
-#widget-prev-mini:hover,#widget-next-mini:hover,#widget-open-mini:hover,#widget-fav-mini:hover,#widget-share-mini:hover,#widget-report-mini:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
-#widget-play-mini:hover{transform:scale(1.1)}
-#widget-close{background:rgba(0,0,0,0.2);border:none;color:var(--text);
-             font-size:0.9rem;cursor:pointer;padding:0.4rem;border-radius:50%;
-             width:28px;height:28px;display:flex;align-items:center;
-             justify-content:center;transition:var(--transition);margin-left:0.4rem}
+#widget-play-mini{background:var(--gradient-primary);color:#fff;min-width:52px;min-height:52px}
+#widget-prev-mini:hover,#widget-next-mini:hover{background:rgba(249,115,22,0.3);transform:scale(1.08)}
+#widget-play-mini:hover{transform:scale(1.08)}
+#widget-close{position:absolute;top:0.45rem;right:0.45rem;background:rgba(0,0,0,0.2);border:none;color:var(--text);
+             font-size:0.8rem;cursor:pointer;padding:0.3rem;border-radius:50%;
+             width:26px;height:26px;display:flex;align-items:center;
+             justify-content:center;transition:var(--transition);margin:0}
 #widget-close:hover{background:rgba(0,0,0,0.4);transform:scale(1.1)}
 /* Mobile widget adjustments */
 @media (max-width: 480px) {
   #floating-widget{bottom:100px;right:10px;left:10px;max-width:none;min-width:auto}
-  #widget-img{width:40px;height:40px}
-  #widget-name{font-size:0.85rem}
+  #widget-img{width:44px;height:44px}
+  #widget-name{font-size:0.9rem}
   #widget-status{font-size:0.7rem}
-  #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:32px;min-height:32px;padding:0.4rem;font-size:0.9rem}
-  #widget-play-mini{min-width:36px;min-height:36px}
+  #widget-prev-mini,#widget-play-mini,#widget-next-mini{min-width:42px;min-height:42px;padding:0.45rem;font-size:1rem}
+  #widget-play-mini{min-width:50px;min-height:50px}
 }
 </style>
 </head>
@@ -1476,22 +1478,18 @@ audio{display:none}
 </div>
 <!-- Floating Mini Player Widget -->
 <div id="floating-widget" style="display:none;">
+  <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
   <div id="widget-content">
     <img id="widget-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
     <div id="widget-info">
       <div id="widget-name"></div>
       <div id="widget-status">Live</div>
     </div>
-    <div id="widget-controls-mini">
-      <button id="widget-prev-mini" title="Previous"><i class="fas fa-step-backward"></i></button>
-      <button id="widget-play-mini" title="Play/Pause"><i class="fas fa-play"></i></button>
-      <button id="widget-next-mini" title="Next"><i class="fas fa-step-forward"></i></button>
-      <button id="widget-open-mini" title="Open Player"><i class="fas fa-expand"></i></button>
-      <button id="widget-fav-mini" title="Favorite"><i class="far fa-heart"></i></button>
-      <button id="widget-share-mini" title="Share"><i class="fas fa-share-alt"></i></button>
-      <button id="widget-report-mini" title="Report"><i class="fas fa-exclamation-triangle"></i></button>
-    </div>
-    <button id="widget-close" title="Close Widget"><i class="fas fa-times"></i></button>
+  </div>
+  <div id="widget-controls-mini">
+    <button id="widget-prev-mini" title="Previous station"><i class="fas fa-step-backward"></i></button>
+    <button id="widget-play-mini" title="Play/Pause"><i class="fas fa-play"></i></button>
+    <button id="widget-next-mini" title="Next station"><i class="fas fa-step-forward"></i></button>
   </div>
 </div>
 <div id="shareAppModal" role="dialog" aria-labelledby="shareAppTitle" aria-modal="true">
@@ -1826,10 +1824,7 @@ const widgetStatus = document.getElementById('widget-status');
 const widgetPlayMini = document.getElementById('widget-play-mini');
 const widgetPrevMini = document.getElementById('widget-prev-mini');
 const widgetNextMini = document.getElementById('widget-next-mini');
-const widgetOpenMini = document.getElementById('widget-open-mini');
-const widgetFavMini = document.getElementById('widget-fav-mini');
-const widgetShareMini = document.getElementById('widget-share-mini');
-const widgetReportMini = document.getElementById('widget-report-mini');
+const widgetContent = document.getElementById('widget-content');
 /* ---- LOAD + INIT ---- */
 function getLanguageKeyFromFileName(fileName) {
   return fileName.replace(/\.json$/i, '').trim().toLowerCase();
@@ -6059,14 +6054,10 @@ window.addEventListener('load', () => {
 function updateFloatingWidget() {
   if (!floatingWidget || !floatingWidget.classList.contains('active')) return;
   
-  widgetImg.src = pImg.src;
-  widgetName.textContent = pName.textContent.trim() || 'TC RADIOS';
-  widgetStatus.textContent = document.getElementById('p-now').textContent;
-  if (lastPlayedStation && widgetFavMini) {
-    const isFavorite = favorites.includes(lastPlayedStation.station.name);
-    widgetFavMini.classList.toggle('on', isFavorite);
-    widgetFavMini.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
-  }
+  const station = lastPlayedStation && lastPlayedStation.station;
+  widgetImg.src = (station && station.logo) || pImg.src || '/icons/default-artwork.jpg';
+  widgetName.textContent = (station && station.name) || pName.textContent.trim() || 'TC RADIOS';
+  widgetStatus.textContent = document.getElementById('p-now').textContent || (player.classList.contains('playing') ? 'Live' : 'Paused');
   
   // Update playing state
   if (player.classList.contains('playing')) {
@@ -6130,30 +6121,8 @@ if (widgetNextMini) {
   };
 }
 
-if (widgetOpenMini) {
-  widgetOpenMini.onclick = () => openFullscreenPlayer();
-}
-
-if (widgetFavMini) {
-  widgetFavMini.onclick = () => {
-    if (!lastPlayedStation) return showNotification('No station playing');
-    toggleFav(lastPlayedStation.station.name);
-    updateFloatingWidget();
-  };
-}
-
-if (widgetShareMini) {
-  widgetShareMini.onclick = () => {
-    if (!lastPlayedStation) return showNotification('No station playing');
-    shareStation(lastPlayedStation.station, true);
-  };
-}
-
-if (widgetReportMini) {
-  widgetReportMini.onclick = () => {
-    if (!lastPlayedStation) return showNotification('No station playing');
-    showStreamReportModal(lastPlayedStation.station);
-  };
+if (widgetContent) {
+  widgetContent.onclick = () => openFullscreenPlayer();
 }
 
 // Update widget when playing state changes

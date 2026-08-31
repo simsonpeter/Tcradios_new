@@ -39,6 +39,7 @@ public final class StationSyncStore {
     public static final String PREF_LAST_GENRE = "last_station_genre";
     public static final String PREF_LAST_URL = "last_station_url";
     public static final String PREF_LAST_ARTWORK = "last_station_artwork";
+    public static final String PREF_IS_PLAYING = "is_playing";
 
     private static final String SUPABASE_URL = "https://rerzpgrxztaarwecidza.supabase.co";
     private static final String SUPABASE_ANON_KEY =
@@ -133,6 +134,15 @@ public final class StationSyncStore {
             }
         }
         return names;
+    }
+
+    public static boolean isPlaying(Context context) {
+        return prefs(context).getBoolean(PREF_IS_PLAYING, false);
+    }
+
+    public static void setPlaying(Context context, boolean playing) {
+        prefs(context).edit().putBoolean(PREF_IS_PLAYING, playing).apply();
+        notifyWidgets(context);
     }
 
     public static JSONArray getRecentStationsJson(Context context) {

@@ -57,8 +57,8 @@ android {
         applicationId "com.jayathasoft.tcradios.app"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 37
-        versionName "Target API 36 + Android Auto fix"
+        versionCode 38
+        versionName "Mini player home widget"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
