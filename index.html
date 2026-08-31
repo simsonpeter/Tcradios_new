@@ -501,6 +501,11 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   border-radius:0.65rem;background:rgba(249,115,22,.12);font-size:1.15rem;flex-shrink:0;
 }
 #shareAppModal .share-app-option:hover i{background:rgba(255,255,255,.18);color:#fff}
+#shareAppModal .share-app-option-both{
+  border-color:rgba(249,115,22,.45);
+  background:linear-gradient(135deg,rgba(249,115,22,.14),rgba(249,115,22,.06));
+}
+#shareAppModal .share-app-option-both i{background:rgba(249,115,22,.22)}
 #shareAppModal .share-app-option small{display:block;font-weight:400;opacity:0.72;margin-top:0.15rem;font-size:0.78rem}
 #shareAppModal .share-app-close{
   width:100%;margin-top:0.85rem;padding:0.75rem 1rem;border:1px solid var(--border);
@@ -1438,6 +1443,10 @@ audio{display:none}
     </div>
     <div class="share-app-body">
       <div class="share-app-options">
+        <button type="button" class="share-app-option share-app-option-both" data-share-platform="both">
+          <i class="fas fa-share-nodes"></i>
+          <span>Share both links<small>Android &amp; iOS / Web</small></span>
+        </button>
         <button type="button" class="share-app-option" data-share-platform="android">
           <i class="fab fa-google-play"></i>
           <span>Android<small>Google Play Store</small></span>
@@ -4416,6 +4425,13 @@ const APP_SHARE_LINKS = {
     label: 'iOS',
     url: 'https://tcradios-new.vercel.app/',
     text: 'Listen to TC RADIOS — uplifting Christian music and messages worldwide.'
+  },
+  both: {
+    label: 'All platforms',
+    url: 'https://tcradios-new.vercel.app/',
+    text: 'Listen to TC RADIOS — uplifting Christian music and messages worldwide.\n\n' +
+      'Android (Google Play): https://play.google.com/store/apps/details?id=com.jayathasoft.tcradios.app\n' +
+      'iOS & Web: https://tcradios-new.vercel.app/'
   }
 };
 
@@ -4426,12 +4442,6 @@ function isAndroidDevice() {
 function isIOSDevice() {
   const ua = navigator.userAgent || '';
   return /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
-function getPreferredAppSharePlatform() {
-  if (isAndroidDevice()) return 'android';
-  if (isIOSDevice()) return 'ios';
-  return null;
 }
 
 function loadShareImage(src) {
@@ -4512,13 +4522,19 @@ async function createAppShareCard(platform) {
 
   ctx.font = '600 36px system-ui, sans-serif';
   ctx.fillStyle = '#fed7aa';
-  const platformLine = platform === 'android' ? 'Get it on Google Play' : 'Listen on iOS & Web';
-  ctx.fillText(platformLine, canvas.width / 2, 820);
-
-  ctx.font = '500 28px system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.72)';
-  const host = target.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-  ctx.fillText(host, canvas.width / 2, 900);
+  if (platform === 'both') {
+    ctx.fillText('Android & iOS / Web', canvas.width / 2, 800);
+    ctx.font = '500 28px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.fillText('Google Play  •  tcradios-new.vercel.app', canvas.width / 2, 860);
+  } else {
+    const platformLine = platform === 'android' ? 'Get it on Google Play' : 'Listen on iOS & Web';
+    ctx.fillText(platformLine, canvas.width / 2, 820);
+    ctx.font = '500 28px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
+    const host = target.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    ctx.fillText(host, canvas.width / 2, 900);
+  }
   ctx.textAlign = 'start';
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -4582,11 +4598,6 @@ async function shareAppLink(platform) {
 }
 
 async function shareThisApp() {
-  const preferred = getPreferredAppSharePlatform();
-  if (preferred && navigator.share) {
-    await shareAppLink(preferred);
-    return;
-  }
   openShareAppModal();
 }
 
