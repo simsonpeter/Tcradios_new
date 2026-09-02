@@ -2696,25 +2696,6 @@ document.getElementById('tab-all').onclick   = () => switchTab('all');
 document.getElementById('tab-fav').onclick   = () => switchTab('fav');
 document.getElementById('tab-history').onclick = () => switchTab('history');
 document.getElementById('tab-about').onclick = () => switchTab('about');
-let tabSwipeStartX = 0;
-let tabSwipeEnabled = false;
-document.getElementById('content').addEventListener('touchstart', e => {
-  tabSwipeEnabled = isTabSwipeAllowed(e);
-  if (!tabSwipeEnabled) return;
-  tabSwipeStartX = e.changedTouches[0].screenX;
-}, { passive: true });
-document.getElementById('content').addEventListener('touchend', e => {
-  if (!tabSwipeEnabled) return;
-  const th = 50;
-  const tabs = ['all','fav','history','about'];
-  if (e.changedTouches[0].screenX < tabSwipeStartX - th) {
-    const i = tabs.indexOf(currentTab);
-    if (i < tabs.length - 1) switchTab(tabs[i+1]);
-  } else if (tabSwipeStartX < e.changedTouches[0].screenX - th) {
-    const i = tabs.indexOf(currentTab);
-    if (i > 0) switchTab(tabs[i-1]);
-  }
-});
 let stationFiltersExpanded = false;
 
 function canShowStationFilters() {
@@ -6694,17 +6675,6 @@ let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 let stationSwipeBlocked = false;
-
-function isTabSwipeAllowed(e) {
-  const target = e.target;
-  if (!target || !target.closest) return false;
-  if (target.closest('#favQuickRow')) return false;
-  if (target.closest('#searchRow')) return false;
-  if (target.closest('#stationFilterBar')) return false;
-  if (target.closest('#tabs')) return false;
-  if (target.closest('.history-tabs')) return false;
-  return !!target.closest('.station-list');
-}
 
 function shouldBlockStationSwipe(e) {
   const target = e.target;
