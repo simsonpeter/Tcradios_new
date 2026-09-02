@@ -365,8 +365,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                   border:1px solid var(--border);border-radius:0.5rem;padding:0.45rem 0.6rem}
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
-#favQuickRow{display:none;margin:0 0 0.75rem}
-#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease}
+#favQuickRow{display:none;margin:0}
+#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
 .fav-quick-panel{background:var(--card);border:1px solid var(--border);border-radius:0.85rem;
                  padding:0.7rem 0.5rem 0.55rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .fav-quick-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -430,17 +430,23 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .vote-button{margin-top:0.45rem;border:1px solid rgba(249,115,22,0.35);
              background:rgba(249,115,22,0.12);color:var(--accent);
              border-radius:999px;padding:0.35rem 0.7rem;cursor:pointer}
-#content,#about-panel{flex:1;overflow-y:auto;padding:.75rem 1rem var(--player-height);
-                      display:flex;flex-direction:column}
+#content,#about-panel{flex:1;display:flex;flex-direction:column;min-height:0}
+#content{overflow:hidden;padding:.75rem 1rem 0}
 #about-panel{
   display:none;
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  padding:2rem 1rem;
+  overflow-y:auto;
+  padding:2rem 1rem var(--player-height);
   background:linear-gradient(135deg, var(--bg) 0%, rgba(249,115,22,0.05) 100%);
   min-height:100vh;
 }
+#contentTop{flex-shrink:0;display:flex;flex-direction:column;gap:0;z-index:25}
+#stationScrollArea{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;
+                    padding-bottom:var(--player-height);margin:0 -0.15rem;padding-left:0.15rem;
+                    padding-right:0.15rem;-webkit-overflow-scrolling:touch}
+#favQuickRow.is-visible-on-all{flex-shrink:0}
 
 .about-hero{
   text-align:center;
@@ -1374,29 +1380,33 @@ audio{display:none}
   <span id="tab-about">About</span>
 </div>
 <div id="content" aria-busy="true">
-  <div id="searchRow">
-    <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
-    <div id="stationViewToggle" role="group" aria-label="Station view">
-      <button id="viewListBtn" type="button" title="List view" aria-pressed="true"><i class="fas fa-list"></i></button>
-      <button id="viewLogoBtn" type="button" title="Logo view" aria-pressed="false"><i class="fas fa-th-large"></i></button>
+  <div id="contentTop">
+    <div id="searchRow">
+      <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
+      <div id="stationViewToggle" role="group" aria-label="Station view">
+        <button id="viewListBtn" type="button" title="List view" aria-pressed="true"><i class="fas fa-list"></i></button>
+        <button id="viewLogoBtn" type="button" title="Logo view" aria-pressed="false"><i class="fas fa-th-large"></i></button>
+      </div>
     </div>
+    <div id="stationFilterBar">
+      <select id="genreFilter" title="Filter by genre">
+        <option value="">All genres</option>
+      </select>
+      <select id="sortFilter" title="Sort stations">
+        <option value="default">Default order</option>
+        <option value="name">Name A-Z</option>
+        <option value="most-played">Most played</option>
+        <option value="top-rated">Top rated</option>
+        <option value="recent">Recently played</option>
+      </select>
+      <label><input type="checkbox" id="favoritesOnlyFilter"/> Favorites only</label>
+      <button id="clearFilters" type="button">Clear</button>
+    </div>
+    <div id="favQuickRow" hidden></div>
   </div>
-  <div id="stationFilterBar">
-    <select id="genreFilter" title="Filter by genre">
-      <option value="">All genres</option>
-    </select>
-    <select id="sortFilter" title="Sort stations">
-      <option value="default">Default order</option>
-      <option value="name">Name A-Z</option>
-      <option value="most-played">Most played</option>
-      <option value="top-rated">Top rated</option>
-      <option value="recent">Recently played</option>
-    </select>
-    <label><input type="checkbox" id="favoritesOnlyFilter"/> Favorites only</label>
-    <button id="clearFilters" type="button">Clear</button>
+  <div id="stationScrollArea">
+    <div class="station-list"></div>
   </div>
-  <div id="favQuickRow" hidden></div>
-  <div class="station-list"></div>
 </div>
 <div id="about-panel">
   <!-- Hero Section -->
@@ -2911,7 +2921,7 @@ function renderFavQuickRow() {
 
   if (currentTab !== 'all') {
     row.hidden = true;
-    row.classList.remove('is-visible');
+    row.classList.remove('is-visible', 'is-visible-on-all');
     row.innerHTML = '';
     return;
   }
@@ -2919,7 +2929,7 @@ function renderFavQuickRow() {
   const favStations = getFavoritesInOrder();
   if (!favStations.length) {
     row.hidden = true;
-    row.classList.remove('is-visible');
+    row.classList.remove('is-visible', 'is-visible-on-all');
     row.innerHTML = '';
     return;
   }
@@ -2932,7 +2942,7 @@ function renderFavQuickRow() {
   }).join('');
 
   row.hidden = false;
-  row.classList.add('is-visible');
+  row.classList.add('is-visible', 'is-visible-on-all');
   row.innerHTML = `
     <div class="fav-quick-panel">
       <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
