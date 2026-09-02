@@ -1290,7 +1290,7 @@ audio{display:none}
     <button id="accountBtn" title="Account" class="header-btn"><i class="fas fa-user"></i></button>
     <button id="requestRadioBtn" title="Request Radio" class="header-btn"><i class="fas fa-plus-circle"></i></button>
     <button id="shareAppBtn" title="Share this App" class="header-btn"><i class="fas fa-share-alt"></i></button>
-    <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
+    <button id="castBtn" title="Cast" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
     <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
   </div>
@@ -1303,7 +1303,7 @@ audio{display:none}
     <button id="menuShareAppBtn" title="Share this App"><i class="fas fa-share-alt"></i> Share this App</button>
     <button id="menuRateAppBtn" title="Rate us on Play Store"><i class="fas fa-star"></i> Rate us on Play Store</button>
     <button id="menuAdminDashboardBtn" title="Admin Dashboard" style="display:none"><i class="fas fa-chart-line"></i> Admin Dashboard</button>
-    <button id="menuCastBtn" title="Cast to Google Nest"><i class="fab fa-chromecast"></i> Cast to Google Nest</button>
+    <button id="menuCastBtn" title="Cast"><i class="fab fa-chromecast"></i> Cast</button>
     <button id="menuInstallBtn" title="Install App" style="display:none"><i class="fas fa-download"></i> Install App</button>
   </div>
 </header>
@@ -2818,7 +2818,7 @@ function renderAboutPanel() {
     ['fa-mobile-alt', 'Mini player widget'],
     ['fa-bell', 'Lock-screen controls'],
     ['fa-download', 'Install as PWA / app'],
-    ['fa-chromecast', 'Google Nest casting'],
+    ['fa-chromecast', 'Casting'],
     ['fa-star', 'Ratings & sharing'],
     ['fa-pray', 'Prayer & encouragement']
   ];
@@ -3803,12 +3803,12 @@ async function loadStationOnGoogleNest(st, autoplay = true) {
     updatePlaybackUiForRemote(autoplay);
     updateGoogleNestCastControls();
     if (autoplay) {
-      showNotification(`Casting ${st.name} to Google Nest`);
+      showNotification(`Casting ${st.name}`);
     }
     return true;
   } catch (error) {
     console.error('Google Nest cast load failed:', error);
-    showNotification('Unable to cast this station to Google Nest');
+    showNotification('Unable to cast this station');
     return false;
   }
 }
@@ -3897,7 +3897,7 @@ function updateGoogleNestCastControls() {
   const noDevicesState = window.cast?.framework?.CastState?.NO_DEVICES_AVAILABLE || 'NO_DEVICES_AVAILABLE';
   const canCast = googleNestCastState && googleNestCastState !== noDevicesState;
   const connected = isGoogleNestCasting();
-  const label = connected ? 'Casting to Google Nest' : 'Cast to Google Nest';
+  const label = connected ? 'Casting' : 'Cast';
   const castControl = document.getElementById('castBtn');
   const menuCastControl = document.getElementById('menuCastBtn');
 
@@ -3918,7 +3918,7 @@ function updateGoogleNestCastControls() {
 async function requestGoogleNestCastSession() {
   const context = getCastContext();
   if (!context) {
-    showNotification('Google Nest casting is not available in this browser');
+    showNotification('Casting is not available in this browser');
     return;
   }
 
@@ -3930,13 +3930,13 @@ async function requestGoogleNestCastSession() {
     if (lastPlayedStation && lastPlayedStation.station && audio.src) {
       await loadStationOnGoogleNest(lastPlayedStation.station, isPlaybackCurrentlyPlaying());
     } else {
-      showNotification('Select a station to cast to Google Nest');
+      showNotification('Select a station to cast');
     }
   } catch (error) {
     const canceled = error === chrome.cast.ErrorCode.CANCEL || error?.code === chrome.cast.ErrorCode.CANCEL;
     if (!canceled) {
       console.error('Google Nest cast session failed:', error);
-      showNotification('Unable to connect to Google Nest');
+      showNotification('Unable to connect to Cast device');
     }
   }
 }
