@@ -374,10 +374,14 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .fav-quick-label{display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;
                 font-weight:700;color:var(--accent);margin:0 0 0.5rem 0.35rem}
 .fav-quick-scroll{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;
-                  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+                  -webkit-overflow-scrolling:touch;scroll-snap-type:none;
                   padding:0.15rem 0.2rem 0.25rem;scrollbar-width:none;
                   touch-action:pan-x;overscroll-behavior-x:contain}
+.fav-quick-scroll.is-user-scroll{scroll-snap-type:x proximity}
 .fav-quick-scroll::-webkit-scrollbar{display:none}
+.fav-quick-track{display:flex;flex-shrink:0}
+.fav-quick-scroll.is-marquee-active{mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);
+                                    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
 .fav-quick-item{flex:0 0 86px;scroll-snap-align:start;display:flex;flex-direction:column;
                 align-items:center;gap:0.35rem;cursor:pointer;text-align:center;
                 background:transparent;border:none;color:inherit;padding:0.5rem 0.55rem;
@@ -2797,9 +2801,113 @@ function switchTab(tab) {
   }
 }
 /* ---- RENDER ---- */
+let favMarqueeActive = false;
+let favMarqueePausedByUser = false;
+let favMarqueeRaf = null;
+let favMarqueeResumeTimer = null;
+const FAV_MARQUEE_SPEED = 0.55;
+const FAV_MARQUEE_RESUME_MS = 5000;
+
+function destroyFavMarquee() {
+  favMarqueeActive = false;
+  favMarqueePausedByUser = false;
+  if (favMarqueeRaf) cancelAnimationFrame(favMarqueeRaf);
+  favMarqueeRaf = null;
+  clearTimeout(favMarqueeResumeTimer);
+  favMarqueeResumeTimer = null;
+}
+
+function buildFavQuickItemMarkup(st, i, playing) {
+  return `<button type="button" class="fav-quick-item${playing ? ' playing' : ''}" data-name="${st.name}" role="listitem" title="${st.name}" style="animation-delay:${Math.min(i * 0.05, 0.45)}s">
+    <span class="fav-quick-art-wrap">
+      <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="">
+    </span>
+    <span class="fav-quick-name">${st.name}</span>
+  </button>`;
+}
+
+function pauseFavMarqueeForUser() {
+  const scroller = document.querySelector('.fav-quick-scroll');
+  if (scroller) {
+    scroller.classList.add('is-user-scroll');
+    scroller.classList.remove('is-marquee-active');
+  }
+  favMarqueePausedByUser = true;
+  if (favMarqueeRaf) cancelAnimationFrame(favMarqueeRaf);
+  favMarqueeRaf = null;
+  clearTimeout(favMarqueeResumeTimer);
+  favMarqueeResumeTimer = setTimeout(resumeFavMarquee, FAV_MARQUEE_RESUME_MS);
+}
+
+function resumeFavMarquee() {
+  favMarqueePausedByUser = false;
+  const scroller = document.querySelector('.fav-quick-scroll');
+  if (scroller) scroller.classList.remove('is-user-scroll');
+  runFavMarqueeLoop();
+}
+
+function runFavMarqueeLoop() {
+  if (!favMarqueeActive || favMarqueePausedByUser) return;
+  const scroller = document.querySelector('.fav-quick-scroll');
+  const track = scroller?.querySelector('.fav-quick-track');
+  if (!scroller || !track) return;
+
+  if (track.scrollWidth / 2 <= scroller.clientWidth) {
+    scroller.classList.remove('is-marquee-active');
+    return;
+  }
+
+  scroller.classList.add('is-marquee-active');
+
+  const tick = () => {
+    if (!favMarqueeActive || favMarqueePausedByUser) return;
+    scroller.scrollLeft += FAV_MARQUEE_SPEED;
+    const loopWidth = track.scrollWidth / 2;
+    if (loopWidth > 0 && scroller.scrollLeft >= loopWidth) {
+      scroller.scrollLeft -= loopWidth;
+    }
+    favMarqueeRaf = requestAnimationFrame(tick);
+  };
+
+  if (favMarqueeRaf) cancelAnimationFrame(favMarqueeRaf);
+  favMarqueeRaf = requestAnimationFrame(tick);
+}
+
+function initFavMarquee(scroller) {
+  destroyFavMarquee();
+  if (!scroller) return;
+  const track = scroller.querySelector('.fav-quick-track');
+  if (!track || track.scrollWidth / 2 <= scroller.clientWidth) return;
+
+  favMarqueeActive = true;
+  requestAnimationFrame(() => runFavMarqueeLoop());
+}
+
+function bindFavMarqueeControls(scroller) {
+  if (!scroller || scroller.dataset.marqueeBound === '1') return;
+  scroller.dataset.marqueeBound = '1';
+
+  const pause = () => pauseFavMarqueeForUser();
+
+  scroller.addEventListener('touchstart', e => {
+    e.stopPropagation();
+    pause();
+  }, { passive: true });
+  scroller.addEventListener('touchmove', e => {
+    e.stopPropagation();
+    pause();
+  }, { passive: true });
+  scroller.addEventListener('touchend', e => e.stopPropagation());
+  scroller.addEventListener('pointerdown', pause);
+  scroller.addEventListener('wheel', pause, { passive: true });
+  scroller.addEventListener('mousedown', pause);
+}
+
 function renderFavQuickRow() {
   const row = document.getElementById('favQuickRow');
   if (!row) return;
+
+  destroyFavMarquee();
 
   if (currentTab !== 'all') {
     row.hidden = true;
@@ -2816,37 +2924,37 @@ function renderFavQuickRow() {
     return;
   }
 
+  const itemsHtml = favStations.map((st, i) => {
+    const playing = lastPlayedStation &&
+      lastPlayedStation.station.name === st.name &&
+      !audio.paused;
+    return buildFavQuickItemMarkup(st, i, playing);
+  }).join('');
+
   row.hidden = false;
   row.classList.add('is-visible');
   row.innerHTML = `
     <div class="fav-quick-panel">
       <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
       <div class="fav-quick-scroll" role="list">
-        ${favStations.map((st, i) => {
-        const playing = lastPlayedStation &&
-          lastPlayedStation.station.name === st.name &&
-          !audio.paused;
-        return `<button type="button" class="fav-quick-item${playing ? ' playing' : ''}" data-name="${st.name}" role="listitem" title="${st.name}" style="animation-delay:${Math.min(i * 0.05, 0.45)}s">
-          <span class="fav-quick-art-wrap">
-            <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="">
-          </span>
-          <span class="fav-quick-name">${st.name}</span>
-        </button>`;
-      }).join('')}
+        <div class="fav-quick-track">
+          ${itemsHtml}
+          ${itemsHtml}
+        </div>
       </div>
     </div>
   `;
 
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
-    btn.onclick = () => playFavoriteStation(btn.dataset.name);
+    btn.onclick = () => {
+      destroyFavMarquee();
+      playFavoriteStation(btn.dataset.name);
+    };
   });
 
   const scroller = row.querySelector('.fav-quick-scroll');
-  if (scroller) {
-    scroller.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
-    scroller.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
-    scroller.addEventListener('touchend', e => e.stopPropagation());
-  }
+  bindFavMarqueeControls(scroller);
+  initFavMarquee(scroller);
 }
 
 function playFavoriteStation(stationName) {
