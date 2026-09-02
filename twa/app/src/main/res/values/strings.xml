@@ -41,4 +41,6 @@
   <string name="widget_play_cd">Play or pause</string>
   <string name="widget_prev_cd">Previous station</string>
   <string name="widget_next_cd">Next station</string>
+  <string name="playback_channel_name">Now playing</string>
+  <string name="playback_channel_description">Lock screen and notification player controls</string>
 </resources>

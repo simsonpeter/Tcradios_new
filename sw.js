@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v5';
+const CACHE = 'tcr-v6';
 const FILES = [
   '/',
   '/index.html',
@@ -12,80 +12,115 @@ const FILES = [
   '/icons/apple-touch-icon.png',
   '/icons/default-artwork.jpg'
 ];
+const MEDIA_TAG = 'tcradios-now-playing';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
-  self.skipWaiting(); // Activate immediately
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE).map(key => caches.delete(key))
+    ))
   );
-  return self.clients.claim(); // Take control of all pages immediately
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  // For HTML files and root, try network first, then cache
   if (e.request.url.endsWith('.html') || url.pathname === '/') {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
         .then(res => {
-          // Clone the response
           const resClone = res.clone();
-          // Update cache
-          caches.open(CACHE).then(cache => {
-            cache.put(e.request, resClone);
-          });
+          caches.open(CACHE).then(cache => cache.put(e.request, resClone));
           return res;
         })
         .catch(() => caches.match(e.request))
     );
   } else {
-    // For other files, use cache first
-    e.respondWith(
-      caches.match(e.request).then(res => res || fetch(e.request))
-    );
+    e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
   }
 });
 
-// Android Auto support
+function broadcastToClients(data) {
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+    clients.forEach(client => client.postMessage(data));
+  });
+}
+
 self.addEventListener('message', event => {
-  if (event.data.type === 'ANDROID_AUTO_COMMAND') {
-    // Forward Android Auto commands to main app
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage(event.data);
-      });
-    });
+  const data = event.data || {};
+  if (data.type === 'ANDROID_AUTO_COMMAND') {
+    broadcastToClients(data);
+    return;
+  }
+  if (data.type === 'MEDIA_NOTIFICATION') {
+    event.waitUntil(showNowPlayingNotification(data));
+    return;
+  }
+  if (data.type === 'MEDIA_NOTIFICATION_CLEAR') {
+    event.waitUntil(self.registration.getNotifications({ tag: MEDIA_TAG })
+      .then(list => list.forEach(n => n.close())));
   }
 });
 
-// Handle Android Auto media session updates
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  
-  // Handle Android Auto notification clicks
-  if (event.action === 'play') {
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: 'ANDROID_AUTO_COMMAND', command: { action: 'PLAY' } });
-      });
+async function showNowPlayingNotification(data) {
+  const playing = !!data.playing;
+  const name = data.name || 'TC RADIOS';
+  try {
+    await self.registration.showNotification(name, {
+      body: playing ? 'Live • TC RADIOS' : 'Paused • TC RADIOS',
+      icon: data.icon || '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png',
+      tag: MEDIA_TAG,
+      renotify: false,
+      silent: true,
+      requireInteraction: true,
+      actions: [
+        { action: 'prev', title: 'Previous' },
+        { action: playing ? 'pause' : 'play', title: playing ? 'Pause' : 'Play' },
+        { action: 'next', title: 'Next' }
+      ],
+      data: { name, playing }
     });
-  } else if (event.action === 'pause') {
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: 'ANDROID_AUTO_COMMAND', command: { action: 'PAUSE' } });
-      });
-    });
+  } catch (e) {
+    // Notification permission may be missing.
   }
+}
+
+self.addEventListener('notificationclick', event => {
+  const action = event.action;
+  const isTransport = action === 'play' || action === 'pause' || action === 'next' || action === 'prev';
+  if (!isTransport) {
+    event.notification.close();
+  }
+  event.waitUntil((async () => {
+    const command = action === 'play' ? 'PLAY'
+      : action === 'pause' ? 'PAUSE'
+      : action === 'next' ? 'NEXT'
+      : action === 'prev' ? 'PREVIOUS'
+      : null;
+    const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (command) {
+      if (clientsList.length) {
+        clientsList.forEach(client => {
+          client.postMessage({ type: 'ANDROID_AUTO_COMMAND', command: { action: command } });
+        });
+        if (clientsList[0].focus) await clientsList[0].focus();
+        return;
+      }
+      const url = new URL('/', self.location.origin);
+      url.searchParams.set('action', action === 'play' ? 'play' : action === 'pause' ? 'pause' : action);
+      await self.clients.openWindow(url.toString());
+      return;
+    }
+    if (clientsList.length) {
+      await clientsList[0].focus();
+      return;
+    }
+    await self.clients.openWindow('/');
+  })());
 });
