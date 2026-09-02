@@ -2604,14 +2604,21 @@ function initFilters() {
 
 function applyStationViewMode() {
   if (!stationList) return;
-  stationList.classList.toggle('view-logo', stationViewMode === 'logo');
+  const useLogoView = stationViewMode === 'logo' && (currentTab === 'all' || currentTab === 'fav');
+  stationList.classList.toggle('view-logo', useLogoView);
+  const showViewToggle = currentTab === 'all' || currentTab === 'fav';
   if (viewListBtn) {
     viewListBtn.classList.toggle('active', stationViewMode === 'list');
     viewListBtn.setAttribute('aria-pressed', stationViewMode === 'list' ? 'true' : 'false');
+    viewListBtn.style.display = showViewToggle ? '' : 'none';
   }
   if (viewLogoBtn) {
     viewLogoBtn.classList.toggle('active', stationViewMode === 'logo');
     viewLogoBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
+    viewLogoBtn.style.display = showViewToggle ? '' : 'none';
+  }
+  if (document.getElementById('stationViewToggle')) {
+    document.getElementById('stationViewToggle').style.display = showViewToggle ? '' : 'none';
   }
 }
 
@@ -2702,6 +2709,7 @@ function switchTab(tab) {
     if (searchRow) searchRow.style.display = 'none';
     else searchBar.style.display = 'none';
     setStationFiltersVisible(false);
+    applyStationViewMode();
     renderHistory();
   } else {
     document.getElementById('content').style.display = 'flex';
@@ -3811,6 +3819,7 @@ function formatTimestamp(timestamp) {
 
 function renderHistory() {
   stationList.innerHTML = '';
+  applyStationViewMode();
   
   // Create tabs for Recently Played and Most Played
   const historyTabs = document.createElement('div');
