@@ -365,6 +365,24 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                   border:1px solid var(--border);border-radius:0.5rem;padding:0.45rem 0.6rem}
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
+#favQuickRow{display:none;margin:0 0 0.65rem}
+#favQuickRow.is-visible{display:block}
+.fav-quick-label{display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;
+                font-weight:700;color:var(--accent);margin-bottom:0.35rem}
+.fav-quick-scroll{display:flex;gap:0.55rem;overflow-x:auto;overflow-y:hidden;
+                  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+                  padding:0.1rem 0.1rem 0.35rem;scrollbar-width:none}
+.fav-quick-scroll::-webkit-scrollbar{display:none}
+.fav-quick-item{flex:0 0 72px;scroll-snap-align:start;display:flex;flex-direction:column;
+                align-items:center;gap:0.28rem;cursor:pointer;text-align:center;
+                background:transparent;border:none;color:inherit;padding:0}
+.fav-quick-item img{width:56px;height:56px;border-radius:50%;object-fit:cover;
+                    border:2px solid transparent;box-shadow:var(--shadow-sm);transition:var(--transition)}
+.fav-quick-item:hover img{border-color:rgba(249,115,22,0.45);transform:scale(1.04)}
+.fav-quick-item.playing img{border-color:var(--accent);box-shadow:0 0 0 2px rgba(249,115,22,0.25)}
+.fav-quick-name{font-size:0.68rem;font-weight:600;line-height:1.2;
+                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                overflow:hidden;max-width:72px}
 #fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
 #fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
 .admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
@@ -1340,6 +1358,7 @@ audio{display:none}
     <label><input type="checkbox" id="favoritesOnlyFilter"/> Favorites only</label>
     <button id="clearFilters" type="button">Clear</button>
   </div>
+  <div id="favQuickRow" hidden></div>
   <div class="station-list"></div>
 </div>
 <div id="about-panel">
@@ -2731,12 +2750,14 @@ function switchTab(tab) {
     if (searchRow) searchRow.style.display = 'none';
     else searchBar.style.display = 'none';
     setStationFiltersVisible(false);
+    renderFavQuickRow();
   } else if (tab === 'history') {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
     if (searchRow) searchRow.style.display = 'none';
     else searchBar.style.display = 'none';
     setStationFiltersVisible(false);
+    renderFavQuickRow();
     applyStationViewMode();
     renderHistory();
   } else {
@@ -2755,7 +2776,64 @@ function switchTab(tab) {
   }
 }
 /* ---- RENDER ---- */
+function renderFavQuickRow() {
+  const row = document.getElementById('favQuickRow');
+  if (!row) return;
+
+  if (currentTab !== 'all') {
+    row.hidden = true;
+    row.classList.remove('is-visible');
+    row.innerHTML = '';
+    return;
+  }
+
+  const favStations = getFavoritesInOrder();
+  if (!favStations.length) {
+    row.hidden = true;
+    row.classList.remove('is-visible');
+    row.innerHTML = '';
+    return;
+  }
+
+  row.hidden = false;
+  row.classList.add('is-visible');
+  row.innerHTML = `
+    <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
+    <div class="fav-quick-scroll" role="list">
+      ${favStations.map(st => {
+        const playing = lastPlayedStation &&
+          lastPlayedStation.station.name === st.name &&
+          !audio.paused;
+        return `<button type="button" class="fav-quick-item${playing ? ' playing' : ''}" data-name="${st.name}" role="listitem" title="${st.name}">
+          <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="">
+          <span class="fav-quick-name">${st.name}</span>
+        </button>`;
+      }).join('')}
+    </div>
+  `;
+
+  row.querySelectorAll('.fav-quick-item').forEach(btn => {
+    btn.onclick = () => playFavoriteStation(btn.dataset.name);
+  });
+}
+
+function playFavoriteStation(stationName) {
+  for (const lang of Object.keys(stationsPerLang)) {
+    const langStations = stationsPerLang[lang] || [];
+    const idx = langStations.findIndex(s => s.name === stationName);
+    if (idx < 0) continue;
+    if (currentLang !== lang) {
+      currentLang = lang;
+      localStorage.setItem('currentLang', currentLang);
+      if (langSelect) langSelect.value = currentLang;
+    }
+    play(langStations[idx], idx);
+    return;
+  }
+}
+
 function render(list, options = {}) {
+  renderFavQuickRow();
   stationList.innerHTML = '';
   applyStationViewMode();
 
