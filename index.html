@@ -2789,6 +2789,8 @@ function switchTab(tab) {
   } else if (tab === 'history') {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
+    const contentTop = document.getElementById('contentTop');
+    if (contentTop) contentTop.style.display = 'none';
     if (searchRow) searchRow.style.display = 'none';
     else searchBar.style.display = 'none';
     setStationFiltersVisible(false);
@@ -2798,6 +2800,8 @@ function switchTab(tab) {
   } else {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
+    const contentTop = document.getElementById('contentTop');
+    if (contentTop) contentTop.style.display = '';
     if (searchRow) searchRow.style.display = '';
     else searchBar.style.display = '';
     // Hide when changing tabs; keep open only on same-tab re-renders (search/filter updates)
