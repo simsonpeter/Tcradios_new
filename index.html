@@ -8,7 +8,8 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-title" content="TC RADIOS">
 <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
 <link rel="icon" href="/icons/favicon.ico">
@@ -51,6 +52,7 @@ window.__onGCastApiAvailable = function(isAvailable) {
 <style>
 /* Modern Elegant Theme System */
 :root{
+  color-scheme:dark;
   --accent:#f97316;--bg:#111827;--card:#1f2937;--text:#f3f4f6;
   --border:#374151;--header:#000000;--heart:#f3f4f6;
   --header-btn:#f3f4f6;--player-height:80px;
@@ -67,6 +69,7 @@ window.__onGCastApiAvailable = function(isAvailable) {
 
 /* Light Theme */
 [data-theme="light"]{
+  color-scheme:light;
   --bg:#f8fafc;--card:#ffffff;--text:#1e293b;
   --border:#e2e8f0;--header:#ffffff;--heart:#1e293b;
   --header-btn:#1e293b;
@@ -273,16 +276,14 @@ window.__onGCastApiAvailable = function(isAvailable) {
 html,body{height:100%;height:100vh;height:100dvh;width:100%;overflow:hidden}
 body{display:flex;flex-direction:column;font-family:system-ui;
      background:var(--bg);color:var(--text);overflow:hidden;
-     /* Ensure fullscreen on mobile */
      position:fixed;top:0;left:0;right:0;bottom:0;
-     /* Handle safe areas for notched devices */
-     padding-top:env(safe-area-inset-top);
      padding-bottom:env(safe-area-inset-bottom);
      padding-left:env(safe-area-inset-left);
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
        display:flex;justify-content:space-between;align-items:center;
-       padding:1rem 1.2rem;font-size:1.25rem;font-weight:700;min-height:70px;
+       padding:calc(1rem + env(safe-area-inset-top, 0px)) 1.2rem 1rem;
+       font-size:1.25rem;font-weight:700;min-height:70px;
        backdrop-filter:var(--blur);position:relative;z-index:100}
 .header-title{display:flex;flex-direction:column;gap:0.2rem}
 .header-title>span:first-child{font-size:1.25rem;font-weight:700}
@@ -2387,9 +2388,36 @@ function applyTheme(theme) {
   } else {
     body.removeAttribute('data-theme');
   }
+
+  updateThemeColorMeta(theme);
   
   // Add theme-specific animations
   addThemeAnimations(theme);
+}
+
+function updateThemeColorMeta(theme) {
+  const themeColors = {
+    dark: '#111827',
+    light: '#f8fafc',
+    ocean: '#0f172a',
+    forest: '#064e3b',
+    sunset: '#1e1b4b',
+    rose: '#1f2937',
+    midnight: '#0c0a09',
+    aurora: '#0f172a',
+    christmas: '#14532d',
+    easter: '#fdf4ff',
+    gold: '#1c1917',
+    minimal: '#ffffff'
+  };
+  const color = themeColors[theme] || themeColors.dark;
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.content = color;
 }
 
 function addThemeAnimations(theme) {
