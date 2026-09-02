@@ -337,6 +337,23 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
             transition:var(--transition)}
 #langSelect:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
 #langSelect:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
+#contentToolbar{display:flex;align-items:center;justify-content:flex-end;gap:0.35rem;
+                margin-bottom:0.55rem}
+.toolbar-picker{position:relative;width:38px;height:38px;flex-shrink:0}
+.toolbar-icon-btn{width:38px;height:38px;min-width:38px;min-height:38px;
+                  display:flex;align-items:center;justify-content:center;
+                  background:var(--card);border:1px solid var(--border);border-radius:0.55rem;
+                  color:var(--text);font-size:1rem;pointer-events:none}
+.toolbar-native-select{position:absolute;inset:0;opacity:0;width:100%;height:100%;
+                       cursor:pointer;z-index:2;border:none;background:transparent}
+.toolbar-action-btn{width:38px;height:38px;min-width:38px;min-height:38px;
+                    display:flex;align-items:center;justify-content:center;
+                    background:var(--card);border:1px solid var(--border);border-radius:0.55rem;
+                    color:var(--text);font-size:1rem;cursor:pointer;transition:var(--transition)}
+.toolbar-action-btn:hover,.toolbar-action-btn.active{border-color:var(--accent);color:var(--accent)}
+#searchRow{display:none;margin-bottom:0.65rem}
+#searchRow.is-visible{display:block}
+#searchRow #searchBar{margin-bottom:0}
 #tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;
       background:var(--header);position:relative;backdrop-filter:var(--blur)}
 #tabs::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
@@ -600,16 +617,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 }
 #shareAppModal .share-app-close:hover{background:var(--hover)}
 
-#searchRow{display:flex;gap:0.5rem;align-items:center;margin-bottom:.75rem}
-#searchRow #searchBar{flex:1;margin-bottom:0}
-#stationViewToggle{display:flex;gap:0.2rem;flex-shrink:0;background:var(--card);
-                   border:1px solid var(--border);border-radius:0.5rem;padding:0.15rem}
-#stationViewToggle button{background:transparent;border:none;color:var(--text);
-                          cursor:pointer;padding:0.45rem 0.55rem;border-radius:0.4rem;
-                          font-size:1rem;line-height:1;transition:var(--transition)}
-#stationViewToggle button:hover{color:var(--accent)}
-#stationViewToggle button.active{background:var(--accent);color:#fff}
-#searchBar{width:100%;margin-bottom:.75rem;padding:.55rem .7rem;border-radius:.4rem;
+#searchBar{width:100%;padding:.55rem .7rem;border-radius:.4rem;
            border:1px solid var(--border);background:var(--card);color:var(--text);
            font-size:1rem}
 #searchBar::placeholder{color:var(--border)}
@@ -1163,25 +1171,6 @@ audio{display:none}
     <span class="header-subtitle">by JayathaSoft</span>
   </div>
   <div id="headerControls">
-  <div id="themeBox">
-    <select id="themeSelect">
-      <option value="dark">🌙 Dark</option>
-      <option value="light">☀️ Light</option>
-      <option value="ocean">🌊 Ocean</option>
-      <option value="forest">🌲 Forest</option>
-      <option value="sunset">🌅 Sunset</option>
-      <option value="rose">🌹 Rose</option>
-      <option value="midnight">🌌 Midnight</option>
-      <option value="aurora">🌌 Aurora</option>
-      <option value="christmas">🎄 Christmas</option>
-      <option value="easter">🐰 Easter</option>
-      <option value="gold">✨ Gold</option>
-      <option value="minimal">⚪ Minimal</option>
-    </select>
-  </div>
-  <div id="langBox">
-    <select id="langSelect"></select>
-  </div>
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
     <button id="miniPlayerBtn" title="Mini Player" class="header-btn"><i class="fas fa-window-restore"></i></button>
@@ -1213,12 +1202,41 @@ audio{display:none}
 </div>
 <div id="content" aria-busy="true">
   <div id="contentTop">
+    <div id="contentToolbar" aria-label="Quick controls">
+      <div class="toolbar-picker" title="Theme">
+        <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+          <i class="fas fa-palette"></i>
+        </button>
+        <select id="themeSelect" class="toolbar-native-select" title="Theme" aria-label="Theme">
+          <option value="dark">🌙 Dark</option>
+          <option value="light">☀️ Light</option>
+          <option value="ocean">🌊 Ocean</option>
+          <option value="forest">🌲 Forest</option>
+          <option value="sunset">🌅 Sunset</option>
+          <option value="rose">🌹 Rose</option>
+          <option value="midnight">🌌 Midnight</option>
+          <option value="aurora">🌌 Aurora</option>
+          <option value="christmas">🎄 Christmas</option>
+          <option value="easter">🐰 Easter</option>
+          <option value="gold">✨ Gold</option>
+          <option value="minimal">⚪ Minimal</option>
+        </select>
+      </div>
+      <div class="toolbar-picker" title="Language">
+        <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+          <i class="fas fa-globe"></i>
+        </button>
+        <select id="langSelect" class="toolbar-native-select" title="Language" aria-label="Language"></select>
+      </div>
+      <button id="searchToggleBtn" type="button" class="toolbar-action-btn" title="Search stations" aria-label="Search stations">
+        <i class="fas fa-search"></i>
+      </button>
+      <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
+        <i class="fas fa-list"></i>
+      </button>
+    </div>
     <div id="searchRow">
       <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
-      <div id="stationViewToggle" role="group" aria-label="Station view">
-        <button id="viewListBtn" type="button" title="List view" aria-pressed="true"><i class="fas fa-list"></i></button>
-        <button id="viewLogoBtn" type="button" title="Logo view" aria-pressed="false"><i class="fas fa-th-large"></i></button>
-      </div>
     </div>
     <div id="stationFilterBar">
       <select id="genreFilter" title="Filter by genre">
@@ -1601,8 +1619,9 @@ let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'n
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const searchRow   = document.getElementById('searchRow');
-const viewListBtn = document.getElementById('viewListBtn');
-const viewLogoBtn = document.getElementById('viewLogoBtn');
+const searchToggleBtn = document.getElementById('searchToggleBtn');
+const viewToggleBtn = document.getElementById('viewToggleBtn');
+const contentToolbar = document.getElementById('contentToolbar');
 const stationList = document.querySelector('.station-list');
 const genreFilter = document.getElementById('genreFilter');
 const sortFilter = document.getElementById('sortFilter');
@@ -2399,18 +2418,15 @@ function applyStationViewMode() {
   const useLogoView = stationViewMode === 'logo' && (currentTab === 'all' || currentTab === 'fav');
   stationList.classList.toggle('view-logo', useLogoView);
   const showViewToggle = currentTab === 'all' || currentTab === 'fav';
-  if (viewListBtn) {
-    viewListBtn.classList.toggle('active', stationViewMode === 'list');
-    viewListBtn.setAttribute('aria-pressed', stationViewMode === 'list' ? 'true' : 'false');
-    viewListBtn.style.display = showViewToggle ? '' : 'none';
+  if (viewToggleBtn) {
+    const icon = viewToggleBtn.querySelector('i');
+    if (icon) icon.className = stationViewMode === 'logo' ? 'fas fa-th-large' : 'fas fa-list';
+    viewToggleBtn.title = stationViewMode === 'logo' ? 'Switch to list view' : 'Switch to logo view';
+    viewToggleBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
+    viewToggleBtn.style.display = showViewToggle ? 'flex' : 'none';
   }
-  if (viewLogoBtn) {
-    viewLogoBtn.classList.toggle('active', stationViewMode === 'logo');
-    viewLogoBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
-    viewLogoBtn.style.display = showViewToggle ? '' : 'none';
-  }
-  if (document.getElementById('stationViewToggle')) {
-    document.getElementById('stationViewToggle').style.display = showViewToggle ? '' : 'none';
+  if (contentToolbar) {
+    contentToolbar.style.display = showViewToggle ? 'flex' : 'none';
   }
 }
 
@@ -2425,13 +2441,23 @@ function setStationViewMode(mode) {
   }
 }
 
+function setSearchBarVisible(show) {
+  searchToolbarExpanded = !!show;
+  if (searchRow) searchRow.classList.toggle('is-visible', searchToolbarExpanded);
+  if (searchToggleBtn) searchToggleBtn.classList.toggle('active', searchToolbarExpanded);
+  if (searchToolbarExpanded && searchBar) {
+    searchBar.focus();
+    if (canShowStationFilters()) setStationFiltersVisible(true);
+  }
+}
+
 function initStationViewToggle() {
   applyStationViewMode();
-  if (viewListBtn) {
-    viewListBtn.onclick = () => setStationViewMode('list');
+  if (viewToggleBtn) {
+    viewToggleBtn.onclick = () => setStationViewMode(stationViewMode === 'logo' ? 'list' : 'logo');
   }
-  if (viewLogoBtn) {
-    viewLogoBtn.onclick = () => setStationViewMode('logo');
+  if (searchToggleBtn) {
+    searchToggleBtn.onclick = () => setSearchBarVisible(!searchToolbarExpanded);
   }
 }
 
@@ -2441,6 +2467,7 @@ document.getElementById('tab-fav').onclick   = () => switchTab('fav');
 document.getElementById('tab-history').onclick = () => switchTab('history');
 document.getElementById('tab-about').onclick = () => switchTab('about');
 let stationFiltersExpanded = false;
+let searchToolbarExpanded = false;
 
 function canShowStationFilters() {
   return currentTab === 'all' || currentTab === 'fav';
@@ -2469,6 +2496,7 @@ document.addEventListener('pointerdown', e => {
   const bar = document.getElementById('stationFilterBar');
   if (!stationFiltersExpanded) return;
   if (searchBar.contains(e.target) || (bar && bar.contains(e.target))) return;
+  if (contentToolbar && contentToolbar.contains(e.target)) return;
   setStationFiltersVisible(false);
 });
 function getAboutStats() {
@@ -2609,8 +2637,7 @@ function switchTab(tab) {
   if (tab === 'about') {
     document.getElementById('content').style.display = 'none';
     document.getElementById('about-panel').style.display = 'flex';
-    if (searchRow) searchRow.style.display = 'none';
-    else searchBar.style.display = 'none';
+    setSearchBarVisible(false);
     setStationFiltersVisible(false);
     renderFavQuickRow();
     renderAboutPanel();
@@ -2619,8 +2646,7 @@ function switchTab(tab) {
     document.getElementById('about-panel').style.display = 'none';
     const contentTop = document.getElementById('contentTop');
     if (contentTop) contentTop.style.display = 'none';
-    if (searchRow) searchRow.style.display = 'none';
-    else searchBar.style.display = 'none';
+    setSearchBarVisible(false);
     setStationFiltersVisible(false);
     renderFavQuickRow();
     applyStationViewMode();
@@ -2630,8 +2656,8 @@ function switchTab(tab) {
     document.getElementById('about-panel').style.display = 'none';
     const contentTop = document.getElementById('contentTop');
     if (contentTop) contentTop.style.display = '';
-    if (searchRow) searchRow.style.display = '';
-    else searchBar.style.display = '';
+    if (previousTab !== tab) setSearchBarVisible(false);
+    applyStationViewMode();
     // Hide when changing tabs; keep open only on same-tab re-renders (search/filter updates)
     if (previousTab !== tab) setStationFiltersVisible(false);
     else setStationFiltersVisible(stationFiltersExpanded);
@@ -6653,6 +6679,7 @@ function shouldBlockStationSwipe(e) {
   if (!target || !target.closest) return false;
   return !!(target.closest('#favQuickRow') ||
             target.closest('#searchRow') ||
+            target.closest('#contentToolbar') ||
             target.closest('#stationFilterBar') ||
             target.closest('#tabs') ||
             target.closest('.history-tabs'));
