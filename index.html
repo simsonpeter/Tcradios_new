@@ -712,6 +712,11 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
       background:var(--card);box-shadow:var(--shadow-sm);border:1px solid var(--border);
       transition:var(--transition);cursor:pointer;position:relative;
       backdrop-filter:var(--blur);margin-bottom:.5rem}
+.item.has-accent{border-left:3px solid var(--station-accent,var(--accent))}
+.item.has-accent:not(.playing):hover{border-color:color-mix(in srgb,var(--station-accent,var(--accent)) 55%,var(--border))}
+.item.playing.has-accent{box-shadow:0 0 0 1px color-mix(in srgb,var(--station-accent) 40%,transparent),var(--shadow-lg)}
+.station-list.view-logo .item.has-accent{box-shadow:0 0 0 2px color-mix(in srgb,var(--station-accent) 35%,transparent),var(--shadow-sm)}
+.station-list.view-logo .item.has-accent.playing{box-shadow:0 0 0 2px color-mix(in srgb,var(--station-accent) 55%,#fff),var(--shadow-lg)}
 .item::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
               background:var(--gradient-primary);opacity:0;transition:var(--transition);
               border-radius:.75rem;z-index:-1}
@@ -791,7 +796,20 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #player .name span{display:inline-block;padding-right:1rem;
                    animation:marquee 8s linear infinite}
 @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+#player .p-now-row{display:flex;align-items:center;gap:0.45rem;min-width:0}
 #player #p-now{font-size:.8rem;color:var(--accent);white-space:nowrap;font-weight:500}
+#player .p-waveform{display:none;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
+#player.playing .p-waveform{display:flex}
+#player .p-waveform span{display:block;width:3px;height:100%;border-radius:2px;
+                           background:var(--station-accent,var(--accent));opacity:0.9;
+                           transform-origin:bottom center;animation:waveBar 0.85s ease-in-out infinite}
+#player .p-waveform span:nth-child(1){animation-delay:0s}
+#player .p-waveform span:nth-child(2){animation-delay:0.12s}
+#player .p-waveform span:nth-child(3){animation-delay:0.24s}
+#player .p-waveform span:nth-child(4){animation-delay:0.36s}
+#player .p-waveform span:nth-child(5){animation-delay:0.48s}
+@keyframes waveBar{0%,100%{transform:scaleY(0.3)}50%{transform:scaleY(1)}}
+#player.has-accent{border-top-color:color-mix(in srgb,var(--station-accent) 35%,var(--border))}
 #player .metadata{margin-top:0.3rem;font-size:0.75rem}
 #player .song-title{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.1rem}
 #player .artist-name{color:var(--accent);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
@@ -1345,7 +1363,10 @@ audio{display:none}
   <img id="p-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
   <div class="info">
     <div class="name"><span id="p-name"></span></div>
-    <div id="p-now">Live</div>
+    <div class="p-now-row">
+      <div id="p-waveform" class="p-waveform" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+      <div id="p-now">Live</div>
+    </div>
     <div id="p-metadata" class="metadata" style="display:none;">
       <div id="p-song" class="song-title"></div>
       <div id="p-artist" class="artist-name"></div>
@@ -1717,6 +1738,7 @@ let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
 let sleepTimer;
 let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
+const stationAccentCache = new Map();
 /* ---- ELEMENTS ---- */
 const searchBar   = document.getElementById('searchBar');
 const searchRow   = document.getElementById('searchRow');
@@ -2881,6 +2903,36 @@ function renderAboutPanel() {
       <p>Progressive Web App with Android support, cloud streaming, secure playback, widgets, Android Auto, and cross-device favorites sync.</p>
     </div>
 
+    <div class="about-section">
+      <h2><i class="fas fa-shield-alt"></i> Privacy</h2>
+      <p>TC RADIOS keeps most listening data on your device. When you sign in, a small amount of account and community data is stored securely in the cloud.</p>
+      <div class="about-rows">
+        <div class="about-row"><i class="fas fa-mobile-alt"></i><span><strong>On your device:</strong> favorites, play history, play counts, theme, language, filters, last-played station, and widget preferences (browser local storage).</span></div>
+        <div class="about-row"><i class="fas fa-cloud"></i><span><strong>In the cloud (signed-in users):</strong> account login via Supabase, synced favorites, and community star ratings you submit.</span></div>
+        <div class="about-row"><i class="fas fa-ban"></i><span><strong>We do not sell</strong> your personal data. Stream URLs are loaded directly from station providers when you press play.</span></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2><i class="fas fa-balance-scale"></i> Content disclaimer</h2>
+      <p>Streams, logos, and station metadata come from third-party broadcasters and public directories. JayathaSoft does not own, host, or control station audio or on-air content.</p>
+      <div class="about-rows">
+        <div class="about-row"><i class="fas fa-exclamation-circle"></i><span>Availability and quality of a station can change without notice.</span></div>
+        <div class="about-row"><i class="fas fa-envelope"></i><span>To report a broken stream, copyright concern, or request removal, email <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a>.</span></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2><i class="fas fa-code-branch"></i> Open source & credits</h2>
+      <p>TC RADIOS is built with excellent open tools and services:</p>
+      <div class="about-rows">
+        <div class="about-row"><i class="fas fa-icons"></i><span><strong>Font Awesome</strong> 6.4 — icons (<a href="https://fontawesome.com" target="_blank" rel="noopener">fontawesome.com</a>)</span></div>
+        <div class="about-row"><i class="fas fa-database"></i><span><strong>Supabase</strong> — auth &amp; cloud data (<a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>)</span></div>
+        <div class="about-row"><i class="fas fa-chromecast"></i><span><strong>Google Cast SDK</strong> — Cast to speakers &amp; TVs</span></div>
+        <div class="about-row"><i class="fas fa-cloud-download-alt"></i><span><strong>jsDelivr / GitHub</strong> — station catalog delivery</span></div>
+      </div>
+    </div>
+
     <div class="about-actions">
       <button id="aboutShareAppBtn" class="about-share-btn" type="button" title="Share this App">
         <i class="fas fa-share-alt"></i> Share App
@@ -3304,6 +3356,77 @@ function openStationRating(st) {
   showRatingModal(st);
 }
 
+function extractStationAccentColor(logoUrl, callback) {
+  if (!logoUrl || typeof callback !== 'function') return;
+  if (stationAccentCache.has(logoUrl)) {
+    callback(stationAccentCache.get(logoUrl));
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    let color = null;
+    try {
+      const canvas = document.createElement('canvas');
+      const size = 16;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, size, size);
+      const data = ctx.getImageData(0, 0, size, size).data;
+      let bestScore = -1;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a < 128) continue;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const sat = max === 0 ? 0 : (max - min) / max;
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        if (lum < 0.12 || lum > 0.92) continue;
+        const score = sat * (1 - Math.abs(lum - 0.45));
+        if (score > bestScore) {
+          bestScore = score;
+          color = `rgb(${r},${g},${b})`;
+        }
+      }
+    } catch (e) {
+      color = null;
+    }
+    stationAccentCache.set(logoUrl, color);
+    callback(color);
+  };
+  img.onerror = () => {
+    stationAccentCache.set(logoUrl, null);
+    callback(null);
+  };
+  img.src = logoUrl;
+}
+
+function applyStationAccent(el, logoUrl) {
+  if (!el || !logoUrl) return;
+  extractStationAccentColor(logoUrl, color => {
+    if (!el.isConnected || !color) return;
+    el.classList.add('has-accent');
+    el.style.setProperty('--station-accent', color);
+  });
+}
+
+function applyPlayerAccent(logoUrl) {
+  if (!player || !logoUrl) return;
+  extractStationAccentColor(logoUrl, color => {
+    if (!color) {
+      player.classList.remove('has-accent');
+      player.style.removeProperty('--station-accent');
+      return;
+    }
+    player.classList.add('has-accent');
+    player.style.setProperty('--station-accent', color);
+  });
+}
+
 function buildStationItemMarkup(st, isCurrentlyPlaying) {
   const newBadge = isNewStation(st)
     ? ' <span class="new-badge" title="Newly added station"><i class="fas fa-flag"></i> NEW</span>'
@@ -3350,6 +3473,7 @@ function appendStationItem(st, i) {
       play(st, i);
     };
     bindStationLongPress(div, st);
+    applyStationAccent(div, st.logo);
     stationList.appendChild(div);
 }
 /* ---- PLAYER ---- */
@@ -3359,6 +3483,7 @@ function play(st, i) {
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
   player.classList.add('playing');
+  applyPlayerAccent(st.logo);
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
   if (isGoogleNestCasting()) {
