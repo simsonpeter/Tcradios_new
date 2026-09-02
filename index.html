@@ -3287,18 +3287,12 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
   const newBadge = isNewStation(st)
     ? ' <span class="new-badge" title="Newly added station"><i class="fas fa-flag"></i> NEW</span>'
     : '';
-  const favoriteClass = favorites.includes(st.name) ? 'on' : '';
   const ratingsMarkup = buildStationRatingMarkup(st);
-  const ratingButtonMarkup = buildStationRatingButtonMarkup(st);
 
   if (stationViewMode === 'logo') {
     return `
       <div class="station-logo-wrap">
         <img src="${st.logo}" alt="" class="station-icon">
-        <div class="station-actions">
-          ${ratingButtonMarkup}
-          <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
-        </div>
       </div>
       <div class="station-info">
         <div class="station-name">${st.name}${newBadge}</div>
@@ -3314,10 +3308,6 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
         <div class="station-name">${st.name}${newBadge}</div>
         <div class="station-genre">${st.genre}</div>
         ${ratingsMarkup}
-      </div>
-      <div class="station-actions">
-        ${ratingButtonMarkup}
-        <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
     `;
 }
@@ -3335,16 +3325,9 @@ function appendStationItem(st, i) {
     div.innerHTML = buildStationItemMarkup(st, isCurrentlyPlaying);
     
     div.onclick = e => { 
-      if (!e.target.closest('.favorite-button') && !e.target.closest('.rating-button')) {
-        if (shouldSkipStationClick()) return;
-        play(st, i);
-      }
+      if (shouldSkipStationClick()) return;
+      play(st, i);
     };
-    div.querySelector('.favorite-button').onclick = e => {
-      e.stopPropagation(); 
-      toggleFav(st.name);
-    };
-    bindStationRatingButton(div, st);
     bindStationLongPress(div, st);
     stationList.appendChild(div);
 }
@@ -4464,35 +4447,19 @@ function renderHistory() {
             ${tab === 'recent' ? `<i class="fas fa-clock"></i> ${timestamp}` : `<i class="fas fa-play-circle"></i> ${timestamp}${lastPlayed ? ` • <i class="fas fa-clock"></i> ${lastPlayed}` : ''}`}
           </div>
         </div>
-        <div class="station-actions">
-          ${buildStationRatingButtonMarkup(st)}
-          <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
-        </div>
       `;
       
       div.onclick = e => {
-        if (!e.target.closest('.favorite-button') && !e.target.closest('.rating-button')) {
-          if (shouldSkipStationClick()) return;
-          // Find station in current language list
-          const allStations = stationsPerLang[currentLang] || [];
-          const stationIndex = allStations.findIndex(s => s.name === st.name);
-          if (stationIndex >= 0) {
-            play(allStations[stationIndex], stationIndex);
-          } else {
-            // Station might be from different language, play directly
-            play(st, i);
-          }
+        if (shouldSkipStationClick()) return;
+        const allStations = stationsPerLang[currentLang] || [];
+        const stationIndex = allStations.findIndex(s => s.name === st.name);
+        if (stationIndex >= 0) {
+          play(allStations[stationIndex], stationIndex);
+        } else {
+          play(st, i);
         }
       };
       
-      div.querySelector('.favorite-button').onclick = e => {
-        e.stopPropagation();
-        toggleFav(st.name);
-        // Update button state
-        div.querySelector('.favorite-button').classList.toggle('on', favorites.includes(st.name));
-      };
-
-      bindStationRatingButton(div, st);
       bindStationLongPress(div, st);
       
       historyContainer.appendChild(div);
