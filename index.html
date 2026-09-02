@@ -281,11 +281,12 @@ body{display:flex;flex-direction:column;font-family:system-ui;
      padding-left:env(safe-area-inset-left);
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
-       display:flex;align-items:center;gap:0.5rem;
+       display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+       align-items:center;gap:0.5rem;
        padding:calc(1rem + env(safe-area-inset-top, 0px)) 1.2rem 1rem;
        font-size:1.25rem;font-weight:700;min-height:70px;
        backdrop-filter:var(--blur);position:relative;z-index:100}
-.header-title{display:flex;flex-direction:column;gap:0.2rem;flex-shrink:0}
+.header-title{display:flex;flex-direction:column;gap:0.2rem;justify-self:start;min-width:0}
 .header-title>span:first-child{font-size:1.25rem;font-weight:700}
 .header-subtitle{font-size:0.75rem;font-weight:400;opacity:0.7;font-style:italic;
                  color:var(--text)}
@@ -304,9 +305,13 @@ header button:hover::before{opacity:0.1}
 header button:hover{transform:scale(1.05);box-shadow:var(--shadow-md)}
 header button:active{transform:scale(0.95)}
 header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transition)}
-#headerControls{display:flex;align-items:center;gap:0.8rem;position:relative;flex-shrink:0;margin-left:auto}
+#headerControls{display:flex;align-items:center;justify-content:flex-end;gap:0.8rem;
+                position:relative;justify-self:end;min-width:0}
 .header-btn{display:flex}
-.header-menu-btn{display:none}
+.header-menu-btn{display:none;background:transparent;border:none;font-size:1.4rem;cursor:pointer;
+                 padding:0.45rem;border-radius:50%;transition:var(--transition);
+                 color:var(--header-btn);position:relative;overflow:hidden}
+.header-menu-btn i{font-size:1.35rem}
 #castBtn.cast-connected{color:var(--accent)}
 #castBtn.cast-connected i{color:var(--accent)}
 #menuCastBtn{display:none}
@@ -337,8 +342,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
             transition:var(--transition)}
 #langSelect:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
 #langSelect:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
-#contentToolbar{display:flex;align-items:center;justify-content:flex-end;gap:0.3rem;
-                flex:1;min-width:0;margin:0}
+#contentToolbar{display:flex;align-items:center;justify-content:center;gap:0.35rem;
+                justify-self:center;max-width:100%;margin:0}
 .toolbar-picker{position:relative;width:34px;height:34px;flex-shrink:0;overflow:hidden}
 .toolbar-icon-btn{width:34px;height:34px;min-width:34px;min-height:34px;
                   display:flex;align-items:center;justify-content:center;
@@ -1207,7 +1212,7 @@ audio{display:none}
       <i class="fas fa-search"></i>
     </button>
     <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
-      <i class="fas fa-list"></i>
+      <i class="fas fa-list-ul"></i>
     </button>
   </div>
   <div id="headerControls">
@@ -1219,7 +1224,7 @@ audio{display:none}
     <button id="shareAppBtn" title="Share this App" class="header-btn"><i class="fas fa-share-alt"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
-    <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
+    <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-ellipsis-vertical"></i></button>
   </div>
   <div id="headerMenu" class="header-menu">
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
@@ -2427,7 +2432,7 @@ function applyStationViewMode() {
   const showViewToggle = currentTab === 'all' || currentTab === 'fav';
   if (viewToggleBtn) {
     const icon = viewToggleBtn.querySelector('i');
-    if (icon) icon.className = stationViewMode === 'logo' ? 'fas fa-th-large' : 'fas fa-list';
+    if (icon) icon.className = stationViewMode === 'logo' ? 'fas fa-image' : 'fas fa-list-ul';
     viewToggleBtn.title = stationViewMode === 'logo' ? 'Switch to list view' : 'Switch to logo view';
     viewToggleBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
     viewToggleBtn.style.display = showViewToggle ? 'flex' : 'none';
@@ -2550,7 +2555,7 @@ function renderAboutPanel() {
   const features = [
     ['fa-globe', 'Global Christian stations'],
     ['fa-language', 'Multi-language radio'],
-    ['fa-th-large', 'List & logo views'],
+    ['fa-image', 'List & logo views'],
     ['fa-heart', 'Favorites & quick row'],
     ['fa-search', 'Search & filters'],
     ['fa-clock', 'Sleep timer & alarm'],
