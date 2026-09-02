@@ -691,15 +691,19 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-list.view-logo .station-genre{font-size:0.68rem;margin-bottom:0;
                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
                                        max-width:100%}
-.station-list.view-logo .station-rating-display{display:none}
-.station-list.view-logo .station-actions{position:absolute;top:-2px;right:-2px;z-index:2}
-.station-list.view-logo .favorite-button{font-size:0.7rem;width:22px;height:22px;min-width:22px;min-height:22px;
+.station-list.view-logo .station-rating-display{font-size:0.62rem;margin-top:0.15rem;justify-content:center}
+.station-list.view-logo .station-actions{position:absolute;top:-2px;right:-2px;z-index:2;display:flex;gap:0.2rem}
+.station-list.view-logo .favorite-button,.station-list.view-logo .rating-button{font-size:0.7rem;width:22px;height:22px;min-width:22px;min-height:22px;
                                          padding:0;display:flex;align-items:center;justify-content:center;
                                          background:rgba(15,18,28,0.92);border:1px solid rgba(255,255,255,0.18);
                                          border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.35);
                                          color:rgba(255,255,255,0.8);backdrop-filter:none}
 .station-list.view-logo .favorite-button i{font-size:0.62rem}
+.station-list.view-logo .rating-button i{font-size:0.62rem}
 .station-list.view-logo .favorite-button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.station-list.view-logo .rating-button{background:rgba(15,18,28,0.92);border:1px solid rgba(255,255,255,0.18);
+                                      border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.35);color:rgba(255,255,255,0.8)}
+.station-list.view-logo .rating-button i.rated{color:#ffc107}
 .station-list.view-logo .new-badge{font-size:0.5rem;padding:0.12rem 0.45rem 0.12rem 0.28rem}
 .station-list.view-logo .item.playing .favorite-button{background:rgba(255,255,255,0.95);
                                                      border-color:rgba(255,255,255,0.95);color:var(--accent)}
@@ -748,7 +752,14 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .favorite-button i{font-size:1.1rem}
 .favorite-button.on{color:var(--accent)}
 .favorite-button:hover{transform:scale(1.1)}
-.station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem}
+.rating-button{font-size:1.3rem;color:var(--text-secondary);cursor:pointer;padding:0.3rem;transition:var(--transition);position:relative}
+.rating-button i{font-size:1.1rem}
+.rating-button:hover{color:var(--accent);transform:scale(1.1)}
+.rating-button i.rated{color:#ffc107}
+.station-rating-display{font-size:0.75rem;color:#ffc107;margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem;flex-wrap:wrap}
+.station-rating-display.global-rating{color:#ffc107}
+.station-rating-display.your-rating{font-size:0.7rem;opacity:0.85;color:var(--text-secondary)}
+.station-rating-display .rating-count{opacity:0.75;font-size:0.68rem}
 .station-rating-display i{font-size:0.7rem}
 #player{background:var(--header);border-top:1px solid var(--border);
         display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;
@@ -1467,6 +1478,9 @@ audio{display:none}
       <i class="far fa-star" data-rating="5"></i>
     </div>
     <div id="globalRatingDisplay" style="text-align:center;margin:1rem 0;font-size:0.9rem;color:var(--text-secondary)"></div>
+    <div id="ratingLoginHint" style="display:none;text-align:center;margin:0.5rem 0 1rem;font-size:0.85rem;color:var(--text-secondary)">
+      Sign in to rate this station and contribute to the global score.
+    </div>
     <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem">
       <button id="saveRating">Save Rating</button>
       <button id="closeRatingModal">Close</button>
@@ -1540,6 +1554,7 @@ audio{display:none}
     <button type="button" class="station-action-btn" data-action="favorite"><i class="fas fa-heart"></i> <span id="stationActionFavLabel">Add to favorites</span></button>
     <button type="button" class="station-action-btn" data-action="share"><i class="fas fa-share-alt"></i> Share station</button>
     <button type="button" class="station-action-btn" data-action="genre"><i class="fas fa-filter"></i> Browse this genre</button>
+    <button type="button" class="station-action-btn" data-action="rate"><i class="fas fa-star"></i> Rate station</button>
     <button type="button" class="station-action-btn danger" data-action="report"><i class="fas fa-exclamation-triangle"></i> Report issue</button>
     <button type="button" class="station-action-close" id="stationActionClose">Cancel</button>
   </div>
@@ -2580,11 +2595,16 @@ function openStationActionSheet(station) {
   const title = document.getElementById('stationActionTitle');
   const genre = document.getElementById('stationActionGenre');
   const favLabel = document.getElementById('stationActionFavLabel');
+  const rateBtn = sheet?.querySelector('[data-action="rate"]');
   if (logo) logo.src = station.logo || '/icons/default-artwork.jpg';
   if (title) title.textContent = station.name || 'Station';
   if (genre) genre.textContent = station.genre || 'Christian Radio';
   if (favLabel) {
     favLabel.textContent = favorites.includes(station.name) ? 'Remove from favorites' : 'Add to favorites';
+  }
+  if (rateBtn) {
+    rateBtn.style.display = 'flex';
+    rateBtn.innerHTML = `<i class="fas fa-star"></i> ${stationRatings[station.name]?.rating ? 'Change your rating' : 'Rate station'}`;
   }
   if (sheet) {
     sheet.hidden = false;
@@ -2630,6 +2650,11 @@ function handleStationAction(action) {
   }
   if (action === 'genre') {
     goToStationGenre(station);
+    return;
+  }
+  if (action === 'rate') {
+    closeStationActionSheet();
+    openStationRating(station);
     return;
   }
   if (action === 'report') {
@@ -3219,26 +3244,66 @@ function isStationCurrentlyPlaying(st) {
     !audio.paused;
 }
 
+function buildStationRatingMarkup(st) {
+  const parts = [];
+  if (globalRatings[st.name]?.count) {
+    const global = globalRatings[st.name];
+    parts.push(`<div class="station-rating-display global-rating" title="Community rating"><i class="fas fa-star"></i> ${global.total.toFixed(1)}/5 <span class="rating-count">(${global.count})</span></div>`);
+  }
+  if (stationRatings[st.name]?.rating) {
+    parts.push(`<div class="station-rating-display your-rating" title="Your rating"><i class="fas fa-user"></i> You: ${stationRatings[st.name].rating}/5</div>`);
+  }
+  return parts.join('');
+}
+
+function buildStationRatingButtonMarkup(st) {
+  const rated = !!stationRatings[st.name]?.rating;
+  const title = currentUser
+    ? (rated ? 'Change your rating' : 'Rate this station (1-5 stars)')
+    : 'Sign in to rate this station';
+  return `<div class="rating-button" title="${title}"><i class="fas fa-star${rated ? ' rated' : ''}"></i></div>`;
+}
+
+function bindStationRatingButton(container, st) {
+  const ratingBtn = container.querySelector('.rating-button');
+  if (!ratingBtn) return;
+  ratingBtn.onclick = e => {
+    e.stopPropagation();
+    openStationRating(st);
+  };
+}
+
+function openStationRating(st) {
+  if (!st) return;
+  if (!currentUser) {
+    showNotification('Sign in to rate stations');
+    showAccountModal();
+    return;
+  }
+  showRatingModal(st);
+}
+
 function buildStationItemMarkup(st, isCurrentlyPlaying) {
   const newBadge = isNewStation(st)
     ? ' <span class="new-badge" title="Newly added station"><i class="fas fa-flag"></i> NEW</span>'
     : '';
   const favoriteClass = favorites.includes(st.name) ? 'on' : '';
-  const ratingsMarkup = stationViewMode === 'logo' ? '' : `
-        ${stationRatings[st.name] ? `<div class="station-rating-display"><i class="fas fa-star"></i> ${stationRatings[st.name].rating}/5</div>` : ''}
-        ${globalRatings[st.name] ? `<div class="station-rating-display" style="font-size:0.7rem;opacity:0.8">Global: ${globalRatings[st.name].total.toFixed(1)}/5 (${globalRatings[st.name].count})</div>` : ''}`;
+  const ratingsMarkup = buildStationRatingMarkup(st);
+  const ratingButtonMarkup = buildStationRatingButtonMarkup(st);
 
   if (stationViewMode === 'logo') {
     return `
       <div class="station-logo-wrap">
         <img src="${st.logo}" alt="" class="station-icon">
         <div class="station-actions">
+          ${ratingButtonMarkup}
           <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
         </div>
       </div>
       <div class="station-info">
         <div class="station-name">${st.name}${newBadge}</div>
         <div class="station-genre">${st.genre}</div>
+        ${ratingsMarkup}
       </div>
     `;
   }
@@ -3251,6 +3316,7 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
         ${ratingsMarkup}
       </div>
       <div class="station-actions">
+        ${ratingButtonMarkup}
         <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
       </div>
     `;
@@ -3269,7 +3335,7 @@ function appendStationItem(st, i) {
     div.innerHTML = buildStationItemMarkup(st, isCurrentlyPlaying);
     
     div.onclick = e => { 
-      if (!e.target.closest('.favorite-button')) {
+      if (!e.target.closest('.favorite-button') && !e.target.closest('.rating-button')) {
         if (shouldSkipStationClick()) return;
         play(st, i);
       }
@@ -3278,6 +3344,7 @@ function appendStationItem(st, i) {
       e.stopPropagation(); 
       toggleFav(st.name);
     };
+    bindStationRatingButton(div, st);
     bindStationLongPress(div, st);
     stationList.appendChild(div);
 }
@@ -4392,17 +4459,19 @@ function renderHistory() {
         <div class="station-info">
           <div class="station-name">${st.name}</div>
           <div class="station-genre">${st.genre || ''}</div>
+          ${buildStationRatingMarkup(st)}
           <div class="history-meta" style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem">
             ${tab === 'recent' ? `<i class="fas fa-clock"></i> ${timestamp}` : `<i class="fas fa-play-circle"></i> ${timestamp}${lastPlayed ? ` • <i class="fas fa-clock"></i> ${lastPlayed}` : ''}`}
           </div>
         </div>
         <div class="station-actions">
+          ${buildStationRatingButtonMarkup(st)}
           <div class="favorite-button ${favorites.includes(st.name) ? 'on' : ''}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
         </div>
       `;
       
       div.onclick = e => {
-        if (!e.target.closest('.favorite-button')) {
+        if (!e.target.closest('.favorite-button') && !e.target.closest('.rating-button')) {
           if (shouldSkipStationClick()) return;
           // Find station in current language list
           const allStations = stationsPerLang[currentLang] || [];
@@ -4423,6 +4492,7 @@ function renderHistory() {
         div.querySelector('.favorite-button').classList.toggle('on', favorites.includes(st.name));
       };
 
+      bindStationRatingButton(div, st);
       bindStationLongPress(div, st);
       
       historyContainer.appendChild(div);
@@ -5664,13 +5734,22 @@ let currentRatingStation = null;
 let selectedRating = 0;
 
 function showRatingModal(station) {
+  if (!currentUser) {
+    showNotification('Sign in to rate stations');
+    showAccountModal();
+    return;
+  }
   currentRatingStation = station;
   const ratingModal = document.getElementById('ratingModal');
   const stationName = document.getElementById('ratingStationName');
   const stars = ratingModal.querySelectorAll('.rating-stars i');
   const globalRatingDisplay = document.getElementById('globalRatingDisplay');
+  const loginHint = document.getElementById('ratingLoginHint');
+  const saveBtn = document.getElementById('saveRating');
   
   stationName.textContent = station.name;
+  if (loginHint) loginHint.style.display = 'none';
+  if (saveBtn) saveBtn.disabled = false;
   
   // Load existing rating if any
   if (stationRatings[station.name]) {
@@ -5680,13 +5759,14 @@ function showRatingModal(station) {
   }
   
   // Show global rating if available
-  if (globalRatings[station.name]) {
+  if (globalRatings[station.name]?.count) {
     const global = globalRatings[station.name];
     const avgRating = global.total.toFixed(1);
-    globalRatingDisplay.innerHTML = `Global Rating: <strong>${avgRating}/5</strong> (${global.count} ${global.count === 1 ? 'rating' : 'ratings'})`;
+    globalRatingDisplay.innerHTML = `Global rating: <strong>${avgRating}/5</strong> (${global.count} ${global.count === 1 ? 'rating' : 'ratings'})`;
     globalRatingDisplay.style.display = 'block';
   } else {
-    globalRatingDisplay.style.display = 'none';
+    globalRatingDisplay.innerHTML = 'No global ratings yet. Be the first to rate this station!';
+    globalRatingDisplay.style.display = 'block';
   }
   
   // Update star display
@@ -5727,6 +5807,11 @@ function showRatingModal(station) {
 }
 
 function saveRating() {
+  if (!currentUser) {
+    showNotification('Please sign in to save your rating');
+    showAccountModal();
+    return;
+  }
   if (!currentRatingStation || selectedRating === 0) {
     showNotification('Please select a rating');
     return;
@@ -5741,10 +5826,7 @@ function saveRating() {
   
   localStorage.setItem('tcr-ratings', JSON.stringify(stationRatings));
   
-  // Submit to global ratings if logged in
-  if (currentUser) {
-    submitRatingToGlobal(currentRatingStation.name, selectedRating, existingRating);
-  }
+  submitRatingToGlobal(currentRatingStation.name, selectedRating, existingRating);
   
   showNotification(`Rated ${currentRatingStation.name} ${selectedRating} stars!`);
   hapticFeedback('success');
@@ -5939,6 +6021,12 @@ async function loginUser(email, password) {
       console.error('Error syncing favorites on login:', error);
       // Continue even if sync fails
     }
+    try {
+      await syncUserRatingsFromServer();
+      await fetchGlobalRatings();
+    } catch (error) {
+      console.error('Error syncing ratings on login:', error);
+    }
     
     return { user: currentUser, token: authToken };
   } catch (error) {
@@ -6044,13 +6132,14 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
     // Check if user already rated this station
     let ratingRecord = null;
     if (currentUser) {
-      const { data } = await supabaseClient
+      const { data, error: lookupError } = await supabaseClient
         .from('user_ratings')
         .select('id, rating')
         .eq('user_id', currentUser.id)
         .eq('station_name', stationName)
-        .single();
+        .maybeSingle();
       
+      if (lookupError) throw lookupError;
       ratingRecord = data;
     }
     
@@ -6128,6 +6217,7 @@ async function fetchGlobalRatings() {
     });
     
     globalRatings = aggregated;
+    localStorage.setItem('tcr-global-ratings', JSON.stringify(globalRatings));
     updateRatingDisplays();
     return globalRatings;
   } catch (error) {
@@ -6140,6 +6230,27 @@ function updateRatingDisplays() {
   // This will be called to update rating displays with global data
   if (currentTab !== 'about') {
     switchTab(currentTab);
+  }
+}
+
+async function syncUserRatingsFromServer() {
+  if (!currentUser || !supabaseClient) return;
+  try {
+    const { data, error } = await supabaseClient
+      .from('user_ratings')
+      .select('station_name, rating, updated_at')
+      .eq('user_id', currentUser.id);
+    if (error) throw error;
+    (data || []).forEach(item => {
+      stationRatings[item.station_name] = {
+        rating: item.rating,
+        timestamp: item.updated_at || new Date().toISOString()
+      };
+    });
+    localStorage.setItem('tcr-ratings', JSON.stringify(stationRatings));
+    updateRatingDisplays();
+  } catch (error) {
+    console.error('Failed to sync user ratings:', error);
   }
 }
 
@@ -6163,6 +6274,11 @@ async function checkSupabaseSession() {
         await syncFavoritesFromServer();
       } catch (error) {
         console.error('Failed to sync favorites:', error);
+      }
+      try {
+        await syncUserRatingsFromServer();
+      } catch (error) {
+        console.error('Failed to sync user ratings:', error);
       }
       try {
         await fetchGlobalRatings();
