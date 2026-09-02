@@ -27,9 +27,9 @@ def twaManifest = [
     name: 'TC RADIOS', // The application name.
     launcherName: 'TC RADIOS', // The name shown on the Android Launcher.
     themeColor: '#F97316', // The color used for the status bar.
-    themeColorDark: '#000000', // The color used for the dark status bar.
-    navigationColor: '#000000', // The color used for the navigation bar.
-    navigationColorDark: '#000000', // The color used for the dark navbar.
+    themeColorDark: '#111827', // The color used for the dark status bar.
+    navigationColor: '#111827', // The color used for the navigation bar.
+    navigationColorDark: '#111827', // The color used for the dark navbar.
     navigationDividerColor: '#000000', // The navbar divider color.
     navigationDividerColorDark: '#000000', // The dark navbar divider color.
     backgroundColor: '#FFFFFF', // The color used for the splash screen background.
@@ -57,8 +57,8 @@ android {
         applicationId "com.jayathasoft.tcradios.app"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 39
-        versionName "Lock screen notification player"
+        versionCode 40
+        versionName "Status bar visibility fix"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
