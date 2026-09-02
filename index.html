@@ -281,11 +281,11 @@ body{display:flex;flex-direction:column;font-family:system-ui;
      padding-left:env(safe-area-inset-left);
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
-       display:flex;justify-content:space-between;align-items:center;
+       display:flex;align-items:center;gap:0.5rem;
        padding:calc(1rem + env(safe-area-inset-top, 0px)) 1.2rem 1rem;
        font-size:1.25rem;font-weight:700;min-height:70px;
        backdrop-filter:var(--blur);position:relative;z-index:100}
-.header-title{display:flex;flex-direction:column;gap:0.2rem}
+.header-title{display:flex;flex-direction:column;gap:0.2rem;flex-shrink:0}
 .header-title>span:first-child{font-size:1.25rem;font-weight:700}
 .header-subtitle{font-size:0.75rem;font-weight:400;opacity:0.7;font-style:italic;
                  color:var(--text)}
@@ -304,7 +304,7 @@ header button:hover::before{opacity:0.1}
 header button:hover{transform:scale(1.05);box-shadow:var(--shadow-md)}
 header button:active{transform:scale(0.95)}
 header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transition)}
-#headerControls{display:flex;align-items:center;gap:0.8rem;position:relative}
+#headerControls{display:flex;align-items:center;gap:0.8rem;position:relative;flex-shrink:0;margin-left:auto}
 .header-btn{display:flex}
 .header-menu-btn{display:none}
 #castBtn.cast-connected{color:var(--accent)}
@@ -337,19 +337,23 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
             transition:var(--transition)}
 #langSelect:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
 #langSelect:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
-#contentToolbar{display:flex;align-items:center;justify-content:flex-end;gap:0.35rem;
-                margin-bottom:0.55rem}
-.toolbar-picker{position:relative;width:38px;height:38px;flex-shrink:0}
-.toolbar-icon-btn{width:38px;height:38px;min-width:38px;min-height:38px;
+#contentToolbar{display:flex;align-items:center;justify-content:flex-end;gap:0.3rem;
+                flex:1;min-width:0;margin:0}
+.toolbar-picker{position:relative;width:34px;height:34px;flex-shrink:0;overflow:hidden}
+.toolbar-icon-btn{width:34px;height:34px;min-width:34px;min-height:34px;
                   display:flex;align-items:center;justify-content:center;
-                  background:var(--card);border:1px solid var(--border);border-radius:0.55rem;
-                  color:var(--text);font-size:1rem;pointer-events:none}
+                  background:var(--card);border:1px solid var(--border);border-radius:0.5rem;
+                  color:var(--text);font-size:0.9rem;pointer-events:none}
 .toolbar-native-select{position:absolute;inset:0;opacity:0;width:100%;height:100%;
-                       cursor:pointer;z-index:2;border:none;background:transparent}
-.toolbar-action-btn{width:38px;height:38px;min-width:38px;min-height:38px;
+                       min-width:0;max-width:100%;padding:0;
+                       cursor:pointer;z-index:2;border:none;background:transparent;box-shadow:none}
+#contentToolbar #themeSelect,
+#contentToolbar #langSelect{min-width:0;max-width:100%;padding:0;border:none;box-shadow:none;background:transparent}
+.toolbar-action-btn{width:34px;height:34px;min-width:34px;min-height:34px;
                     display:flex;align-items:center;justify-content:center;
-                    background:var(--card);border:1px solid var(--border);border-radius:0.55rem;
-                    color:var(--text);font-size:1rem;cursor:pointer;transition:var(--transition)}
+                    background:var(--card);border:1px solid var(--border);border-radius:0.5rem;
+                    color:var(--text);font-size:0.9rem;cursor:pointer;transition:var(--transition);
+                    position:relative;z-index:3;flex-shrink:0}
 .toolbar-action-btn:hover,.toolbar-action-btn.active{border-color:var(--accent);color:var(--accent)}
 #searchRow{display:none;margin-bottom:0.65rem}
 #searchRow.is-visible{display:block}
@@ -827,6 +831,9 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play,#p-prev,#p-next{padding:0.6rem;min-width:44px;min-height:44px}
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
+  #contentToolbar{gap:0.2rem}
+  .toolbar-picker,.toolbar-action-btn{width:30px;height:30px;min-width:30px;min-height:30px}
+  .toolbar-icon-btn{width:30px;height:30px;min-width:30px;min-height:30px;font-size:0.8rem}
   #headerControls{gap:0.6rem}
   /* Hide individual buttons, show menu button on small screens */
   .header-btn{display:none !important}
@@ -1170,6 +1177,39 @@ audio{display:none}
   <span>TC RADIOS</span>
     <span class="header-subtitle">by JayathaSoft</span>
   </div>
+  <div id="contentToolbar" aria-label="Quick controls">
+    <div class="toolbar-picker" title="Theme">
+      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+        <i class="fas fa-palette"></i>
+      </button>
+      <select id="themeSelect" class="toolbar-native-select" title="Theme" aria-label="Theme">
+        <option value="dark">🌙 Dark</option>
+        <option value="light">☀️ Light</option>
+        <option value="ocean">🌊 Ocean</option>
+        <option value="forest">🌲 Forest</option>
+        <option value="sunset">🌅 Sunset</option>
+        <option value="rose">🌹 Rose</option>
+        <option value="midnight">🌌 Midnight</option>
+        <option value="aurora">🌌 Aurora</option>
+        <option value="christmas">🎄 Christmas</option>
+        <option value="easter">🐰 Easter</option>
+        <option value="gold">✨ Gold</option>
+        <option value="minimal">⚪ Minimal</option>
+      </select>
+    </div>
+    <div class="toolbar-picker" title="Language">
+      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+        <i class="fas fa-globe"></i>
+      </button>
+      <select id="langSelect" class="toolbar-native-select" title="Language" aria-label="Language"></select>
+    </div>
+    <button id="searchToggleBtn" type="button" class="toolbar-action-btn" title="Search stations" aria-label="Search stations">
+      <i class="fas fa-search"></i>
+    </button>
+    <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
+      <i class="fas fa-list"></i>
+    </button>
+  </div>
   <div id="headerControls">
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
@@ -1202,39 +1242,6 @@ audio{display:none}
 </div>
 <div id="content" aria-busy="true">
   <div id="contentTop">
-    <div id="contentToolbar" aria-label="Quick controls">
-      <div class="toolbar-picker" title="Theme">
-        <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
-          <i class="fas fa-palette"></i>
-        </button>
-        <select id="themeSelect" class="toolbar-native-select" title="Theme" aria-label="Theme">
-          <option value="dark">🌙 Dark</option>
-          <option value="light">☀️ Light</option>
-          <option value="ocean">🌊 Ocean</option>
-          <option value="forest">🌲 Forest</option>
-          <option value="sunset">🌅 Sunset</option>
-          <option value="rose">🌹 Rose</option>
-          <option value="midnight">🌌 Midnight</option>
-          <option value="aurora">🌌 Aurora</option>
-          <option value="christmas">🎄 Christmas</option>
-          <option value="easter">🐰 Easter</option>
-          <option value="gold">✨ Gold</option>
-          <option value="minimal">⚪ Minimal</option>
-        </select>
-      </div>
-      <div class="toolbar-picker" title="Language">
-        <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
-          <i class="fas fa-globe"></i>
-        </button>
-        <select id="langSelect" class="toolbar-native-select" title="Language" aria-label="Language"></select>
-      </div>
-      <button id="searchToggleBtn" type="button" class="toolbar-action-btn" title="Search stations" aria-label="Search stations">
-        <i class="fas fa-search"></i>
-      </button>
-      <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
-        <i class="fas fa-list"></i>
-      </button>
-    </div>
     <div id="searchRow">
       <input id="searchBar" type="search" placeholder="Search stations…" autocomplete="off"/>
     </div>
