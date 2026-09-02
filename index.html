@@ -365,25 +365,57 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                   border:1px solid var(--border);border-radius:0.5rem;padding:0.45rem 0.6rem}
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
-#favQuickRow{display:none;margin:0 0 0.65rem}
-#favQuickRow.is-visible{display:block}
+#favQuickRow{display:none;margin:0 0 0.75rem}
+#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease}
+.fav-quick-panel{background:var(--card);border:1px solid var(--border);border-radius:0.85rem;
+                 padding:0.7rem 0.5rem 0.55rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.fav-quick-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+                          background:var(--gradient-primary);opacity:0.85}
 .fav-quick-label{display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;
-                font-weight:700;color:var(--accent);margin-bottom:0.35rem}
-.fav-quick-scroll{display:flex;gap:0.55rem;overflow-x:auto;overflow-y:hidden;
+                font-weight:700;color:var(--accent);margin:0 0 0.5rem 0.35rem}
+.fav-quick-scroll{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;
                   -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-                  padding:0.1rem 0.1rem 0.35rem;scrollbar-width:none;
+                  padding:0.15rem 0.2rem 0.25rem;scrollbar-width:none;
                   touch-action:pan-x;overscroll-behavior-x:contain}
 .fav-quick-scroll::-webkit-scrollbar{display:none}
-.fav-quick-item{flex:0 0 72px;scroll-snap-align:start;display:flex;flex-direction:column;
-                align-items:center;gap:0.28rem;cursor:pointer;text-align:center;
-                background:transparent;border:none;color:inherit;padding:0}
-.fav-quick-item img{width:56px;height:56px;border-radius:50%;object-fit:cover;
-                    border:2px solid transparent;box-shadow:var(--shadow-sm);transition:var(--transition)}
-.fav-quick-item:hover img{border-color:rgba(249,115,22,0.45);transform:scale(1.04)}
-.fav-quick-item.playing img{border-color:var(--accent);box-shadow:0 0 0 2px rgba(249,115,22,0.25)}
+.fav-quick-item{flex:0 0 86px;scroll-snap-align:start;display:flex;flex-direction:column;
+                align-items:center;gap:0.35rem;cursor:pointer;text-align:center;
+                background:transparent;border:none;color:inherit;padding:0.5rem 0.55rem;
+                position:relative;transition:transform 0.25s ease;
+                animation:favItemIn 0.45s ease backwards}
+.fav-quick-item:not(:last-child)::after{content:'';position:absolute;top:14%;bottom:18%;right:0;
+                                        width:1px;background:linear-gradient(180deg,transparent,
+                                        rgba(249,115,22,0.35) 20%,rgba(249,115,22,0.35) 80%,transparent)}
+.fav-quick-art-wrap{width:60px;height:60px;border-radius:50%;padding:3px;display:flex;
+                    align-items:center;justify-content:center;
+                    background:linear-gradient(145deg,rgba(249,115,22,0.22),rgba(249,115,22,0.04));
+                    border:1.5px solid rgba(249,115,22,0.28);box-shadow:var(--shadow-sm);
+                    transition:transform 0.28s cubic-bezier(0.4,0,0.2,1),box-shadow 0.28s ease,
+                               border-color 0.28s ease,background 0.28s ease}
+.fav-quick-item img{width:100%;height:100%;border-radius:50%;object-fit:cover;
+                    border:2px solid var(--card);transition:transform 0.28s ease}
+.fav-quick-item:hover .fav-quick-art-wrap{transform:translateY(-4px) scale(1.06);
+                                          border-color:var(--accent);
+                                          box-shadow:0 10px 22px rgba(249,115,22,0.28);
+                                          background:linear-gradient(145deg,rgba(249,115,22,0.35),rgba(249,115,22,0.08))}
+.fav-quick-item:hover .fav-quick-name{color:var(--accent)}
+.fav-quick-item:active .fav-quick-art-wrap{transform:translateY(-1px) scale(0.97)}
+.fav-quick-item.playing .fav-quick-art-wrap{border-color:var(--accent);
+                                            background:linear-gradient(145deg,rgba(249,115,22,0.45),rgba(249,115,22,0.12));
+                                            animation:favPlayingPulse 1.8s ease-in-out infinite}
+.fav-quick-item.playing .fav-quick-name{color:var(--accent);font-weight:700}
 .fav-quick-name{font-size:0.68rem;font-weight:600;line-height:1.2;
                 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-                overflow:hidden;max-width:72px}
+                overflow:hidden;max-width:78px;transition:color 0.25s ease,color 0.25s ease}
+@keyframes favRowIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes favItemIn{from{opacity:0;transform:translateY(10px) scale(0.92)}
+                     to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes favPlayingPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.35)}
+                          50%{box-shadow:0 0 0 7px rgba(249,115,22,0)}}
+@media (hover:none) and (pointer:coarse){
+  .fav-quick-item:hover .fav-quick-art-wrap{transform:none;box-shadow:var(--shadow-sm)}
+  .fav-quick-item:active .fav-quick-art-wrap{transform:scale(0.95);border-color:var(--accent)}
+}
 #fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
 #fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
 .admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
@@ -2787,17 +2819,21 @@ function renderFavQuickRow() {
   row.hidden = false;
   row.classList.add('is-visible');
   row.innerHTML = `
-    <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
-    <div class="fav-quick-scroll" role="list">
-      ${favStations.map(st => {
+    <div class="fav-quick-panel">
+      <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
+      <div class="fav-quick-scroll" role="list">
+        ${favStations.map((st, i) => {
         const playing = lastPlayedStation &&
           lastPlayedStation.station.name === st.name &&
           !audio.paused;
-        return `<button type="button" class="fav-quick-item${playing ? ' playing' : ''}" data-name="${st.name}" role="listitem" title="${st.name}">
-          <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="">
+        return `<button type="button" class="fav-quick-item${playing ? ' playing' : ''}" data-name="${st.name}" role="listitem" title="${st.name}" style="animation-delay:${Math.min(i * 0.05, 0.45)}s">
+          <span class="fav-quick-art-wrap">
+            <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="">
+          </span>
           <span class="fav-quick-name">${st.name}</span>
         </button>`;
       }).join('')}
+      </div>
     </div>
   `;
 
