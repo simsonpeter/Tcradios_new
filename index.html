@@ -5806,7 +5806,7 @@ function showRatingModal(station) {
   ratingModal.style.display = 'flex';
 }
 
-function saveRating() {
+async function saveRating() {
   if (!currentUser) {
     showNotification('Please sign in to save your rating');
     showAccountModal();
@@ -5826,7 +5826,7 @@ function saveRating() {
   
   localStorage.setItem('tcr-ratings', JSON.stringify(stationRatings));
   
-  submitRatingToGlobal(currentRatingStation.name, selectedRating, existingRating);
+  await submitRatingToGlobal(currentRatingStation.name, selectedRating, existingRating);
   
   showNotification(`Rated ${currentRatingStation.name} ${selectedRating} stars!`);
   hapticFeedback('success');
