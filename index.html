@@ -392,7 +392,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
 #favQuickRow{display:none;margin:0}
-#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
+#favQuickRow.is-visible{display:flex;flex-direction:column;gap:0.55rem;
+                       animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
 .fav-quick-panel{background:var(--card);border:1px solid var(--border);border-radius:0.85rem;
                  padding:0.7rem 0.5rem 0.55rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .fav-quick-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -1224,7 +1225,7 @@ audio{display:none}
     <button id="shareAppBtn" title="Share this App" class="header-btn"><i class="fas fa-share-alt"></i></button>
     <button id="castBtn" title="Cast to Google Nest" class="header-btn" style="display:none"><i class="fab fa-chromecast"></i></button>
     <button id="installBtn" title="Install App" class="header-btn" style="display:none"><i class="fas fa-download"></i></button>
-    <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-ellipsis-vertical"></i></button>
+    <button id="menuBtn" title="Menu" class="header-menu-btn"><i class="fas fa-bars"></i></button>
   </div>
   <div id="headerMenu" class="header-menu">
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
@@ -2556,7 +2557,7 @@ function renderAboutPanel() {
     ['fa-globe', 'Global Christian stations'],
     ['fa-language', 'Multi-language radio'],
     ['fa-image', 'List & logo views'],
-    ['fa-heart', 'Favorites & quick row'],
+    ['fa-clock-rotate-left', 'Recent & most played quick rows'],
     ['fa-search', 'Search & filters'],
     ['fa-clock', 'Sleep timer & alarm'],
     ['fa-palette', 'Themes & dark mode'],
@@ -2708,6 +2709,24 @@ function buildFavQuickItemMarkup(st, i, playing) {
   </button>`;
 }
 
+function buildQuickRowSection(label, iconClass, stations, sectionKey) {
+  if (!stations.length) return '';
+  const itemsHtml = stations.map((st, i) => {
+    const playing = lastPlayedStation &&
+      lastPlayedStation.station.name === st.name &&
+      !audio.paused;
+    return buildFavQuickItemMarkup(st, i, playing);
+  }).join('');
+  return `
+    <div class="fav-quick-panel" data-quick-section="${sectionKey}">
+      <div class="fav-quick-label"><i class="fas ${iconClass}"></i> ${label}</div>
+      <div class="fav-quick-scroll" role="list">
+        <div class="fav-quick-track">${itemsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
 function pauseFavMarqueeForUser() {
   const scroller = document.querySelector('.fav-quick-scroll');
   if (scroller) {
@@ -2798,45 +2817,31 @@ function renderFavQuickRow() {
     return;
   }
 
-  const favStations = getFavoritesInOrder();
-  if (!favStations.length) {
+  const recentStations = getRecentlyPlayed(16).map(entry => entry.station).filter(Boolean);
+  const mostStations = getMostPlayed(16).map(entry => entry.station).filter(Boolean);
+  const sections = [
+    buildQuickRowSection('Recently Played', 'fa-clock-rotate-left', recentStations, 'recent'),
+    buildQuickRowSection('Most Played', 'fa-chart-line', mostStations, 'most')
+  ].filter(Boolean).join('');
+
+  if (!sections) {
     row.hidden = true;
     row.classList.remove('is-visible', 'is-visible-on-all');
     row.innerHTML = '';
     return;
   }
 
-  const itemsHtml = favStations.map((st, i) => {
-    const playing = lastPlayedStation &&
-      lastPlayedStation.station.name === st.name &&
-      !audio.paused;
-    return buildFavQuickItemMarkup(st, i, playing);
-  }).join('');
-
   row.hidden = false;
   row.classList.add('is-visible', 'is-visible-on-all');
-  row.innerHTML = `
-    <div class="fav-quick-panel">
-      <div class="fav-quick-label"><i class="fas fa-heart"></i> Favorites</div>
-      <div class="fav-quick-scroll" role="list">
-        <div class="fav-quick-track">
-          ${itemsHtml}
-          ${itemsHtml}
-        </div>
-      </div>
-    </div>
-  `;
+  row.innerHTML = sections;
 
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
-    btn.onclick = () => {
-      destroyFavMarquee();
-      playFavoriteStation(btn.dataset.name);
-    };
+    btn.onclick = () => playFavoriteStation(btn.dataset.name);
   });
 
-  const scroller = row.querySelector('.fav-quick-scroll');
-  bindFavMarqueeControls(scroller);
-  initFavMarquee(scroller);
+  row.querySelectorAll('.fav-quick-scroll').forEach(scroller => {
+    bindFavMarqueeControls(scroller);
+  });
 }
 
 function playFavoriteStation(stationName) {
