@@ -2436,18 +2436,19 @@ function initFilters() {
 
 function applyStationViewMode() {
   if (!stationList) return;
-  const useLogoView = stationViewMode === 'logo' && (currentTab === 'all' || currentTab === 'fav');
+  const showStationViews = currentTab === 'all' || currentTab === 'fav';
+  const useLogoView = stationViewMode === 'logo' && showStationViews;
   stationList.classList.toggle('view-logo', useLogoView);
-  const showViewToggle = currentTab === 'all' || currentTab === 'fav';
+  const showToolbar = currentTab !== 'about';
   if (viewToggleBtn) {
     const icon = viewToggleBtn.querySelector('i');
     if (icon) icon.className = stationViewMode === 'logo' ? 'fas fa-image' : 'fas fa-list-ul';
     viewToggleBtn.title = stationViewMode === 'logo' ? 'Switch to list view' : 'Switch to logo view';
     viewToggleBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
-    viewToggleBtn.style.display = showViewToggle ? 'flex' : 'none';
+    viewToggleBtn.style.display = showToolbar ? 'flex' : 'none';
   }
   if (contentToolbar) {
-    contentToolbar.style.display = showViewToggle ? 'flex' : 'none';
+    contentToolbar.style.display = showToolbar ? 'flex' : 'none';
   }
 }
 
@@ -2466,11 +2467,24 @@ function setSearchBarVisible(show) {
   searchToolbarExpanded = !!show;
   if (searchRow) searchRow.classList.toggle('is-visible', searchToolbarExpanded);
   if (searchToggleBtn) searchToggleBtn.classList.toggle('active', searchToolbarExpanded);
+  syncContentTopVisibility();
   if (searchToolbarExpanded && searchBar) {
     searchBar.focus();
     if (canShowStationFilters()) setStationFiltersVisible(true);
   } else {
     setStationFiltersVisible(false);
+  }
+}
+
+function syncContentTopVisibility() {
+  const contentTop = document.getElementById('contentTop');
+  if (!contentTop) return;
+  if (currentTab === 'history') {
+    contentTop.style.display = searchToolbarExpanded ? '' : 'none';
+  } else if (currentTab === 'about') {
+    contentTop.style.display = 'none';
+  } else {
+    contentTop.style.display = '';
   }
 }
 
@@ -2667,18 +2681,16 @@ function switchTab(tab) {
   } else if (tab === 'history') {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
-    const contentTop = document.getElementById('contentTop');
-    if (contentTop) contentTop.style.display = 'none';
     setSearchBarVisible(false);
     setStationFiltersVisible(false);
+    syncContentTopVisibility();
     renderFavQuickRow();
     applyStationViewMode();
     renderHistory();
   } else {
     document.getElementById('content').style.display = 'flex';
     document.getElementById('about-panel').style.display = 'none';
-    const contentTop = document.getElementById('contentTop');
-    if (contentTop) contentTop.style.display = '';
+    syncContentTopVisibility();
     if (previousTab !== tab) setSearchBarVisible(false);
     applyStationViewMode();
     // Hide when changing tabs; keep open only on same-tab re-renders (search/filter updates)
