@@ -399,6 +399,11 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                           background:var(--gradient-primary);opacity:0.85}
 .fav-quick-label{display:flex;align-items:center;gap:0.35rem;font-size:0.78rem;
                 font-weight:700;color:var(--accent);margin:0 0 0.5rem 0.35rem}
+.fav-quick-chips{display:flex;gap:0.35rem;padding:0 0.35rem 0.45rem;flex-wrap:wrap}
+.fav-quick-chip{border:1px solid var(--border);background:var(--bg);color:var(--text);
+                border-radius:999px;padding:0.28rem 0.65rem;font-size:0.68rem;font-weight:700;
+                cursor:pointer;transition:var(--transition)}
+.fav-quick-chip:hover,.fav-quick-chip.active{background:var(--gradient-primary);color:#fff;border-color:transparent}
 .fav-quick-scroll{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;
                   -webkit-overflow-scrolling:touch;scroll-snap-type:none;
                   padding:0.15rem 0.2rem 0.25rem;scrollbar-width:none;
@@ -408,7 +413,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .fav-quick-track{display:flex;flex-shrink:0;align-items:flex-start}
 .fav-quick-section{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
                    gap:0.2rem;padding:0.35rem 0.45rem 0.15rem;min-width:58px;max-width:72px;text-align:center;
-                   position:relative}
+                   position:relative;background:transparent;border:none;color:inherit;cursor:pointer}
 .fav-quick-section i{font-size:0.82rem;color:var(--accent);opacity:0.9}
 .fav-quick-section span{font-size:0.58rem;font-weight:700;line-height:1.15;color:var(--accent);
                         text-transform:uppercase;letter-spacing:0.02em}
@@ -426,7 +431,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                                         width:1px;background:linear-gradient(180deg,transparent,
                                         rgba(249,115,22,0.35) 20%,rgba(249,115,22,0.35) 80%,transparent)}
 .fav-quick-art-wrap{width:60px;height:60px;border-radius:50%;padding:3px;display:flex;
-                    align-items:center;justify-content:center;
+                    align-items:center;justify-content:center;position:relative;
                     background:linear-gradient(145deg,rgba(249,115,22,0.22),rgba(249,115,22,0.04));
                     border:1.5px solid rgba(249,115,22,0.28);box-shadow:var(--shadow-sm);
                     transition:transform 0.28s cubic-bezier(0.4,0,0.2,1),box-shadow 0.28s ease,
@@ -441,7 +446,11 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .fav-quick-item:active .fav-quick-art-wrap{transform:translateY(-1px) scale(0.97)}
 .fav-quick-item.playing .fav-quick-art-wrap{border-color:var(--accent);
                                             background:linear-gradient(145deg,rgba(249,115,22,0.45),rgba(249,115,22,0.12));
-                                            animation:favPlayingPulse 1.8s ease-in-out infinite}
+                                            animation:favPlayingPulse 1.8s ease-in-out infinite;
+                                            box-shadow:0 0 0 3px rgba(249,115,22,0.25),0 0 18px rgba(249,115,22,0.35)}
+.fav-quick-item.playing .fav-quick-art-wrap::after{content:'';position:absolute;inset:-5px;border-radius:50%;
+                                                    border:2px solid rgba(249,115,22,0.55);
+                                                    animation:favPlayingRing 1.8s ease-in-out infinite}
 .fav-quick-item.playing .fav-quick-name{color:var(--accent);font-weight:700}
 .fav-quick-name{font-size:0.68rem;font-weight:600;line-height:1.2;
                 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
@@ -451,6 +460,33 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                      to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes favPlayingPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.35)}
                           50%{box-shadow:0 0 0 7px rgba(249,115,22,0)}}
+@keyframes favPlayingRing{0%,100%{transform:scale(1);opacity:0.85}
+                         50%{transform:scale(1.08);opacity:0.35}}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+             text-align:center;padding:2rem 1.25rem;color:var(--text-secondary);gap:0.45rem}
+.empty-state i{font-size:2rem;color:var(--accent);opacity:0.85;margin-bottom:0.25rem}
+.empty-state p{margin:0;font-size:1rem;font-weight:700;color:var(--text)}
+.empty-state span{font-size:0.85rem;line-height:1.4;opacity:0.8;max-width:280px}
+#stationActionSheet{position:fixed;inset:0;z-index:2100;display:none;align-items:flex-end;justify-content:center}
+#stationActionSheet.active{display:flex}
+.station-action-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px)}
+.station-action-panel{position:relative;width:100%;max-width:420px;background:var(--card);
+                      border:1px solid var(--border);border-radius:1rem 1rem 0 0;padding:0.85rem 1rem 1.25rem;
+                      box-shadow:var(--shadow-xl);animation:actionSheetUp .28s ease}
+@keyframes actionSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.station-action-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;padding-bottom:0.65rem;
+                        border-bottom:1px solid var(--border)}
+.station-action-header img{width:48px;height:48px;border-radius:0.65rem;object-fit:cover;border:1px solid var(--border)}
+.station-action-header strong{display:block;font-size:0.95rem;color:var(--text)}
+.station-action-header span{display:block;font-size:0.75rem;color:var(--text-secondary);margin-top:0.15rem}
+.station-action-btn{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.8rem 0.65rem;
+                    background:transparent;border:none;color:var(--text);border-radius:0.55rem;
+                    cursor:pointer;font-size:0.92rem;font-weight:600;text-align:left;transition:var(--transition)}
+.station-action-btn:hover{background:var(--hover)}
+.station-action-btn i{width:20px;text-align:center;color:var(--accent)}
+.station-action-btn.danger i{color:#f87171}
+.station-action-close{margin-top:0.35rem;background:var(--bg);border:1px solid var(--border);color:var(--text);
+                       border-radius:0.55rem;padding:0.75rem;width:100%;cursor:pointer;font-weight:600}
 @media (hover:none) and (pointer:coarse){
   .fav-quick-item:hover .fav-quick-art-wrap{transform:none;box-shadow:var(--shadow-sm)}
   .fav-quick-item:active .fav-quick-art-wrap{transform:scale(0.95);border-color:var(--accent)}
@@ -1491,6 +1527,23 @@ audio{display:none}
     <div id="feedbackStatus"></div>
   </div>
 </div>
+<div id="stationActionSheet" hidden aria-hidden="true">
+  <div class="station-action-backdrop" id="stationActionBackdrop"></div>
+  <div class="station-action-panel" role="dialog" aria-modal="true" aria-labelledby="stationActionTitle">
+    <div class="station-action-header">
+      <img id="stationActionLogo" src="/icons/default-artwork.jpg" alt="">
+      <div>
+        <strong id="stationActionTitle">Station</strong>
+        <span id="stationActionGenre"></span>
+      </div>
+    </div>
+    <button type="button" class="station-action-btn" data-action="favorite"><i class="fas fa-heart"></i> <span id="stationActionFavLabel">Add to favorites</span></button>
+    <button type="button" class="station-action-btn" data-action="share"><i class="fas fa-share-alt"></i> Share station</button>
+    <button type="button" class="station-action-btn" data-action="genre"><i class="fas fa-filter"></i> Browse this genre</button>
+    <button type="button" class="station-action-btn danger" data-action="report"><i class="fas fa-exclamation-triangle"></i> Report issue</button>
+    <button type="button" class="station-action-close" id="stationActionClose">Cancel</button>
+  </div>
+</div>
 <div id="radioRequestModal">
   <div>
     <h3>Request Radio Station</h3>
@@ -1971,6 +2024,7 @@ function clearAllCacheOnLaunch() {
     initThemeSystem(); // Initialize theme system
     initFilters();
     initStationViewToggle();
+    initStationActionSheet();
     restoreSleepTimer();
     
     if (tab) {
@@ -2505,6 +2559,143 @@ document.getElementById('tab-history').onclick = () => switchTab('history');
 document.getElementById('tab-about').onclick = () => switchTab('about');
 let stationFiltersExpanded = false;
 let searchToolbarExpanded = false;
+let historyActiveTab = 'recent';
+let stationActionTarget = null;
+let stationLongPressTriggered = false;
+const STATION_LONG_PRESS_MS = 500;
+
+function renderEmptyState(message, hint, icon = 'fa-radio') {
+  return `<div class="empty-state">
+    <i class="fas ${icon}"></i>
+    <p>${message}</p>
+    <span>${hint}</span>
+  </div>`;
+}
+
+function openStationActionSheet(station) {
+  if (!station) return;
+  stationActionTarget = station;
+  const sheet = document.getElementById('stationActionSheet');
+  const logo = document.getElementById('stationActionLogo');
+  const title = document.getElementById('stationActionTitle');
+  const genre = document.getElementById('stationActionGenre');
+  const favLabel = document.getElementById('stationActionFavLabel');
+  if (logo) logo.src = station.logo || '/icons/default-artwork.jpg';
+  if (title) title.textContent = station.name || 'Station';
+  if (genre) genre.textContent = station.genre || 'Christian Radio';
+  if (favLabel) {
+    favLabel.textContent = favorites.includes(station.name) ? 'Remove from favorites' : 'Add to favorites';
+  }
+  if (sheet) {
+    sheet.hidden = false;
+    sheet.classList.add('active');
+    sheet.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeStationActionSheet() {
+  const sheet = document.getElementById('stationActionSheet');
+  if (sheet) {
+    sheet.classList.remove('active');
+    sheet.hidden = true;
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+  stationActionTarget = null;
+}
+
+function goToStationGenre(station) {
+  if (!station?.genre) {
+    showNotification('No genre available for this station');
+    return;
+  }
+  currentGenreFilter = station.genre;
+  localStorage.setItem('tcr-genre-filter', currentGenreFilter);
+  if (genreFilter) genreFilter.value = currentGenreFilter;
+  closeStationActionSheet();
+  switchTab('all');
+}
+
+function handleStationAction(action) {
+  const station = stationActionTarget;
+  if (!station) return;
+  if (action === 'favorite') {
+    toggleFav(station.name);
+    closeStationActionSheet();
+    return;
+  }
+  if (action === 'share') {
+    closeStationActionSheet();
+    shareStation(station, false);
+    return;
+  }
+  if (action === 'genre') {
+    goToStationGenre(station);
+    return;
+  }
+  if (action === 'report') {
+    closeStationActionSheet();
+    showStreamReportModal(station);
+  }
+}
+
+function bindStationLongPress(el, station) {
+  if (!el || !station || el.dataset.longPressBound === '1') return;
+  el.dataset.longPressBound = '1';
+  let timer = null;
+  let startX = 0;
+  let startY = 0;
+
+  const clearTimer = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+
+  const onStart = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    stationLongPressTriggered = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    clearTimer();
+    timer = setTimeout(() => {
+      timer = null;
+      stationLongPressTriggered = true;
+      hapticFeedback('medium');
+      openStationActionSheet(station);
+    }, STATION_LONG_PRESS_MS);
+  };
+
+  const onMove = (e) => {
+    if (Math.hypot(e.clientX - startX, e.clientY - startY) > 12) clearTimer();
+  };
+
+  const onEnd = () => clearTimer();
+
+  el.addEventListener('pointerdown', onStart);
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onEnd);
+  el.addEventListener('pointercancel', onEnd);
+  el.addEventListener('pointerleave', onEnd);
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    openStationActionSheet(station);
+  });
+}
+
+function shouldSkipStationClick() {
+  if (stationLongPressTriggered) {
+    stationLongPressTriggered = false;
+    return true;
+  }
+  return false;
+}
+
+function initStationActionSheet() {
+  document.getElementById('stationActionBackdrop')?.addEventListener('click', closeStationActionSheet);
+  document.getElementById('stationActionClose')?.addEventListener('click', closeStationActionSheet);
+  document.querySelectorAll('#stationActionSheet .station-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => handleStationAction(btn.dataset.action));
+  });
+}
 
 function canShowStationFilters() {
   return currentTab === 'all' || currentTab === 'fav';
@@ -2749,37 +2940,63 @@ function buildQuickPickGroups() {
   const seen = new Set();
   const groups = [];
 
-  function addGroup(label, icon, stations) {
+  function addGroup(key, label, icon, stations) {
     const unique = (stations || []).filter(st => {
       if (!st?.name || seen.has(st.name)) return false;
       seen.add(st.name);
       return true;
     });
-    if (unique.length) groups.push({ label, icon, stations: unique });
+    if (unique.length) groups.push({ key, label, icon, stations: unique });
   }
 
-  addGroup('Recent', 'fa-clock-rotate-left', getRecentlyPlayed(12).map(entry => entry.station));
-  addGroup('Top', 'fa-chart-line', getMostPlayed(12).map(entry => entry.station));
-  addGroup('New', 'fa-flag', getNewlyAddedStations(12));
+  addGroup('recent', 'Recent', 'fa-clock-rotate-left', getRecentlyPlayed(12).map(entry => entry.station));
+  addGroup('top', 'Top', 'fa-chart-line', getMostPlayed(12).map(entry => entry.station));
+  addGroup('new', 'New', 'fa-flag', getNewlyAddedStations(12));
   return groups;
 }
 
 function buildQuickPickTrackMarkup(groups) {
   return groups.map(group => {
     const itemsHtml = group.stations.map((st, i) => {
-      const playing = lastPlayedStation &&
-        lastPlayedStation.station.name === st.name &&
-        !audio.paused;
+      const playing = isQuickPickStationPlaying(st);
       return buildFavQuickItemMarkup(st, i, playing);
     }).join('');
     return `
-      <div class="fav-quick-section" aria-label="${group.label}">
+      <button type="button" class="fav-quick-section" data-section="${group.key}" aria-label="${group.label}">
         <i class="fas ${group.icon}"></i>
         <span>${group.label}</span>
-      </div>
+      </button>
       ${itemsHtml}
     `;
   }).join('');
+}
+
+function isQuickPickStationPlaying(st) {
+  return !!(lastPlayedStation &&
+    lastPlayedStation.station?.name === st.name &&
+    !audio.paused);
+}
+
+function scrollToQuickPickSection(sectionKey) {
+  const scroller = document.querySelector('#favQuickRow .fav-quick-scroll');
+  const track = scroller?.querySelector('.fav-quick-track');
+  const section = track?.querySelector(`.fav-quick-section[data-section="${sectionKey}"]`);
+  if (!scroller || !section) return;
+  pauseFavMarqueeForUser();
+  scroller.scrollTo({ left: Math.max(0, section.offsetLeft - 6), behavior: 'smooth' });
+  document.querySelectorAll('.fav-quick-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.section === sectionKey);
+  });
+}
+
+function bindQuickPickSectionControls(row, groups) {
+  row.querySelectorAll('.fav-quick-chip, .fav-quick-section').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      scrollToQuickPickSection(btn.dataset.section);
+    };
+  });
 }
 
 function pauseFavMarqueeForUser() {
@@ -2874,18 +3091,27 @@ function renderFavQuickRow() {
 
   const groups = buildQuickPickGroups();
   if (!groups.length) {
-    row.hidden = true;
-    row.classList.remove('is-visible', 'is-visible-on-all');
-    row.innerHTML = '';
+    row.hidden = false;
+    row.classList.add('is-visible', 'is-visible-on-all');
+    row.innerHTML = `
+      <div class="fav-quick-panel">
+        <div class="fav-quick-label"><i class="fas fa-compass"></i> Quick picks</div>
+        ${renderEmptyState('Nothing here yet', 'Play a station to see recent and top picks here.', 'fa-compass')}
+      </div>
+    `;
     return;
   }
 
+  const chipsHtml = groups.map(group =>
+    `<button type="button" class="fav-quick-chip" data-section="${group.key}">${group.label}</button>`
+  ).join('');
   const trackHtml = buildQuickPickTrackMarkup(groups);
   row.hidden = false;
   row.classList.add('is-visible', 'is-visible-on-all');
   row.innerHTML = `
     <div class="fav-quick-panel">
       <div class="fav-quick-label"><i class="fas fa-compass"></i> Quick picks</div>
+      <div class="fav-quick-chips">${chipsHtml}</div>
       <div class="fav-quick-scroll" role="list">
         <div class="fav-quick-track">
           ${trackHtml}
@@ -2895,8 +3121,15 @@ function renderFavQuickRow() {
     </div>
   `;
 
+  bindQuickPickSectionControls(row, groups);
+
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
+    const station = { name: btn.dataset.name };
+    const fullStation = findStationByName(btn.dataset.name);
+    if (fullStation) Object.assign(station, fullStation);
+    bindStationLongPress(btn, station);
     btn.onclick = () => {
+      if (shouldSkipStationClick()) return;
       destroyFavMarquee();
       playFavoriteStation(btn.dataset.name);
     };
@@ -2922,13 +3155,41 @@ function playFavoriteStation(stationName) {
   }
 }
 
+function findStationByName(stationName) {
+  for (const lang of Object.keys(stationsPerLang)) {
+    const match = (stationsPerLang[lang] || []).find(s => s.name === stationName);
+    if (match) return { ...match, language: lang };
+  }
+  return null;
+}
+
 function render(list, options = {}) {
   renderFavQuickRow();
   stationList.innerHTML = '';
   applyStationViewMode();
 
   if (!list || !list.length) {
-    stationList.innerHTML = '<div class="item">No stations found.</div>';
+    if (currentTab === 'fav') {
+      stationList.innerHTML = renderEmptyState(
+        'No favorites yet',
+        'Tap the heart on any station to save it here.',
+        'fa-heart'
+      );
+      return;
+    }
+    if (searchTerm) {
+      stationList.innerHTML = renderEmptyState(
+        'No stations found',
+        'Try a different search or clear your filters.',
+        'fa-search'
+      );
+      return;
+    }
+    stationList.innerHTML = renderEmptyState(
+      'No stations found',
+      'Check back soon or try another language.',
+      'fa-radio'
+    );
     return;
   }
 
@@ -3006,6 +3267,7 @@ function appendStationItem(st, i) {
     
     div.onclick = e => { 
       if (!e.target.closest('.favorite-button')) {
+        if (shouldSkipStationClick()) return;
         play(st, i);
       }
     };
@@ -3013,6 +3275,7 @@ function appendStationItem(st, i) {
       e.stopPropagation(); 
       toggleFav(st.name);
     };
+    bindStationLongPress(div, st);
     stationList.appendChild(div);
 }
 /* ---- PLAYER ---- */
@@ -4021,9 +4284,9 @@ function renderHistory() {
   const historyTabs = document.createElement('div');
   historyTabs.className = 'history-tabs';
   historyTabs.innerHTML = `
-    <button class="history-tab active" data-tab="recent">Recently Played</button>
-    <button class="history-tab" data-tab="most">Most Played</button>
-    <button class="history-tab" data-tab="songs">Songs</button>
+    <button class="history-tab ${historyActiveTab === 'recent' ? 'active' : ''}" data-tab="recent">Recently Played</button>
+    <button class="history-tab ${historyActiveTab === 'most' ? 'active' : ''}" data-tab="most">Most Played</button>
+    <button class="history-tab ${historyActiveTab === 'songs' ? 'active' : ''}" data-tab="songs">Songs</button>
   `;
   stationList.appendChild(historyTabs);
   
@@ -4032,11 +4295,14 @@ function renderHistory() {
   historyContainer.className = 'history-container';
   stationList.appendChild(historyContainer);
   
-  let activeHistoryTab = 'recent';
-  
+  function matchesHistorySearch(value) {
+    if (!searchTerm) return true;
+    return String(value || '').toLowerCase().includes(searchTerm);
+  }
+
   function renderHistoryList(tab) {
     historyContainer.innerHTML = '';
-    activeHistoryTab = tab;
+    historyActiveTab = tab;
     
     // Update tab buttons
     historyTabs.querySelectorAll('.history-tab').forEach(btn => {
@@ -4045,11 +4311,18 @@ function renderHistory() {
     
     let stations = [];
     if (tab === 'songs') {
-      if (!nowPlayingHistory.length) {
-        historyContainer.innerHTML = '<div class="item" style="text-align:center;padding:2rem;color:var(--text-secondary)">No song metadata captured yet.</div>';
+      const songEntries = nowPlayingHistory.filter(entry =>
+        matchesHistorySearch(entry.song) ||
+        matchesHistorySearch(entry.artist) ||
+        matchesHistorySearch(entry.stationName)
+      );
+      if (!songEntries.length) {
+        historyContainer.innerHTML = searchTerm
+          ? renderEmptyState('No matching songs', 'Try another search term.', 'fa-music')
+          : renderEmptyState('No song history yet', 'Song titles appear here while stations broadcast metadata.', 'fa-music');
         return;
       }
-      nowPlayingHistory.slice(0, 50).forEach(entry => {
+      songEntries.slice(0, 50).forEach(entry => {
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
@@ -4060,19 +4333,35 @@ function renderHistory() {
             <div class="history-meta"><i class="fas fa-broadcast-tower"></i> ${entry.stationName} • ${formatTimestamp(entry.timestamp)}</div>
           </div>
         `;
+        const linkedStation = findStationByName(entry.stationName) || {
+          name: entry.stationName,
+          logo: entry.stationLogo,
+          genre: entry.artist || ''
+        };
+        bindStationLongPress(div, linkedStation);
         historyContainer.appendChild(div);
       });
       return;
     } else if (tab === 'recent') {
-      stations = getRecentlyPlayed(50);
+      stations = getRecentlyPlayed(50).filter(item =>
+        matchesHistorySearch(item.station?.name) ||
+        matchesHistorySearch(item.station?.genre)
+      );
       if (stations.length === 0) {
-        historyContainer.innerHTML = '<div class="item" style="text-align:center;padding:2rem;color:var(--text-secondary)">No recently played stations yet.</div>';
+        historyContainer.innerHTML = searchTerm
+          ? renderEmptyState('No matching stations', 'Try another search term.', 'fa-search')
+          : renderEmptyState('No recently played stations', 'Play a station to see it here.', 'fa-clock-rotate-left');
         return;
       }
     } else {
-      stations = getMostPlayed(50);
+      stations = getMostPlayed(50).filter(item =>
+        matchesHistorySearch(item.station?.name) ||
+        matchesHistorySearch(item.station?.genre)
+      );
       if (stations.length === 0) {
-        historyContainer.innerHTML = '<div class="item" style="text-align:center;padding:2rem;color:var(--text-secondary)">No play history yet.</div>';
+        historyContainer.innerHTML = searchTerm
+          ? renderEmptyState('No matching stations', 'Try another search term.', 'fa-search')
+          : renderEmptyState('No play history yet', 'Your most played stations will show up here.', 'fa-chart-line');
         return;
       }
     }
@@ -4111,6 +4400,7 @@ function renderHistory() {
       
       div.onclick = e => {
         if (!e.target.closest('.favorite-button')) {
+          if (shouldSkipStationClick()) return;
           // Find station in current language list
           const allStations = stationsPerLang[currentLang] || [];
           const stationIndex = allStations.findIndex(s => s.name === st.name);
@@ -4129,6 +4419,8 @@ function renderHistory() {
         // Update button state
         div.querySelector('.favorite-button').classList.toggle('on', favorites.includes(st.name));
       };
+
+      bindStationLongPress(div, st);
       
       historyContainer.appendChild(div);
     });
@@ -4140,7 +4432,7 @@ function renderHistory() {
   });
   
   // Render initial list
-  renderHistoryList('recent');
+  renderHistoryList(historyActiveTab);
 }
 /* ---- FAVORITES ---- */
 function toggleFav(name) {
