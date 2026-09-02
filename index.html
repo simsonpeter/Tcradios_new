@@ -2810,7 +2810,7 @@ function renderAboutPanel() {
     ['fa-globe', 'Global Christian stations'],
     ['fa-language', 'Multi-language radio'],
     ['fa-image', 'List & logo views'],
-    ['fa-compass', 'Recent, top & new stations in one row'],
+    ['fa-compass', 'Recent, top, rated & new quick picks'],
     ['fa-search', 'Search & filters'],
     ['fa-clock', 'Sleep timer & alarm'],
     ['fa-palette', 'Themes & dark mode'],
@@ -2976,6 +2976,25 @@ function getNewlyAddedStations(limit = 16) {
   return result.slice(0, limit);
 }
 
+function getTopRatedStations(limit = 12, minRating = 3, maxRating = 5) {
+  const allStations = Object.values(stationsPerLang).flat();
+  const byName = new Map(allStations.map(st => [st.name, st]));
+
+  return Object.entries(globalRatings)
+    .filter(([, data]) => {
+      const score = data?.total || 0;
+      const count = data?.count || 0;
+      return count > 0 && score >= minRating && score <= maxRating;
+    })
+    .sort((a, b) => {
+      if (b[1].total !== a[1].total) return b[1].total - a[1].total;
+      return (b[1].count || 0) - (a[1].count || 0);
+    })
+    .slice(0, limit)
+    .map(([name]) => byName.get(name) || globalRatings[name]?.station)
+    .filter(Boolean);
+}
+
 function buildQuickPickGroups() {
   const seen = new Set();
   const groups = [];
@@ -2991,6 +3010,7 @@ function buildQuickPickGroups() {
 
   addGroup('recent', 'Recent', 'fa-clock-rotate-left', getRecentlyPlayed(12).map(entry => entry.station));
   addGroup('top', 'Top', 'fa-chart-line', getMostPlayed(12).map(entry => entry.station));
+  addGroup('rated', 'Rated', 'fa-star', getTopRatedStations(12, 3, 5));
   addGroup('new', 'New', 'fa-flag', getNewlyAddedStations(12));
   return groups;
 }
