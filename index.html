@@ -724,8 +724,10 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                         gap:0.65rem}
 .station-list.view-logo .language-section-title{grid-column:1/-1}
 .station-list.view-logo .item{flex-direction:column;align-items:center;text-align:center;
-                              padding:0.65rem 0.45rem 0.55rem;margin-bottom:0;gap:0.45rem}
-.station-list.view-logo .station-icon{width:72px;height:72px;border-radius:50%}
+                              padding:0.65rem 0.45rem 0.55rem;margin-bottom:0;gap:0.45rem;
+                              backdrop-filter:none}
+.station-list.view-logo .station-logo-wrap{position:relative;width:72px;height:72px;flex-shrink:0}
+.station-list.view-logo .station-icon{width:100%;height:100%;border-radius:50%}
 .station-list.view-logo .station-info{align-items:center;width:100%;min-width:0}
 .station-list.view-logo .station-name{font-size:0.78rem;justify-content:center;
                                       display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
@@ -734,15 +736,18 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
                                        max-width:100%}
 .station-list.view-logo .station-rating-display{display:none}
-.station-list.view-logo .station-actions{position:absolute;top:0.3rem;right:0.3rem}
-.station-list.view-logo .favorite-button{font-size:1rem;padding:0.2rem;
-                                         background:rgba(0,0,0,0.35);border-radius:50%;
-                                         backdrop-filter:blur(4px)}
-.station-list.view-logo .favorite-button i{font-size:0.85rem}
-.station-list.view-logo .favorite-button.on{background:rgba(249,115,22,0.85)}
+.station-list.view-logo .station-actions{position:absolute;top:-2px;right:-2px;z-index:2}
+.station-list.view-logo .favorite-button{font-size:0.7rem;width:22px;height:22px;min-width:22px;min-height:22px;
+                                         padding:0;display:flex;align-items:center;justify-content:center;
+                                         background:rgba(15,18,28,0.92);border:1px solid rgba(255,255,255,0.18);
+                                         border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.35);
+                                         color:rgba(255,255,255,0.8);backdrop-filter:none}
+.station-list.view-logo .favorite-button i{font-size:0.62rem}
+.station-list.view-logo .favorite-button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .station-list.view-logo .new-badge{font-size:0.5rem;padding:0.12rem 0.45rem 0.12rem 0.28rem}
-.station-list.view-logo .item.playing .favorite-button{background:rgba(255,255,255,0.25)}
-.station-list.view-logo .item.playing .favorite-button.on{background:#fff;color:var(--accent)}
+.station-list.view-logo .item.playing .favorite-button{background:rgba(255,255,255,0.95);
+                                                     border-color:rgba(255,255,255,0.95);color:var(--accent)}
+.station-list.view-logo .item.playing .favorite-button.on{background:#fff;border-color:#fff;color:var(--accent)}
 .item{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:.75rem;
       background:var(--card);box-shadow:var(--shadow-sm);border:1px solid var(--border);
       transition:var(--transition);cursor:pointer;position:relative;
@@ -965,7 +970,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play i,#p-prev i,#p-next i{font-size:1.1rem}
   header{padding:0.5rem 1rem;min-height:50px}
   .station-list.view-logo .item{padding:0.55rem}
-  .station-list.view-logo .station-icon{width:56px;height:56px}
+  .station-list.view-logo .station-logo-wrap{width:56px;height:56px}
   .station-list .item{padding:0.6rem}
   .station-list .item img{width:32px;height:32px}
 }
@@ -2756,10 +2761,12 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
 
   if (stationViewMode === 'logo') {
     return `
-      <div class="station-actions">
-        <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
+      <div class="station-logo-wrap">
+        <img src="${st.logo}" alt="" class="station-icon">
+        <div class="station-actions">
+          <div class="favorite-button ${favoriteClass}" data-name="${st.name}" title="Favorite"><i class="fas fa-heart"></i></div>
+        </div>
       </div>
-      <img src="${st.logo}" alt="" class="station-icon">
       <div class="station-info">
         <div class="station-name">${st.name}${newBadge}</div>
         <div class="station-genre">${st.genre}</div>
