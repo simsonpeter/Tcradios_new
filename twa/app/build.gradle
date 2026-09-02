@@ -57,8 +57,8 @@ android {
         applicationId "com.jayathasoft.tcradios.app"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 38
-        versionName "Mini player home widget"
+        versionCode 39
+        versionName "Lock screen notification player"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -242,5 +242,6 @@ dependencies {
         
         // Basic media support for Android Auto compatibility
         implementation 'androidx.media:media:1.7.0'
+        implementation 'androidx.core:core:1.13.1'
     
 }

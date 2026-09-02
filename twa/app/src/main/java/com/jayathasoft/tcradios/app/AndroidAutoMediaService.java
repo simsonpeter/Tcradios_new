@@ -1,10 +1,16 @@
 package com.jayathasoft.tcradios.app;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -15,7 +21,10 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import androidx.media.MediaBrowserServiceCompat;
+import androidx.media.app.NotificationCompat.MediaStyle;
+import androidx.media.session.MediaButtonReceiver;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -125,6 +134,8 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
                     "https://zeno.fm/favicon.ico")
     };
 
+    private static final String PLAYBACK_CHANNEL_ID = "tcradios_playback";
+    private static final int PLAYBACK_NOTIFICATION_ID = 37;
     private MediaSessionCompat mediaSession;
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
@@ -132,6 +143,7 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     private final Map<String, List<Station>> stationsByLanguage = new LinkedHashMap<>();
     private Station currentStation;
     private int currentStationIndex = 0;
+    private boolean startedForeground = false;
 
     private final AudioManager.OnAudioFocusChangeListener audioFocusListener = focusChange -> {
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
@@ -148,7 +160,8 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
         super.onCreate();
 
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        mediaSession = new MediaSessionCompat(this, "TC RADIOS Android Auto");
+        createPlaybackChannel();
+        mediaSession = new MediaSessionCompat(this, "TC RADIOS");
         mediaSession.setFlags(
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
                         | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -329,6 +342,10 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
     public void onDestroy() {
         stopPlayback();
         stationLoader.shutdownNow();
+        if (startedForeground) {
+            stopForeground(true);
+            startedForeground = false;
+        }
         if (mediaSession != null) {
             mediaSession.release();
             mediaSession = null;
@@ -548,6 +565,99 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
                     state == PlaybackStateCompat.STATE_PLAYING
                             || state == PlaybackStateCompat.STATE_BUFFERING);
         }
+        updateNowPlayingNotification(state);
+    }
+
+    private void createPlaybackChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager == null || manager.getNotificationChannel(PLAYBACK_CHANNEL_ID) != null) return;
+        NotificationChannel channel = new NotificationChannel(
+                PLAYBACK_CHANNEL_ID,
+                getString(R.string.playback_channel_name),
+                NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(getString(R.string.playback_channel_description));
+        channel.setShowBadge(false);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        manager.createNotificationChannel(channel);
+    }
+
+    private void updateNowPlayingNotification(int state) {
+        boolean keepVisible = state == PlaybackStateCompat.STATE_PLAYING
+                || state == PlaybackStateCompat.STATE_BUFFERING
+                || state == PlaybackStateCompat.STATE_PAUSED;
+        if (!keepVisible) {
+            if (startedForeground) {
+                stopForeground(true);
+                startedForeground = false;
+            }
+            return;
+        }
+        Notification notification = buildNowPlayingNotification(state);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(PLAYBACK_NOTIFICATION_ID, notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+        } else {
+            startForeground(PLAYBACK_NOTIFICATION_ID, notification);
+        }
+        startedForeground = true;
+    }
+
+    private Notification buildNowPlayingNotification(int state) {
+        boolean playing = state == PlaybackStateCompat.STATE_PLAYING
+                || state == PlaybackStateCompat.STATE_BUFFERING;
+        String title = currentStation != null ? currentStation.name : "TC RADIOS";
+        String text = playing ? "Live" : "Paused";
+
+        Intent openApp = new Intent(this, LauncherActivity.class);
+        openApp.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                this,
+                0,
+                openApp,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Action prev = new NotificationCompat.Action(
+                R.drawable.ic_notif_prev,
+                getString(R.string.widget_prev_cd),
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        this, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
+        NotificationCompat.Action playPause = new NotificationCompat.Action(
+                playing ? R.drawable.ic_notif_pause : R.drawable.ic_notification_icon,
+                getString(R.string.widget_play_cd),
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        this, PlaybackStateCompat.ACTION_PLAY_PAUSE));
+        NotificationCompat.Action next = new NotificationCompat.Action(
+                R.drawable.ic_notif_next,
+                getString(R.string.widget_next_cd),
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT));
+
+        MediaStyle style = new MediaStyle()
+                .setMediaSession(mediaSession.getSessionToken())
+                .setShowActionsInCompactView(0, 1, 2)
+                .setShowCancelButton(true)
+                .setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        this, PlaybackStateCompat.ACTION_STOP));
+
+        return new NotificationCompat.Builder(this, PLAYBACK_CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSubText("TC RADIOS")
+                .setSmallIcon(R.drawable.ic_notification_icon)
+                .setContentIntent(contentIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setOnlyAlertOnce(true)
+                .setShowWhen(false)
+                .setOngoing(playing)
+                .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                .addAction(prev)
+                .addAction(playPause)
+                .addAction(next)
+                .setStyle(style)
+                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        this, PlaybackStateCompat.ACTION_STOP))
+                .build();
     }
 
     private Station findStation(String mediaId) {

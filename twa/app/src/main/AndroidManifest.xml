@@ -216,6 +216,9 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
             <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_LAST" />
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_FAVORITE" />
                 <action android:name="com.jayathasoft.tcradios.app.action.PLAY_LANGUAGE" />
@@ -225,6 +228,14 @@
                 <action android:name="com.jayathasoft.tcradios.app.action.SKIP_PREVIOUS" />
             </intent-filter>
         </service>
+
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".NativeSyncActivity"

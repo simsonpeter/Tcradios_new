@@ -1675,7 +1675,7 @@ audio{display:none}
     <button id="closeAdminDashboardModal" class="secondary">Close</button>
   </div>
 </div>
-<audio id="audio"></audio>
+<audio id="audio" playsinline></audio>
 <script>
 /* ---- CONFIG ---- */
 const DATA_OWNER = 'simsonpeter';
@@ -2151,8 +2151,22 @@ function clearAllCacheOnLaunch() {
         play(stations[0], 0);
         return;
       }
+    } else if (action === 'play') {
+      if (lastPlayedStation) {
+        const stations = stationsPerLang[currentLang] || [];
+        const lastStation = stations.find(st => st.name === lastPlayedStation.station.name);
+        if (lastStation) {
+          play(lastStation, stations.indexOf(lastStation));
+          return;
+        }
+      }
+    } else if (action === 'pause') {
+      return;
+    } else if (action === 'next' || action === 'prev') {
+      autoPlayLastOrFirst();
+      setTimeout(() => prevNext(action === 'next' ? 1 : -1), 900);
+      return;
     } else if (action === 'playfav') {
-      // Wear / shortcut: one-tap first favorite
       if (playFirstFavorite()) return;
     } else if (action === 'playlang') {
       const lang = (urlParams.get('lang') || 'tamil').toLowerCase();
@@ -2716,8 +2730,7 @@ function play(st, i) {
   // Haptic feedback for mobile
   hapticFeedback('success');
   // Request notification permission on first play
-  requestNotificationPermission();
-  showMediaNotification(st);
+  requestNotificationPermission().then(() => showMediaNotification(st));
 }
 pPlay.onclick = (e) => {
   e.stopPropagation();
@@ -2982,10 +2995,9 @@ audio.onplay = () => {
   player.classList.add('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
-  // Update Media Session playback state for Android Auto
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = 'playing';
-  }
+  // Update Media Session playback state for lock screen / notification player
+  updateLockScreenPlaybackState('playing');
+  showMediaNotification(lastPlayedStation && lastPlayedStation.station);
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.add('playing');
@@ -3004,10 +3016,9 @@ audio.onpause = () => {
   player.classList.remove('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
-  // Update Media Session playback state for Android Auto
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = 'paused';
-  }
+  // Update Media Session playback state for lock screen / notification player
+  updateLockScreenPlaybackState('paused');
+  showMediaNotification(lastPlayedStation && lastPlayedStation.station);
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
@@ -3066,6 +3077,9 @@ function updatePlaybackUiForRemote(isPlaying) {
 
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }
+  if (lastPlayedStation && lastPlayedStation.station) {
+    showMediaNotification(lastPlayedStation.station);
   }
 
   if (fullscreenPlayer.classList.contains('active')) {
@@ -3196,6 +3210,7 @@ function stopActiveStream() {
 
   audio.pause();
   audio.currentTime = 0;
+  clearMediaNotification();
 }
 
 function toggleActivePlayback() {
@@ -6139,78 +6154,100 @@ if (widgetVisible === 'true' && floatingWidget) {
   // Update after a short delay to ensure elements are ready
   setTimeout(updateFloatingWidget, 100);
 }
-/* ---- MEDIA SESSION ---- */
-function updateMediaSession(st) {
+/* ---- LOCK SCREEN / NOTIFICATION PLAYER ---- */
+let lockScreenHandlersBound = false;
+
+function mediaArtworkList(st) {
+  const origin = (location && location.origin) || '';
+  const fallback = origin + '/icons/icon-512x512.png';
+  const logo = (st && st.logo) || fallback;
+  const type = /\.webp($|\?)/i.test(logo) ? 'image/webp'
+    : /\.jpe?g($|\?)/i.test(logo) ? 'image/jpeg'
+    : 'image/png';
+  return [
+    { src: fallback, sizes: '192x192', type: 'image/png' },
+    { src: fallback, sizes: '512x512', type: 'image/png' },
+    { src: logo, sizes: '512x512', type }
+  ];
+}
+
+function bindLockScreenPlayerHandlers() {
+  if (lockScreenHandlersBound || !('mediaSession' in navigator)) return;
+  const set = (action, handler) => {
+    try { navigator.mediaSession.setActionHandler(action, handler); } catch (e) {}
+  };
+  set('play', () => {
+    playActiveStream();
+    updateLockScreenPlaybackState('playing');
+  });
+  set('pause', () => {
+    pauseActiveStream();
+    updateLockScreenPlaybackState('paused');
+  });
+  set('previoustrack', () => prevNext(-1));
+  set('nexttrack', () => prevNext(1));
+  set('stop', () => {
+    stopActiveStream();
+    updateLockScreenPlaybackState('paused');
+    clearMediaNotification();
+  });
+  ['seekbackward', 'seekforward', 'seekto'].forEach(action => set(action, null));
+  lockScreenHandlersBound = true;
+}
+
+function updateLockScreenPlaybackState(state) {
   if ('mediaSession' in navigator) {
-    // Use song/artist metadata if available, otherwise use station name
-    const title = currentMetadata.song || st.name;
-    const artist = currentMetadata.artist || 'TC RADIOS';
-    
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: title,
-      artist: artist,
-      album: st.genre || 'Christian Radio',
-      artwork: [{
-        src: st.logo || '/icons/icon-512x512.png',
-        sizes: '512x512', type: 'image/png'
-      }]
-    });
-    
-    // Set playback state based on current audio state
-    navigator.mediaSession.playbackState = isPlaybackCurrentlyPlaying() ? 'playing' : 'paused';
-    
-    // Set position state for Android Auto (radio streams are continuous)
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: Infinity,
-        playbackRate: 1.0,
-        position: 0
-      });
-    } catch (e) {
-      // Position state might not be supported, continue anyway
-      console.log('Position state not supported:', e);
-    }
-    
-    // Enhanced media session controls for Android Auto
-    navigator.mediaSession.setActionHandler('play', () => {
-      playActiveStream();
-      navigator.mediaSession.playbackState = 'playing';
-      showNotification('Playing: ' + st.name);
-      updateWidget('playStateUpdate', { playing: true });
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      pauseActiveStream();
-      navigator.mediaSession.playbackState = 'paused';
-      showNotification('Paused: ' + st.name);
-      updateWidget('playStateUpdate', { playing: false });
-    });
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      prevNext(-1);
-      showNotification('Previous station');
-    });
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      prevNext(1);
-      showNotification('Next station');
-    });
-    // Add stop action for better mobile support
-    navigator.mediaSession.setActionHandler('stop', () => {
-      stopActiveStream();
-      navigator.mediaSession.playbackState = 'paused';
-      showNotification('Stopped');
-      updateWidget('playStateUpdate', { playing: false });
-    });
-    // Android Auto specific handlers
-    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-      // Skip backward 10 seconds (if supported by stream)
-      showNotification('Seek backward');
-    });
-    navigator.mediaSession.setActionHandler('seekforward', (details) => {
-      // Skip forward 10 seconds (if supported by stream)
-      showNotification('Seek forward');
-    });
-    // Update widget with station info
-    updateWidget('stationUpdate', { station: st });
+    navigator.mediaSession.playbackState = state;
   }
+}
+
+function updateMediaSession(st) {
+  if (!st || !('mediaSession' in navigator)) return;
+  bindLockScreenPlayerHandlers();
+  const song = currentMetadata && currentMetadata.song;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: st.name || 'TC RADIOS',
+    artist: song || 'TC RADIOS',
+    album: st.genre || 'Christian Radio',
+    artwork: mediaArtworkList(st)
+  });
+  updateLockScreenPlaybackState(isPlaybackCurrentlyPlaying() ? 'playing' : 'paused');
+  updateWidget('stationUpdate', { station: st });
+  showMediaNotification(st);
+}
+
+function postToServiceWorker(data) {
+  const send = worker => { if (worker) worker.postMessage(data); };
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    send(navigator.serviceWorker.controller);
+    return;
+  }
+  if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+    navigator.serviceWorker.ready.then(reg => send(reg.active));
+  }
+}
+
+function showMediaNotification(station) {
+  if (!station) return;
+  updateLockScreenPlaybackState(isPlaybackCurrentlyPlaying() ? 'playing' : 'paused');
+  const androidHasMediaSession = /Android/i.test(navigator.userAgent) && 'mediaSession' in navigator;
+  if (androidHasMediaSession) return;
+  postToServiceWorker({
+    type: 'MEDIA_NOTIFICATION',
+    name: station.name || 'TC RADIOS',
+    playing: isPlaybackCurrentlyPlaying(),
+    icon: station.logo || '/icons/icon-192x192.png'
+  });
+}
+
+function clearMediaNotification() {
+  postToServiceWorker({ type: 'MEDIA_NOTIFICATION_CLEAR' });
+}
+
+function requestNotificationPermission() {
+  if (!('Notification' in window)) return Promise.resolve('denied');
+  if (Notification.permission !== 'default') return Promise.resolve(Notification.permission);
+  return Notification.requestPermission();
 }
 /* ---- ANDROID AUTO VOICE COMMANDS ---- */
 function initAndroidAutoVoiceCommands() {
@@ -6276,62 +6313,14 @@ function initAndroidAutoVoiceCommands() {
 
 /* ---- ANDROID AUTO INTEGRATION ---- */
 function initAndroidAutoIntegration() {
-  // Initialize voice commands
   initAndroidAutoVoiceCommands();
-  
-  // Enhanced media session for Android Auto
-  if ('mediaSession' in navigator) {
-    // Set initial playback state
-    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
-    
-    // Set up additional Android Auto specific handlers
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      console.log('Seek to:', details.seekTime);
-      showNotification('Seek to ' + Math.round(details.seekTime) + 's');
-    });
-    
-    // Set position state for Android Auto
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: Infinity,
-        playbackRate: 1.0,
-        position: 0
-      });
-    } catch (e) {
-      console.log('Position state not supported:', e);
-    }
-    
-    console.log('Android Auto Media Session initialized');
-  } else {
-    console.warn('Media Session API not supported - Android Auto may not work');
-  }
-  
-  // Listen for Android Auto events
+  bindLockScreenPlayerHandlers();
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      // App is in background - optimize for Android Auto
-      console.log('App in background - Android Auto mode');
-      // Ensure Media Session is updated when app goes to background
-      if ('mediaSession' in navigator && lastPlayedStation) {
-        updateMediaSession(lastPlayedStation.station);
-      }
-    } else {
-      // App is in foreground
-      console.log('App in foreground');
-    }
+    if (lastPlayedStation) updateMediaSession(lastPlayedStation.station);
   });
-  
-  // Handle Android Auto specific events
   window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'android-auto') {
       handleAndroidAutoMessage(event.data);
-    }
-  });
-  
-  // Listen for page visibility changes to maintain Media Session
-  document.addEventListener('visibilitychange', () => {
-    if ('mediaSession' in navigator && lastPlayedStation) {
-      navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
     }
   });
 }
@@ -6401,34 +6390,7 @@ window.addEventListener('message', (event) => {
 });
 /* ---- ANDROID AUTO SUPPORT ---- */
 function initAndroidAuto() {
-  // Enhanced media session for Android Auto
-  if ('mediaSession' in navigator) {
-    // Set initial playback state
-    navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'none';
-    
-    // Add position state for Android Auto
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: Infinity, // Radio streams are continuous
-        playbackRate: 1.0,
-        position: 0
-      });
-    } catch (e) {
-      console.log('Position state not supported:', e);
-    }
-    
-    // Handle Android Auto specific events
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (details.seekTime !== undefined) {
-        audio.currentTime = details.seekTime;
-        showNotification('Seek to ' + Math.round(details.seekTime) + 's');
-      }
-    });
-    
-    console.log('Android Auto support initialized');
-  }
-  
-  // Register for Android Auto
+  bindLockScreenPlayerHandlers();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'ANDROID_AUTO_COMMAND') {
@@ -6445,6 +6407,9 @@ function handleAndroidAutoCommand(command) {
     case 'PAUSE':
       pauseActiveStream();
       break;
+    case 'TOGGLE':
+      toggleActivePlayback();
+      break;
     case 'NEXT':
       prevNext(1);
       break;
@@ -6453,6 +6418,7 @@ function handleAndroidAutoCommand(command) {
       break;
     case 'STOP':
       stopActiveStream();
+      clearMediaNotification();
       break;
   }
 }
@@ -6460,43 +6426,18 @@ function handleAndroidAutoCommand(command) {
 /* ---- ENHANCED NOTIFICATIONS ---- */
 function showNotification(message, actions = [], icon = '/icons/icon-192x192.png') {
   if ('Notification' in window && Notification.permission === 'granted') {
-    const notificationActions = Array.isArray(actions) ? actions : [];
     const notification = new Notification('TC RADIOS', {
       body: message,
       icon,
       badge: '/icons/icon-192x192.png',
-      tag: 'tcradios-control',
-      actions: notificationActions,
-      requireInteraction: true,
-      silent: false
+      tag: 'tcradios-toast',
+      silent: true
     });
-    // Handle notification click
     notification.onclick = () => {
       window.focus();
       notification.close();
     };
-    // Auto-close after 5 seconds unless it has actions
-    if (notificationActions.length === 0) {
-      setTimeout(() => notification.close(), 5000);
-    }
-  }
-}
-function showMediaNotification(station) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    const actions = [
-      { action: 'play', title: 'Play', icon: '/icons/icon-192x192.png' },
-      { action: 'pause', title: 'Pause', icon: '/icons/icon-192x192.png' },
-      { action: 'next', title: 'Next', icon: '/icons/icon-192x192.png' },
-      { action: 'prev', title: 'Previous', icon: '/icons/icon-192x192.png' }
-    ];
-    const nowPlaying = currentMetadata.song ? `${currentMetadata.song} • ${station.name}` : `Now Playing: ${station.name}`;
-    showNotification(nowPlaying, actions, station.logo || '/icons/icon-192x192.png');
-  }
-}
-// Request notification permission on first interaction
-function requestNotificationPermission() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+    setTimeout(() => notification.close(), 4000);
   }
 }
 /* ---- SWIPE GESTURES ---- */
@@ -6560,7 +6501,7 @@ function hapticFeedback(type = 'light') {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add version parameter to force update
-    navigator.serviceWorker.register('/sw.js?v=5').then(registration => {
+    navigator.serviceWorker.register('/sw.js?v=6').then(registration => {
       // Check for updates immediately
       setInterval(() => {
         registration.update();
@@ -6579,7 +6520,7 @@ if ('serviceWorker' in navigator) {
     // Unregister old service workers
     navigator.serviceWorker.getRegistrations().then(registrations => {
       registrations.forEach(registration => {
-        if (registration.scope.includes('/') && !registration.active?.scriptURL.includes('v=5')) {
+        if (registration.scope.includes('/') && !registration.active?.scriptURL.includes('v=6')) {
           registration.unregister();
         }
       });
@@ -6725,47 +6666,7 @@ function addWearOSListeners() {
 }
 // Enhanced media session for Wear OS
 function updateWearOSMediaSession(st) {
-  if ('mediaSession' in navigator) {
-    // Set Wear OS specific metadata
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: st.name,
-      artist: 'TC RADIOS',
-      album: st.genre || 'Christian Radio',
-      artwork: [
-        {
-          src: st.logo || '/icons/icon-192x192.png',
-          sizes: '192x192',
-          type: 'image/png'
-        },
-        {
-          src: st.logo || '/icons/icon-512x512.png',
-          sizes: '512x512',
-          type: 'image/png'
-        }
-      ]
-    });
-    // Wear OS specific action handlers
-    navigator.mediaSession.setActionHandler('play', () => {
-      playActiveStream();
-      hapticFeedback('light');
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      pauseActiveStream();
-      hapticFeedback('light');
-    });
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      prevNext(-1);
-      hapticFeedback('medium');
-    });
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      prevNext(1);
-      hapticFeedback('medium');
-    });
-    navigator.mediaSession.setActionHandler('stop', () => {
-      stopActiveStream();
-      hapticFeedback('heavy');
-    });
-  }
+  updateMediaSession(st);
 }
 /* ---- INITIALIZE MOBILE FEATURES ---- */
 window.addEventListener('load', () => {
