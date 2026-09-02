@@ -371,7 +371,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                 font-weight:700;color:var(--accent);margin-bottom:0.35rem}
 .fav-quick-scroll{display:flex;gap:0.55rem;overflow-x:auto;overflow-y:hidden;
                   -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-                  padding:0.1rem 0.1rem 0.35rem;scrollbar-width:none}
+                  padding:0.1rem 0.1rem 0.35rem;scrollbar-width:none;
+                  touch-action:pan-x;overscroll-behavior-x:contain}
 .fav-quick-scroll::-webkit-scrollbar{display:none}
 .fav-quick-item{flex:0 0 72px;scroll-snap-align:start;display:flex;flex-direction:column;
                 align-items:center;gap:0.28rem;cursor:pointer;text-align:center;
@@ -738,7 +739,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
            border:1px solid var(--border);background:var(--card);color:var(--text);
            font-size:1rem}
 #searchBar::placeholder{color:var(--border)}
-.station-list{width:100%;display:flex;flex-direction:column;gap:.4rem}
+.station-list{width:100%;display:flex;flex-direction:column;gap:.4rem;touch-action:pan-y}
 .station-list.view-logo{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));
                         gap:0.65rem}
 .station-list.view-logo .language-section-title{grid-column:1/-1}
@@ -2695,14 +2696,21 @@ document.getElementById('tab-all').onclick   = () => switchTab('all');
 document.getElementById('tab-fav').onclick   = () => switchTab('fav');
 document.getElementById('tab-history').onclick = () => switchTab('history');
 document.getElementById('tab-about').onclick = () => switchTab('about');
-document.getElementById('content').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+let tabSwipeStartX = 0;
+let tabSwipeEnabled = false;
+document.getElementById('content').addEventListener('touchstart', e => {
+  tabSwipeEnabled = isTabSwipeAllowed(e);
+  if (!tabSwipeEnabled) return;
+  tabSwipeStartX = e.changedTouches[0].screenX;
+}, { passive: true });
 document.getElementById('content').addEventListener('touchend', e => {
+  if (!tabSwipeEnabled) return;
   const th = 50;
   const tabs = ['all','fav','history','about'];
-  if (e.changedTouches[0].screenX < touchStartX - th) {
+  if (e.changedTouches[0].screenX < tabSwipeStartX - th) {
     const i = tabs.indexOf(currentTab);
     if (i < tabs.length - 1) switchTab(tabs[i+1]);
-  } else if (touchStartX < e.changedTouches[0].screenX - th) {
+  } else if (tabSwipeStartX < e.changedTouches[0].screenX - th) {
     const i = tabs.indexOf(currentTab);
     if (i > 0) switchTab(tabs[i-1]);
   }
@@ -2815,6 +2823,13 @@ function renderFavQuickRow() {
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
     btn.onclick = () => playFavoriteStation(btn.dataset.name);
   });
+
+  const scroller = row.querySelector('.fav-quick-scroll');
+  if (scroller) {
+    scroller.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    scroller.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
+    scroller.addEventListener('touchend', e => e.stopPropagation());
+  }
 }
 
 function playFavoriteStation(stationName) {
@@ -6678,6 +6693,28 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
+let stationSwipeBlocked = false;
+
+function isTabSwipeAllowed(e) {
+  const target = e.target;
+  if (!target || !target.closest) return false;
+  if (target.closest('#favQuickRow')) return false;
+  if (target.closest('#searchRow')) return false;
+  if (target.closest('#stationFilterBar')) return false;
+  if (target.closest('#tabs')) return false;
+  if (target.closest('.history-tabs')) return false;
+  return !!target.closest('.station-list');
+}
+
+function shouldBlockStationSwipe(e) {
+  const target = e.target;
+  if (!target || !target.closest) return false;
+  return !!(target.closest('#favQuickRow') ||
+            target.closest('#searchRow') ||
+            target.closest('#stationFilterBar') ||
+            target.closest('#tabs') ||
+            target.closest('.history-tabs'));
+}
 
 // Check if touch target is volume slider or its container
 function isVolumeSliderInteraction(e) {
@@ -6689,14 +6726,21 @@ function isVolumeSliderInteraction(e) {
 }
 
 document.addEventListener('touchstart', e => {
-  // Don't track swipe if interacting with volume slider
-  if (isVolumeSliderInteraction(e)) return;
+  // Don't track swipe if interacting with volume slider or horizontal scroll areas
+  if (isVolumeSliderInteraction(e) || shouldBlockStationSwipe(e)) {
+    stationSwipeBlocked = true;
+    return;
+  }
+  stationSwipeBlocked = false;
   touchStartX = e.changedTouches[0].screenX;
   touchStartY = e.changedTouches[0].screenY;
 }, false);
 document.addEventListener('touchend', e => {
-  // Don't handle swipe if interacting with volume slider
-  if (isVolumeSliderInteraction(e)) return;
+  // Don't handle swipe if interacting with volume slider or horizontal scroll areas
+  if (stationSwipeBlocked || isVolumeSliderInteraction(e) || shouldBlockStationSwipe(e)) {
+    stationSwipeBlocked = false;
+    return;
+  }
   touchEndX = e.changedTouches[0].screenX;
   touchEndY = e.changedTouches[0].screenY;
   handleSwipe();
