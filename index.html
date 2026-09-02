@@ -3256,23 +3256,6 @@ function buildStationRatingMarkup(st) {
   return parts.join('');
 }
 
-function buildStationRatingButtonMarkup(st) {
-  const rated = !!stationRatings[st.name]?.rating;
-  const title = currentUser
-    ? (rated ? 'Change your rating' : 'Rate this station (1-5 stars)')
-    : 'Sign in to rate this station';
-  return `<div class="rating-button" title="${title}"><i class="fas fa-star${rated ? ' rated' : ''}"></i></div>`;
-}
-
-function bindStationRatingButton(container, st) {
-  const ratingBtn = container.querySelector('.rating-button');
-  if (!ratingBtn) return;
-  ratingBtn.onclick = e => {
-    e.stopPropagation();
-    openStationRating(st);
-  };
-}
-
 function openStationRating(st) {
   if (!st) return;
   if (!currentUser) {
