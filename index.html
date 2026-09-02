@@ -2690,6 +2690,9 @@ function shouldSkipStationClick() {
 }
 
 function initStationActionSheet() {
+  const sheet = document.getElementById('stationActionSheet');
+  if (!sheet || sheet.dataset.bound === '1') return;
+  sheet.dataset.bound = '1';
   document.getElementById('stationActionBackdrop')?.addEventListener('click', closeStationActionSheet);
   document.getElementById('stationActionClose')?.addEventListener('click', closeStationActionSheet);
   document.querySelectorAll('#stationActionSheet .station-action-btn').forEach(btn => {
@@ -3122,11 +3125,11 @@ function renderFavQuickRow() {
   `;
 
   bindQuickPickSectionControls(row, groups);
+  const firstChip = row.querySelector('.fav-quick-chip');
+  if (firstChip) firstChip.classList.add('active');
 
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
-    const station = { name: btn.dataset.name };
-    const fullStation = findStationByName(btn.dataset.name);
-    if (fullStation) Object.assign(station, fullStation);
+    const station = findStationByName(btn.dataset.name) || { name: btn.dataset.name };
     bindStationLongPress(btn, station);
     btn.onclick = () => {
       if (shouldSkipStationClick()) return;
