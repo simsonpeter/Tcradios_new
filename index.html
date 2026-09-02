@@ -392,8 +392,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
 #favQuickRow{display:none;margin:0}
-#favQuickRow.is-visible{display:flex;flex-direction:column;gap:0.55rem;
-                       animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
+#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
 .fav-quick-panel{background:var(--card);border:1px solid var(--border);border-radius:0.85rem;
                  padding:0.7rem 0.5rem 0.55rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .fav-quick-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -406,7 +405,16 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                   touch-action:pan-x;overscroll-behavior-x:contain}
 .fav-quick-scroll.is-user-scroll{scroll-snap-type:x proximity}
 .fav-quick-scroll::-webkit-scrollbar{display:none}
-.fav-quick-track{display:flex;flex-shrink:0}
+.fav-quick-track{display:flex;flex-shrink:0;align-items:flex-start}
+.fav-quick-section{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+                   gap:0.2rem;padding:0.35rem 0.45rem 0.15rem;min-width:58px;max-width:72px;text-align:center}
+.fav-quick-section i{font-size:0.82rem;color:var(--accent);opacity:0.9}
+.fav-quick-section span{font-size:0.58rem;font-weight:700;line-height:1.15;color:var(--accent);
+                        text-transform:uppercase;letter-spacing:0.02em}
+.fav-quick-section::after{content:'';position:absolute;top:14%;bottom:18%;right:0;width:1px;
+                          background:linear-gradient(180deg,transparent,rgba(249,115,22,0.35) 20%,
+                          rgba(249,115,22,0.35) 80%,transparent)}
+.fav-quick-section{position:relative}
 .fav-quick-scroll.is-marquee-active{mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);
                                     -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
 .fav-quick-item{flex:0 0 86px;scroll-snap-align:start;display:flex;flex-direction:column;
@@ -2557,7 +2565,7 @@ function renderAboutPanel() {
     ['fa-globe', 'Global Christian stations'],
     ['fa-language', 'Multi-language radio'],
     ['fa-image', 'List & logo views'],
-    ['fa-clock-rotate-left', 'Recent & most played quick rows'],
+    ['fa-compass', 'Recent, top & new stations in one row'],
     ['fa-search', 'Search & filters'],
     ['fa-clock', 'Sleep timer & alarm'],
     ['fa-palette', 'Themes & dark mode'],
@@ -2709,22 +2717,57 @@ function buildFavQuickItemMarkup(st, i, playing) {
   </button>`;
 }
 
-function buildQuickRowSection(label, iconClass, stations, sectionKey) {
-  if (!stations.length) return '';
-  const itemsHtml = stations.map((st, i) => {
-    const playing = lastPlayedStation &&
-      lastPlayedStation.station.name === st.name &&
-      !audio.paused;
-    return buildFavQuickItemMarkup(st, i, playing);
-  }).join('');
-  return `
-    <div class="fav-quick-panel" data-quick-section="${sectionKey}">
-      <div class="fav-quick-label"><i class="fas ${iconClass}"></i> ${label}</div>
-      <div class="fav-quick-scroll" role="list">
-        <div class="fav-quick-track">${itemsHtml}</div>
+function getNewlyAddedStations(limit = 16) {
+  const byKey = new Map();
+  Object.entries(stationsPerLang).forEach(([lang, stations]) => {
+    (stations || []).forEach(st => byKey.set(getStationIdentity(lang, st), st));
+  });
+  const result = [];
+  const seen = new Set();
+  Array.from(newStationKeys).reverse().forEach(key => {
+    const station = byKey.get(key);
+    if (!station || seen.has(station.name)) return;
+    seen.add(station.name);
+    result.push(station);
+  });
+  return result.slice(0, limit);
+}
+
+function buildQuickPickGroups() {
+  const seen = new Set();
+  const groups = [];
+
+  function addGroup(label, icon, stations) {
+    const unique = (stations || []).filter(st => {
+      if (!st?.name || seen.has(st.name)) return false;
+      seen.add(st.name);
+      return true;
+    });
+    if (unique.length) groups.push({ label, icon, stations: unique });
+  }
+
+  addGroup('Recent', 'fa-clock-rotate-left', getRecentlyPlayed(12).map(entry => entry.station));
+  addGroup('Top', 'fa-chart-line', getMostPlayed(12).map(entry => entry.station));
+  addGroup('New', 'fa-flag', getNewlyAddedStations(12));
+  return groups;
+}
+
+function buildQuickPickTrackMarkup(groups) {
+  return groups.map(group => {
+    const itemsHtml = group.stations.map((st, i) => {
+      const playing = lastPlayedStation &&
+        lastPlayedStation.station.name === st.name &&
+        !audio.paused;
+      return buildFavQuickItemMarkup(st, i, playing);
+    }).join('');
+    return `
+      <div class="fav-quick-section" aria-label="${group.label}">
+        <i class="fas ${group.icon}"></i>
+        <span>${group.label}</span>
       </div>
-    </div>
-  `;
+      ${itemsHtml}
+    `;
+  }).join('');
 }
 
 function pauseFavMarqueeForUser() {
@@ -2817,31 +2860,39 @@ function renderFavQuickRow() {
     return;
   }
 
-  const recentStations = getRecentlyPlayed(16).map(entry => entry.station).filter(Boolean);
-  const mostStations = getMostPlayed(16).map(entry => entry.station).filter(Boolean);
-  const sections = [
-    buildQuickRowSection('Recently Played', 'fa-clock-rotate-left', recentStations, 'recent'),
-    buildQuickRowSection('Most Played', 'fa-chart-line', mostStations, 'most')
-  ].filter(Boolean).join('');
-
-  if (!sections) {
+  const groups = buildQuickPickGroups();
+  if (!groups.length) {
     row.hidden = true;
     row.classList.remove('is-visible', 'is-visible-on-all');
     row.innerHTML = '';
     return;
   }
 
+  const trackHtml = buildQuickPickTrackMarkup(groups);
   row.hidden = false;
   row.classList.add('is-visible', 'is-visible-on-all');
-  row.innerHTML = sections;
+  row.innerHTML = `
+    <div class="fav-quick-panel">
+      <div class="fav-quick-label"><i class="fas fa-compass"></i> Quick picks</div>
+      <div class="fav-quick-scroll" role="list">
+        <div class="fav-quick-track">
+          ${trackHtml}
+          ${trackHtml}
+        </div>
+      </div>
+    </div>
+  `;
 
   row.querySelectorAll('.fav-quick-item').forEach(btn => {
-    btn.onclick = () => playFavoriteStation(btn.dataset.name);
+    btn.onclick = () => {
+      destroyFavMarquee();
+      playFavoriteStation(btn.dataset.name);
+    };
   });
 
-  row.querySelectorAll('.fav-quick-scroll').forEach(scroller => {
-    bindFavMarqueeControls(scroller);
-  });
+  const scroller = row.querySelector('.fav-quick-scroll');
+  bindFavMarqueeControls(scroller);
+  initFavMarquee(scroller);
 }
 
 function playFavoriteStation(stationName) {
