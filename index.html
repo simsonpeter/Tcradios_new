@@ -281,7 +281,7 @@ body{display:flex;flex-direction:column;font-family:system-ui;
      padding-left:env(safe-area-inset-left);
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
-       display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+       display:grid;grid-template-columns:minmax(0,1fr) auto;
        align-items:center;gap:0.5rem;
        padding:calc(1rem + env(safe-area-inset-top, 0px)) 1.2rem 1rem;
        font-size:1.25rem;font-weight:700;min-height:70px;
@@ -342,8 +342,38 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
             transition:var(--transition)}
 #langSelect:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
 #langSelect:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1)}
-#contentToolbar{display:flex;align-items:center;justify-content:center;gap:0.35rem;
-                justify-self:center;max-width:100%;margin:0}
+#toolbarFabMenu #themeSelect,
+#toolbarFabMenu #langSelect{min-width:0;max-width:100%;padding:0;border:none;box-shadow:none;background:transparent}
+.toolbar-fab{position:fixed;right:calc(1rem + env(safe-area-inset-right, 0px));
+             bottom:calc(var(--player-height) + 1rem + env(safe-area-inset-bottom, 0px));
+             z-index:120;display:flex;flex-direction:column;align-items:flex-end;gap:0.55rem;
+             pointer-events:none}
+.toolbar-fab.is-hidden{display:none}
+.toolbar-fab > *{pointer-events:auto}
+.toolbar-fab-menu{display:none;flex-direction:column;align-items:stretch;gap:0.45rem;
+                 padding:0.55rem;background:var(--card);border:1px solid var(--border);
+                 border-radius:0.85rem;box-shadow:var(--shadow-xl);backdrop-filter:var(--blur);
+                 min-width:148px}
+.toolbar-fab.open .toolbar-fab-menu{display:flex}
+.toolbar-fab-btn{width:52px;height:52px;min-width:52px;min-height:52px;border-radius:50%;
+                 border:none;background:var(--gradient-primary);color:#fff;font-size:1.15rem;
+                 cursor:pointer;display:flex;align-items:center;justify-content:center;
+                 box-shadow:var(--shadow-lg);transition:var(--transition)}
+.toolbar-fab-btn:hover{transform:scale(1.05);box-shadow:var(--shadow-xl)}
+.toolbar-fab-btn:active{transform:scale(0.96)}
+.toolbar-fab.open .toolbar-fab-btn i{transform:rotate(90deg)}
+.toolbar-fab-btn i{transition:transform 0.2s ease}
+.toolbar-fab .toolbar-picker{width:100%;height:40px}
+.toolbar-fab .toolbar-icon-btn{width:100%;height:40px;min-width:0;min-height:40px;
+                              justify-content:flex-start;gap:0.55rem;padding:0 0.65rem;
+                              pointer-events:none;border-radius:0.55rem}
+.toolbar-fab .toolbar-icon-btn i{width:18px;text-align:center}
+.toolbar-fab .toolbar-action-btn{width:100%;height:40px;min-width:0;min-height:40px;
+                               justify-content:flex-start;gap:0.55rem;padding:0 0.65rem;
+                               border-radius:0.55rem;font-size:0.88rem}
+.toolbar-fab .toolbar-action-btn i{width:18px;text-align:center}
+.toolbar-fab .toolbar-action-label{font-size:0.82rem;font-weight:600}
+.widget-mode .toolbar-fab{bottom:calc(var(--player-height) + 5.75rem + env(safe-area-inset-bottom, 0px))}
 .toolbar-picker{position:relative;width:34px;height:34px;flex-shrink:0;overflow:hidden}
 .toolbar-icon-btn{width:34px;height:34px;min-width:34px;min-height:34px;
                   display:flex;align-items:center;justify-content:center;
@@ -352,8 +382,6 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .toolbar-native-select{position:absolute;inset:0;opacity:0;width:100%;height:100%;
                        min-width:0;max-width:100%;padding:0;
                        cursor:pointer;z-index:2;border:none;background:transparent;box-shadow:none}
-#contentToolbar #themeSelect,
-#contentToolbar #langSelect{min-width:0;max-width:100%;padding:0;border:none;box-shadow:none;background:transparent}
 .toolbar-action-btn{width:34px;height:34px;min-width:34px;min-height:34px;
                     display:flex;align-items:center;justify-content:center;
                     background:var(--card);border:1px solid var(--border);border-radius:0.5rem;
@@ -922,9 +950,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play,#p-prev,#p-next{padding:0.6rem;min-width:44px;min-height:44px}
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
-  #contentToolbar{gap:0.2rem}
-  .toolbar-picker,.toolbar-action-btn{width:30px;height:30px;min-width:30px;min-height:30px}
-  .toolbar-icon-btn{width:30px;height:30px;min-width:30px;min-height:30px;font-size:0.8rem}
+  .toolbar-fab-btn{width:48px;height:48px;min-width:48px;min-height:48px;font-size:1.05rem}
+  .toolbar-fab{right:calc(0.75rem + env(safe-area-inset-right, 0px))}
   #headerControls{gap:0.6rem}
   /* Hide individual buttons, show menu button on small screens */
   .header-btn{display:none !important}
@@ -1268,39 +1295,6 @@ audio{display:none}
   <span>TC RADIOS</span>
     <span class="header-subtitle">by JayathaSoft</span>
   </div>
-  <div id="contentToolbar" aria-label="Quick controls">
-    <div class="toolbar-picker" title="Theme">
-      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
-        <i class="fas fa-palette"></i>
-      </button>
-      <select id="themeSelect" class="toolbar-native-select" title="Theme" aria-label="Theme">
-        <option value="dark">🌙 Dark</option>
-        <option value="light">☀️ Light</option>
-        <option value="ocean">🌊 Ocean</option>
-        <option value="forest">🌲 Forest</option>
-        <option value="sunset">🌅 Sunset</option>
-        <option value="rose">🌹 Rose</option>
-        <option value="midnight">🌌 Midnight</option>
-        <option value="aurora">🌌 Aurora</option>
-        <option value="christmas">🎄 Christmas</option>
-        <option value="easter">🐰 Easter</option>
-        <option value="gold">✨ Gold</option>
-        <option value="minimal">⚪ Minimal</option>
-      </select>
-    </div>
-    <div class="toolbar-picker" title="Language">
-      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
-        <i class="fas fa-globe"></i>
-      </button>
-      <select id="langSelect" class="toolbar-native-select" title="Language" aria-label="Language"></select>
-    </div>
-    <button id="searchToggleBtn" type="button" class="toolbar-action-btn" title="Search stations" aria-label="Search stations">
-      <i class="fas fa-search"></i>
-    </button>
-    <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
-      <i class="fas fa-list-ul"></i>
-    </button>
-  </div>
   <div id="headerControls">
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
     <button id="alarmBtn" title="Alarm Clock" class="header-btn"><i class="fas fa-bell"></i></button>
@@ -1375,6 +1369,44 @@ audio{display:none}
   <button id="p-prev" title="Previous"><i class="fas fa-step-backward"></i></button>
   <button id="p-play" title="Play/Pause"><i class="fas fa-play"></i></button>
   <button id="p-next" title="Next"><i class="fas fa-step-forward"></i></button>
+</div>
+<div id="toolbarFab" class="toolbar-fab" aria-label="Quick controls">
+  <div id="toolbarFabMenu" class="toolbar-fab-menu">
+    <div class="toolbar-picker" title="Theme">
+      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+        <i class="fas fa-palette"></i><span class="toolbar-action-label">Theme</span>
+      </button>
+      <select id="themeSelect" class="toolbar-native-select" title="Theme" aria-label="Theme">
+        <option value="dark">🌙 Dark</option>
+        <option value="light">☀️ Light</option>
+        <option value="ocean">🌊 Ocean</option>
+        <option value="forest">🌲 Forest</option>
+        <option value="sunset">🌅 Sunset</option>
+        <option value="rose">🌹 Rose</option>
+        <option value="midnight">🌌 Midnight</option>
+        <option value="aurora">🌌 Aurora</option>
+        <option value="christmas">🎄 Christmas</option>
+        <option value="easter">🐰 Easter</option>
+        <option value="gold">✨ Gold</option>
+        <option value="minimal">⚪ Minimal</option>
+      </select>
+    </div>
+    <div class="toolbar-picker" title="Language">
+      <button type="button" class="toolbar-icon-btn" aria-hidden="true" tabindex="-1">
+        <i class="fas fa-globe"></i><span class="toolbar-action-label">Language</span>
+      </button>
+      <select id="langSelect" class="toolbar-native-select" title="Language" aria-label="Language"></select>
+    </div>
+    <button id="searchToggleBtn" type="button" class="toolbar-action-btn" title="Search stations" aria-label="Search stations">
+      <i class="fas fa-search"></i><span class="toolbar-action-label">Search</span>
+    </button>
+    <button id="viewToggleBtn" type="button" class="toolbar-action-btn" title="Switch to logo view" aria-label="Switch station view">
+      <i class="fas fa-list-ul"></i><span class="toolbar-action-label">View</span>
+    </button>
+  </div>
+  <button id="toolbarFabBtn" type="button" class="toolbar-fab-btn" title="Quick controls" aria-label="Quick controls" aria-expanded="false" aria-controls="toolbarFabMenu">
+    <i class="fas fa-sliders"></i>
+  </button>
 </div>
 <div id="fullscreen-player">
   <button id="fullscreen-close" title="Close"><i class="fas fa-times"></i></button>
@@ -1744,7 +1776,8 @@ const searchBar   = document.getElementById('searchBar');
 const searchRow   = document.getElementById('searchRow');
 const searchToggleBtn = document.getElementById('searchToggleBtn');
 const viewToggleBtn = document.getElementById('viewToggleBtn');
-const contentToolbar = document.getElementById('contentToolbar');
+const toolbarFab = document.getElementById('toolbarFab');
+const toolbarFabBtn = document.getElementById('toolbarFabBtn');
 const stationList = document.querySelector('.station-list');
 const genreFilter = document.getElementById('genreFilter');
 const sortFilter = document.getElementById('sortFilter');
@@ -2537,6 +2570,13 @@ function initFilters() {
   }
 }
 
+function setToolbarFabOpen(open) {
+  if (!toolbarFab || !toolbarFabBtn) return;
+  const shouldOpen = !!open;
+  toolbarFab.classList.toggle('open', shouldOpen);
+  toolbarFabBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+}
+
 function applyStationViewMode() {
   if (!stationList) return;
   const showStationViews = currentTab === 'all' || currentTab === 'fav';
@@ -2550,8 +2590,9 @@ function applyStationViewMode() {
     viewToggleBtn.setAttribute('aria-pressed', stationViewMode === 'logo' ? 'true' : 'false');
     viewToggleBtn.style.display = showToolbar ? 'flex' : 'none';
   }
-  if (contentToolbar) {
-    contentToolbar.style.display = showToolbar ? 'flex' : 'none';
+  if (toolbarFab) {
+    toolbarFab.classList.toggle('is-hidden', !showToolbar);
+    if (!showToolbar) setToolbarFabOpen(false);
   }
 }
 
@@ -2570,6 +2611,7 @@ function setSearchBarVisible(show) {
   searchToolbarExpanded = !!show;
   if (searchRow) searchRow.classList.toggle('is-visible', searchToolbarExpanded);
   if (searchToggleBtn) searchToggleBtn.classList.toggle('active', searchToolbarExpanded);
+  if (searchToolbarExpanded) setToolbarFabOpen(false);
   syncContentTopVisibility();
   if (searchToolbarExpanded && searchBar) {
     searchBar.focus();
@@ -2594,10 +2636,20 @@ function syncContentTopVisibility() {
 function initStationViewToggle() {
   applyStationViewMode();
   if (viewToggleBtn) {
-    viewToggleBtn.onclick = () => setStationViewMode(stationViewMode === 'logo' ? 'list' : 'logo');
+    viewToggleBtn.onclick = () => {
+      setStationViewMode(stationViewMode === 'logo' ? 'list' : 'logo');
+      setToolbarFabOpen(false);
+    };
   }
   if (searchToggleBtn) {
     searchToggleBtn.onclick = () => setSearchBarVisible(!searchToolbarExpanded);
+  }
+  if (toolbarFabBtn && toolbarFab) {
+    toolbarFabBtn.onclick = (e) => {
+      e.stopPropagation();
+      setToolbarFabOpen(!toolbarFab.classList.contains('open'));
+      hapticFeedback('light');
+    };
   }
 }
 
@@ -2784,10 +2836,16 @@ searchBar.addEventListener('click', () => {
 });
 document.addEventListener('pointerdown', e => {
   const bar = document.getElementById('stationFilterBar');
-  if (!stationFiltersExpanded) return;
-  if (searchBar.contains(e.target) || (bar && bar.contains(e.target))) return;
-  if (contentToolbar && contentToolbar.contains(e.target)) return;
-  setStationFiltersVisible(false);
+  if (stationFiltersExpanded) {
+    if (!searchBar.contains(e.target) && !(bar && bar.contains(e.target))) {
+      if (!(toolbarFab && toolbarFab.contains(e.target))) {
+        setStationFiltersVisible(false);
+      }
+    }
+  }
+  if (toolbarFab && toolbarFab.classList.contains('open') && !toolbarFab.contains(e.target)) {
+    setToolbarFabOpen(false);
+  }
 });
 function getAboutStats() {
   const allStations = Object.keys(stationsPerLang).flatMap(lang => stationsPerLang[lang] || []);
@@ -7285,7 +7343,7 @@ function shouldBlockStationSwipe(e) {
   if (!target || !target.closest) return false;
   return !!(target.closest('#favQuickRow') ||
             target.closest('#searchRow') ||
-            target.closest('#contentToolbar') ||
+            target.closest('#toolbarFab') ||
             target.closest('#stationFilterBar') ||
             target.closest('#tabs') ||
             target.closest('.history-tabs'));
