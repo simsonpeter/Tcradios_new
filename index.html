@@ -1227,9 +1227,10 @@ audio{display:none}
 #blessPrompt .greeting-actions button{border:none;border-radius:0.55rem;padding:0.4rem 0.75rem;
              font-size:0.8rem;font-weight:700;cursor:pointer;transition:var(--transition)}
 #blessPrompt #blessRateBtn{background:var(--gradient-primary);color:#fff}
+#blessPrompt #blessRatedBtn{background:rgba(34,197,94,0.18);color:#22c55e;border:1px solid rgba(34,197,94,0.35)}
 #blessPrompt #blessShareBtn{background:rgba(249,115,22,0.18);color:var(--accent)}
 #blessPrompt #blessDismissBtn{background:transparent;color:var(--text);border:1px solid var(--border)}
-#blessPrompt #blessRateBtn:hover,#blessPrompt #blessShareBtn:hover{transform:translateY(-1px)}
+#blessPrompt #blessRateBtn:hover,#blessShareBtn:hover,#blessRatedBtn:hover{transform:translateY(-1px)}
 #blessPrompt #blessDismissBtn:hover{background:var(--hover)}
 #feedbackModal,#radioRequestModal,#adminDashboardModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem}
 #feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow-xl)}
@@ -1581,6 +1582,7 @@ audio{display:none}
       <div class="greeting-sub">If TC RADIOS has blessed you, please rate us on Play Store and share the app with friends.</div>
       <div class="greeting-actions">
         <button type="button" id="blessRateBtn"><i class="fas fa-star"></i> Rate us</button>
+        <button type="button" id="blessRatedBtn"><i class="fas fa-check"></i> Rated</button>
         <button type="button" id="blessShareBtn"><i class="fas fa-share-alt"></i> Share</button>
         <button type="button" id="blessDismissBtn">Maybe later</button>
       </div>
@@ -6764,9 +6766,18 @@ function showStartupGreeting(force = false) {
 }
 
 /* ---- BLESS / RATE / SHARE PROMPT (after 30s) ---- */
+const RATE_PROMPT_DONE_KEY = 'tcr-app-rate-prompt-done';
 let blessPromptShown = false;
 let blessPromptTimer = null;
 let blessPromptScheduleTimer = null;
+
+function hasCompletedRatePrompt() {
+  return localStorage.getItem(RATE_PROMPT_DONE_KEY) === 'true';
+}
+
+function markRatePromptCompleted() {
+  localStorage.setItem(RATE_PROMPT_DONE_KEY, 'true');
+}
 
 function hideBlessPrompt() {
   const el = document.getElementById('blessPrompt');
@@ -6779,8 +6790,23 @@ function hideBlessPrompt() {
   setTimeout(() => { el.hidden = true; }, 450);
 }
 
+function showBlessThankYou() {
+  const el = document.getElementById('blessPrompt');
+  if (!el) return;
+  const textEl = el.querySelector('.greeting-text');
+  const subEl = el.querySelector('.greeting-sub');
+  const actionsEl = el.querySelector('.greeting-actions');
+  const iconEl = el.querySelector('.greeting-icon i');
+  if (textEl) textEl.textContent = 'Thank you!';
+  if (subEl) subEl.textContent = 'We appreciate your rating and support. God bless you!';
+  if (actionsEl) actionsEl.style.display = 'none';
+  if (iconEl) iconEl.className = 'fas fa-heart';
+  if (blessPromptTimer) clearTimeout(blessPromptTimer);
+  blessPromptTimer = setTimeout(() => hideBlessPrompt(), 3200);
+}
+
 function showBlessPrompt() {
-  if (blessPromptShown) return;
+  if (blessPromptShown || hasCompletedRatePrompt()) return;
   const el = document.getElementById('blessPrompt');
   if (!el) return;
 
@@ -6790,9 +6816,18 @@ function showBlessPrompt() {
   blessPromptShown = true;
   el.hidden = false;
   el.classList.remove('show');
+  const textEl = el.querySelector('.greeting-text');
+  const subEl = el.querySelector('.greeting-sub');
+  const actionsEl = el.querySelector('.greeting-actions');
+  const iconEl = el.querySelector('.greeting-icon i');
+  if (textEl) textEl.textContent = 'Feeling blessed?';
+  if (subEl) subEl.textContent = 'If TC RADIOS has blessed you, please rate us on Play Store and share the app with friends.';
+  if (actionsEl) actionsEl.style.display = 'flex';
+  if (iconEl) iconEl.className = 'fas fa-praying-hands';
   requestAnimationFrame(() => el.classList.add('show'));
 
   const rateBtn = document.getElementById('blessRateBtn');
+  const ratedBtn = document.getElementById('blessRatedBtn');
   const shareBtn = document.getElementById('blessShareBtn');
   const dismissBtn = document.getElementById('blessDismissBtn');
   if (rateBtn) {
@@ -6800,6 +6835,13 @@ function showBlessPrompt() {
       hideBlessPrompt();
       rateUsOnPlayStore();
       hapticFeedback('light');
+    };
+  }
+  if (ratedBtn) {
+    ratedBtn.onclick = () => {
+      markRatePromptCompleted();
+      showBlessThankYou();
+      hapticFeedback('success');
     };
   }
   if (shareBtn) {
@@ -6821,6 +6863,7 @@ function showBlessPrompt() {
 }
 
 function scheduleBlessPrompt() {
+  if (hasCompletedRatePrompt()) return;
   if (blessPromptScheduleTimer) clearTimeout(blessPromptScheduleTimer);
   blessPromptScheduleTimer = setTimeout(() => {
     showBlessPrompt();
