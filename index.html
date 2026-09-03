@@ -295,9 +295,12 @@ header{background:var(--header);border-bottom:1px solid var(--border);
                        font-size:0.7rem;font-weight:700;color:var(--accent);
                        background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.28);
                        border-radius:999px;padding:0.3rem 0.7rem;white-space:nowrap;max-width:46vw;
-                       overflow:hidden;text-overflow:ellipsis;line-height:1.2;pointer-events:none;z-index:1}
+                       overflow:hidden;text-overflow:ellipsis;line-height:1.2;pointer-events:auto;z-index:2;
+                       cursor:pointer;-webkit-tap-highlight-color:transparent}
 .header-bandwidth-pill i{font-size:0.65rem;flex-shrink:0}
 .header-bandwidth-pill.is-live{box-shadow:0 0 0 1px rgba(249,115,22,0.15)}
+.header-bandwidth-pill:hover{background:rgba(249,115,22,0.18);border-color:rgba(249,115,22,0.45)}
+.header-bandwidth-pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                background:var(--gradient-primary);opacity:0.05;z-index:-1}
 header button{background:none;border:none;font-size:1.4rem;cursor:pointer;
@@ -533,6 +536,31 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .station-action-btn.danger i{color:#f87171}
 .station-action-close{margin-top:0.35rem;background:var(--bg);border:1px solid var(--border);color:var(--text);
                        border-radius:0.55rem;padding:0.75rem;width:100%;cursor:pointer;font-weight:600}
+#bandwidthHistorySheet{position:fixed;inset:0;z-index:2100;display:none;align-items:flex-end;justify-content:center}
+#bandwidthHistorySheet.active{display:flex}
+.bandwidth-history-panel{position:relative;width:100%;max-width:420px;max-height:min(78vh,640px);
+                         background:var(--card);border:1px solid var(--border);border-radius:1rem 1rem 0 0;
+                         padding:0.85rem 1rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
+                         box-shadow:var(--shadow-xl);animation:actionSheetUp .28s ease;
+                         display:flex;flex-direction:column;min-height:0}
+.bandwidth-history-header{display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;
+                          padding-bottom:0.7rem;border-bottom:1px solid var(--border);margin-bottom:0.7rem}
+.bandwidth-history-header h3{margin:0;font-size:1rem;font-weight:800;color:var(--text)}
+.bandwidth-history-summary{margin:0.2rem 0 0;font-size:0.78rem;color:var(--text-secondary);line-height:1.4}
+.bandwidth-history-close{background:var(--bg);border:1px solid var(--border);color:var(--text);
+                          width:36px;height:36px;min-width:36px;border-radius:50%;cursor:pointer;
+                          display:flex;align-items:center;justify-content:center}
+.bandwidth-history-list{overflow-y:auto;display:flex;flex-direction:column;gap:0.45rem;min-height:0;
+                        padding-bottom:0.35rem;-webkit-overflow-scrolling:touch}
+.bandwidth-history-row{display:flex;align-items:center;gap:0.7rem;width:100%;text-align:left;
+                       background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:0.75rem;
+                       padding:0.55rem 0.65rem;cursor:pointer;color:var(--text)}
+.bandwidth-history-row:hover{border-color:var(--accent);background:rgba(249,115,22,0.08)}
+.bandwidth-history-row img{width:42px;height:42px;border-radius:0.55rem;object-fit:cover;flex-shrink:0;
+                           border:1px solid var(--border)}
+.bandwidth-history-row strong{display:block;font-size:0.88rem;font-weight:700;line-height:1.25}
+.bandwidth-history-row span{display:block;font-size:0.72rem;color:var(--text-secondary);margin-top:0.12rem}
+.bandwidth-history-empty{padding:1.4rem 0.5rem;text-align:center;color:var(--text-secondary);font-size:0.88rem}
 @media (hover:none) and (pointer:coarse){
   .fav-quick-item:hover .fav-quick-art-wrap{transform:none;box-shadow:var(--shadow-sm)}
   .fav-quick-item:active .fav-quick-art-wrap{transform:scale(0.95);border-color:var(--accent)}
@@ -1321,7 +1349,7 @@ audio{display:none}
   <span>TC RADIOS</span>
     <span class="header-subtitle">by JayathaSoft</span>
   </div>
-  <div id="headerBandwidth" class="header-bandwidth-pill" title="Estimated streaming data used today" aria-live="polite">
+  <div id="headerBandwidth" class="header-bandwidth-pill" title="Tap to see today's station usage" role="button" tabindex="0" aria-live="polite" aria-haspopup="dialog" aria-controls="bandwidthHistorySheet">
     <i class="fas fa-arrow-trend-up" aria-hidden="true"></i>
     <span id="headerBandwidthValue">Today 0 B</span>
   </div>
@@ -1657,6 +1685,21 @@ audio{display:none}
     <button type="button" class="station-action-close" id="stationActionClose">Cancel</button>
   </div>
 </div>
+<div id="bandwidthHistorySheet" hidden aria-hidden="true">
+  <div class="station-action-backdrop" id="bandwidthHistoryBackdrop"></div>
+  <div class="bandwidth-history-panel" role="dialog" aria-modal="true" aria-labelledby="bandwidthHistoryTitle">
+    <div class="bandwidth-history-header">
+      <div>
+        <h3 id="bandwidthHistoryTitle">Today's internet usage</h3>
+        <p id="bandwidthHistorySummary" class="bandwidth-history-summary">No streaming yet today.</p>
+      </div>
+      <button type="button" class="bandwidth-history-close" id="bandwidthHistoryClose" title="Close" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div id="bandwidthHistoryList" class="bandwidth-history-list"></div>
+  </div>
+</div>
 <div id="radioRequestModal">
   <div>
     <h3>Request Radio Station</h3>
@@ -1801,6 +1844,7 @@ let favoritesOnlyFilter = localStorage.getItem('tcr-favorites-only') === 'true';
 const DAILY_BANDWIDTH_KEY = 'tcr-daily-bandwidth';
 let dailyBandwidthBytes = 0;
 let dailyBandwidthDateKey = '';
+let dailyBandwidthStations = {};
 let stationViewMode = localStorage.getItem('tcr-station-view') === 'logo' ? 'logo' : 'list';
 let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
@@ -2153,7 +2197,10 @@ function clearAllCacheOnLaunch() {
       localStorage.setItem('currentTab', currentTab);
     }
     switchTab(currentTab);
-    try { loadDailyBandwidthState(); } catch (e) { console.warn('Daily bandwidth init skipped:', e); }
+    try {
+      loadDailyBandwidthState();
+      initBandwidthHistoryUi();
+    } catch (e) { console.warn('Daily bandwidth init skipped:', e); }
     console.log('App initialized successfully');
   } catch (error) {
     console.error('App initialization error:', error);
@@ -2162,6 +2209,7 @@ function clearAllCacheOnLaunch() {
       stationList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text);">Error loading stations. Please refresh the page.</div>';
     }
   }
+  try { initBandwidthHistoryUi(); } catch (e) {}
   
   // Auto-play last played station or first station
   setTimeout(() => {
@@ -3600,6 +3648,7 @@ function play(st, i) {
   startMetadataFetching(st);
   // Track playback history
   addToHistory(st);
+  recordDailyBandwidthPlay(st);
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     updateFullscreenPlayer();
@@ -3934,13 +3983,83 @@ function getTodayDateKey() {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
+function formatListenDuration(seconds) {
+  const total = Math.max(0, Math.round(Number(seconds) || 0));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${secs}s`;
+  return `${secs}s`;
+}
+
+function normalizeDailyStationMap(raw) {
+  const out = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+  Object.keys(raw).forEach(key => {
+    const item = raw[key];
+    if (!item || typeof item !== 'object') return;
+    const name = String(item.name || key);
+    out[name] = {
+      name,
+      logo: String(item.logo || ''),
+      genre: String(item.genre || ''),
+      lang: String(item.lang || ''),
+      bytes: Math.max(0, Number(item.bytes) || 0),
+      seconds: Math.max(0, Number(item.seconds) || 0),
+      plays: Math.max(0, Number(item.plays) || 0),
+      lastPlayed: item.lastPlayed || ''
+    };
+  });
+  return out;
+}
+
+function rollDailyBandwidthIfNeeded() {
+  const today = getTodayDateKey();
+  if (today === dailyBandwidthDateKey) return;
+  dailyBandwidthDateKey = today;
+  dailyBandwidthBytes = 0;
+  dailyBandwidthStations = {};
+}
+
+function getCurrentUsageStation() {
+  return lastPlayedStation?.station || null;
+}
+
+function upsertDailyStationUsage(station, bytes, seconds, extraPlay) {
+  if (!station?.name) return;
+  rollDailyBandwidthIfNeeded();
+  const name = station.name;
+  const existing = dailyBandwidthStations[name] || {
+    name,
+    logo: '',
+    genre: '',
+    lang: '',
+    bytes: 0,
+    seconds: 0,
+    plays: 0,
+    lastPlayed: ''
+  };
+  existing.logo = station.logo || existing.logo || '';
+  existing.genre = station.genre || existing.genre || '';
+  existing.lang = station.language || currentLang || existing.lang || '';
+  existing.bytes += Math.max(0, Number(bytes) || 0);
+  existing.seconds += Math.max(0, Number(seconds) || 0);
+  if (extraPlay) existing.plays += 1;
+  existing.lastPlayed = new Date().toISOString();
+  dailyBandwidthStations[name] = existing;
+}
+
 function loadDailyBandwidthState() {
   dailyBandwidthDateKey = getTodayDateKey();
   try {
     const raw = JSON.parse(localStorage.getItem(DAILY_BANDWIDTH_KEY) || '{}');
-    dailyBandwidthBytes = raw.date === dailyBandwidthDateKey ? Number(raw.bytes) || 0 : 0;
+    const isToday = raw.date === dailyBandwidthDateKey;
+    dailyBandwidthBytes = isToday ? Number(raw.bytes) || 0 : 0;
+    dailyBandwidthStations = isToday ? normalizeDailyStationMap(raw.stations) : {};
   } catch (e) {
     dailyBandwidthBytes = 0;
+    dailyBandwidthStations = {};
   }
   updateDailyBandwidthDisplay();
 }
@@ -3949,34 +4068,149 @@ function persistDailyBandwidth() {
   try {
     localStorage.setItem(DAILY_BANDWIDTH_KEY, JSON.stringify({
       date: dailyBandwidthDateKey,
-      bytes: Math.round(dailyBandwidthBytes)
+      bytes: Math.round(dailyBandwidthBytes),
+      stations: dailyBandwidthStations
     }));
   } catch (e) {}
 }
 
-function addDailyBandwidthBytes(bytes) {
+function addDailyBandwidthBytes(bytes, seconds) {
   const delta = Number(bytes) || 0;
-  if (delta <= 0) return;
-  const today = getTodayDateKey();
-  if (today !== dailyBandwidthDateKey) {
-    dailyBandwidthDateKey = today;
-    dailyBandwidthBytes = 0;
-  }
-  dailyBandwidthBytes += delta;
+  const elapsed = Number(seconds) || 0;
+  if (delta <= 0 && elapsed <= 0) return;
+  rollDailyBandwidthIfNeeded();
+  if (delta > 0) dailyBandwidthBytes += delta;
+  upsertDailyStationUsage(getCurrentUsageStation(), delta, elapsed, false);
   persistDailyBandwidth();
   updateDailyBandwidthDisplay();
+}
+
+function recordDailyBandwidthPlay(station) {
+  if (!station?.name) return;
+  rollDailyBandwidthIfNeeded();
+  upsertDailyStationUsage(station, 0, 0, true);
+  persistDailyBandwidth();
+  updateDailyBandwidthDisplay();
+}
+
+function getDailyBandwidthStationList() {
+  rollDailyBandwidthIfNeeded();
+  return Object.values(dailyBandwidthStations)
+    .filter(item => item && (item.bytes > 0 || item.seconds > 0 || item.plays > 0))
+    .sort((a, b) => (b.bytes - a.bytes) || (b.seconds - a.seconds) || String(a.name).localeCompare(String(b.name)));
+}
+
+function renderBandwidthHistory() {
+  const listEl = document.getElementById('bandwidthHistoryList');
+  const summaryEl = document.getElementById('bandwidthHistorySummary');
+  if (!listEl) return;
+  const stations = getDailyBandwidthStationList();
+  const totalSeconds = stations.reduce((sum, item) => sum + (Number(item.seconds) || 0), 0);
+  const totalBytes = dailyBandwidthBytes || stations.reduce((sum, item) => sum + (Number(item.bytes) || 0), 0);
+  if (summaryEl) {
+    if (!stations.length) {
+      summaryEl.textContent = 'No streaming yet today.';
+    } else {
+      summaryEl.textContent = `${formatDataSize(totalBytes)} · ${formatListenDuration(totalSeconds)} · ${stations.length} radio${stations.length === 1 ? '' : 's'}`;
+    }
+  }
+  const scrollTop = listEl.scrollTop;
+  if (!stations.length) {
+    listEl.innerHTML = '<div class="bandwidth-history-empty">Play a station to see data used per radio.</div>';
+    return;
+  }
+  listEl.innerHTML = stations.map(item => {
+    const logo = item.logo || '/icons/default-artwork.jpg';
+    const meta = [
+      formatDataSize(item.bytes),
+      formatListenDuration(item.seconds),
+      item.plays ? `${item.plays} play${item.plays === 1 ? '' : 's'}` : ''
+    ].filter(Boolean).join(' · ');
+    return `<button type="button" class="bandwidth-history-row" data-name="${String(item.name).replace(/"/g, '&quot;')}">
+      <img src="${logo}" alt="">
+      <span>
+        <strong>${item.name}</strong>
+        <span>${meta}${item.genre ? ` · ${item.genre}` : ''}</span>
+      </span>
+    </button>`;
+  }).join('');
+  listEl.querySelectorAll('.bandwidth-history-row').forEach(btn => {
+    btn.onclick = () => playStationFromBandwidthHistory(btn.dataset.name);
+  });
+  listEl.scrollTop = scrollTop;
+}
+
+function playStationFromBandwidthHistory(stationName) {
+  if (!stationName) return;
+  for (const lang of Object.keys(stationsPerLang)) {
+    const langStations = stationsPerLang[lang] || [];
+    const idxMatch = langStations.findIndex(s => s.name === stationName);
+    if (idxMatch < 0) continue;
+    if (currentLang !== lang) {
+      currentLang = lang;
+      localStorage.setItem('currentLang', currentLang);
+      if (langSelect) langSelect.value = currentLang;
+    }
+    play(langStations[idxMatch], idxMatch);
+    return;
+  }
+}
+
+function isBandwidthHistoryOpen() {
+  const sheet = document.getElementById('bandwidthHistorySheet');
+  return !!(sheet && sheet.classList.contains('active'));
+}
+
+function openBandwidthHistory() {
+  const sheet = document.getElementById('bandwidthHistorySheet');
+  if (!sheet) return;
+  renderBandwidthHistory();
+  sheet.hidden = false;
+  sheet.classList.add('active');
+  sheet.setAttribute('aria-hidden', 'false');
+}
+
+function closeBandwidthHistory() {
+  const sheet = document.getElementById('bandwidthHistorySheet');
+  if (!sheet) return;
+  sheet.classList.remove('active');
+  sheet.hidden = true;
+  sheet.setAttribute('aria-hidden', 'true');
+}
+
+function initBandwidthHistoryUi() {
+  const chip = document.getElementById('headerBandwidth');
+  const sheet = document.getElementById('bandwidthHistorySheet');
+  if (chip && chip.dataset.bound !== '1') {
+    chip.dataset.bound = '1';
+    chip.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof hapticFeedback === 'function') hapticFeedback('light');
+      if (isBandwidthHistoryOpen()) closeBandwidthHistory();
+      else openBandwidthHistory();
+    };
+    chip.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        chip.click();
+      }
+    };
+  }
+  if (sheet && sheet.dataset.bound !== '1') {
+    sheet.dataset.bound = '1';
+    document.getElementById('bandwidthHistoryBackdrop')?.addEventListener('click', closeBandwidthHistory);
+    document.getElementById('bandwidthHistoryClose')?.addEventListener('click', closeBandwidthHistory);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isBandwidthHistoryOpen()) closeBandwidthHistory();
+    });
+  }
 }
 
 function updateDailyBandwidthDisplay() {
   const valueEl = document.getElementById('headerBandwidthValue');
   const wrapEl = document.getElementById('headerBandwidth');
   if (!valueEl) return;
-  const today = getTodayDateKey();
-  if (today !== dailyBandwidthDateKey) {
-    dailyBandwidthDateKey = today;
-    dailyBandwidthBytes = 0;
-    persistDailyBandwidth();
-  }
+  rollDailyBandwidthIfNeeded();
   valueEl.textContent = `Today ${formatDataSize(dailyBandwidthBytes)}`;
   if (!wrapEl) return;
   let isLive = false;
@@ -3985,8 +4219,9 @@ function updateDailyBandwidthDisplay() {
   } catch (e) {}
   wrapEl.classList.toggle('is-live', isLive);
   wrapEl.title = isLive
-    ? 'Live estimate — streaming data used today'
-    : 'Estimated streaming data used today';
+    ? "Live estimate — tap for today's station usage"
+    : "Tap to see today's station usage";
+  if (isBandwidthHistoryOpen()) renderBandwidthHistory();
 }
 
 function estimateBitrateFromUrl(url) {
@@ -4077,7 +4312,7 @@ function tickStreamUsage() {
   streamUsageLastTick = now;
   const deltaBytes = (streamBitrateKbps * 1000 / 8) * elapsedSec;
   streamSessionBytes += deltaBytes;
-  addDailyBandwidthBytes(deltaBytes);
+  addDailyBandwidthBytes(deltaBytes, elapsedSec);
   updateStreamStatsDisplay();
 }
 
