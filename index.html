@@ -520,6 +520,8 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   .fav-quick-item:active .fav-quick-art-wrap{transform:scale(0.95);border-color:var(--accent)}
 }
 #fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
+#fs-stream-stats{margin-top:0.35rem;font-size:0.82rem;opacity:0.78;line-height:1.35}
+#fs-stream-stats.is-estimate{opacity:0.65}
 #fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
 .admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
 .admin-row,.request-vote-row{background:rgba(255,255,255,0.05);border:1px solid var(--border);
@@ -826,6 +828,10 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 #player .p-now-row{display:flex;align-items:center;gap:0.45rem;min-width:0}
 #player #p-now{font-size:.8rem;color:var(--accent);white-space:nowrap;font-weight:500}
+#player #p-stream-stats{font-size:0.68rem;color:var(--text);opacity:0.72;white-space:nowrap;
+                        overflow:hidden;text-overflow:ellipsis;margin-top:0.12rem;line-height:1.25}
+#player #p-stream-stats.is-estimate{opacity:0.62}
+#player.playing #p-stream-stats{opacity:0.82}
 #player .p-waveform{display:none;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
 #player.playing .p-waveform{display:flex}
 #player .p-waveform span{display:block;width:3px;height:100%;border-radius:2px;
@@ -1361,6 +1367,7 @@ audio{display:none}
       <div id="p-waveform" class="p-waveform" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
       <div id="p-now">Live</div>
     </div>
+    <div id="p-stream-stats" class="p-stream-stats" hidden aria-live="polite"></div>
     <div id="p-metadata" class="metadata" style="display:none;">
       <div id="p-song" class="song-title"></div>
       <div id="p-artist" class="artist-name"></div>
@@ -1415,6 +1422,7 @@ audio{display:none}
     <div id="fullscreen-name"></div>
     <div id="fullscreen-now">Live</div>
     <div id="fullscreen-station-meta"></div>
+    <div id="fs-stream-stats" hidden aria-live="polite"></div>
     <div id="fs-sleep-countdown"></div>
     <div id="fullscreen-metadata" style="display:none;">
       <div id="fullscreen-song"></div>
@@ -1794,6 +1802,8 @@ const fullscreenArtwork = document.getElementById('fullscreen-artwork');
 const fullscreenName = document.getElementById('fullscreen-name');
 const fullscreenNow = document.getElementById('fullscreen-now');
 const fullscreenStationMeta = document.getElementById('fullscreen-station-meta');
+const fsStreamStats = document.getElementById('fs-stream-stats');
+const pStreamStats = document.getElementById('p-stream-stats');
 const fsSleepCountdown = document.getElementById('fs-sleep-countdown');
 const fullscreenSong = document.getElementById('fullscreen-song');
 const fullscreenArtist = document.getElementById('fullscreen-artist');
@@ -3542,6 +3552,7 @@ function play(st, i) {
   pName.innerHTML = '<span>' + st.name + '</span>';
   player.classList.add('playing');
   applyPlayerAccent(st.logo);
+  resetStreamUsageTracking(st);
   lastPlayedStation = { station: st, index: i, lang: currentLang };
   localStorage.setItem('tcr-last-played', JSON.stringify(lastPlayedStation));
   if (isGoogleNestCasting()) {
@@ -3625,6 +3636,7 @@ function updateFullscreenPlayer() {
     fullscreenStationMeta.textContent = '';
   }
   updateSleepCountdown();
+  updateStreamStatsDisplay();
   
   // Update metadata if available
   const songElement = document.getElementById('p-song');
@@ -3838,6 +3850,7 @@ audio.onplay = () => {
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
   syncMediaControls();
+  startStreamUsageTracking();
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.add('playing');
@@ -3857,6 +3870,8 @@ audio.onpause = () => {
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
   syncMediaControls();
+  stopStreamUsageTracking();
+  updateStreamStatsDisplay();
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
@@ -3874,6 +3889,150 @@ audio.onpause = () => {
 };
 audio.onplaying = () => syncMediaControls();
 audio.onwaiting = () => updateLockScreenPlaybackState('playing');
+/* ---- STREAM BITRATE & DATA USAGE ---- */
+let streamBitrateKbps = null;
+let streamBitrateEstimated = true;
+let streamSessionBytes = 0;
+let streamUsageInterval = null;
+let streamUsageLastTick = 0;
+const DEFAULT_STREAM_BITRATE_KBPS = 128;
+
+function estimateBitrateFromUrl(url) {
+  const clean = String(url || '').split('?')[0].toLowerCase();
+  if (clean.endsWith('.aac')) return 96;
+  if (clean.endsWith('.ogg') || clean.endsWith('.oga')) return 96;
+  if (clean.endsWith('.opus')) return 64;
+  if (clean.endsWith('.m3u8')) return 160;
+  if (clean.endsWith('.mp3')) return 128;
+  if (clean.includes('aac')) return 96;
+  return DEFAULT_STREAM_BITRATE_KBPS;
+}
+
+function formatDataSize(bytes) {
+  const value = Math.max(0, Number(bytes) || 0);
+  if (value < 1024) return `${Math.round(value)} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(value < 10 * 1024 ? 1 : 0)} KB`;
+  if (value < 1024 * 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0)} MB`;
+  return `${(value / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function getConnectionLabel() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!conn) return '';
+  if (conn.type === 'wifi' || conn.type === 'ethernet') return 'Wi‑Fi';
+  if (conn.type === 'cellular') {
+    const gen = conn.effectiveType || '';
+    if (gen === '4g') return '4G';
+    if (gen === '3g') return '3G';
+    if (gen === '2g') return '2G';
+    if (gen === 'slow-2g') return '2G';
+    return 'Mobile data';
+  }
+  if (conn.effectiveType) return String(conn.effectiveType).toUpperCase();
+  return '';
+}
+
+function setStreamBitrate(kbps, estimated = false) {
+  const parsed = Number(kbps);
+  if (!parsed || parsed <= 0 || parsed > 2000) return;
+  if (!streamBitrateEstimated && estimated) return;
+  streamBitrateKbps = Math.round(parsed);
+  streamBitrateEstimated = !!estimated;
+  updateStreamStatsDisplay();
+}
+
+function resetStreamUsageTracking(station) {
+  streamSessionBytes = 0;
+  streamBitrateKbps = station?.bitrate ? Number(station.bitrate) : estimateBitrateFromUrl(station?.url);
+  streamBitrateEstimated = !station?.bitrate;
+  streamUsageLastTick = 0;
+  stopStreamUsageTracking();
+  updateStreamStatsDisplay();
+  if (station) detectStreamBitrate(station);
+}
+
+function detectStreamBitrate(station) {
+  if (!station) return;
+  if (station.bitrate) {
+    setStreamBitrate(station.bitrate, false);
+    return;
+  }
+  setStreamBitrate(estimateBitrateFromUrl(station.url), true);
+  fetchStreamHeaders(station);
+  const statusUrl = station.url.replace(/\/stream.*$/, '/status-json.xsl');
+  if (statusUrl !== station.url) {
+    fetch(statusUrl, { method: 'GET', mode: 'cors' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        const source = data.icestats?.source;
+        const sources = Array.isArray(source) ? source : (source ? [source] : []);
+        const match = sources.find(item => item?.bitrate) || sources[0];
+        if (match?.bitrate) setStreamBitrate(match.bitrate, false);
+      })
+      .catch(() => {});
+  }
+}
+
+function tickStreamUsage() {
+  if (!streamBitrateKbps || audio.paused || isGoogleNestCasting()) return;
+  const now = Date.now();
+  if (!streamUsageLastTick) {
+    streamUsageLastTick = now;
+    return;
+  }
+  const elapsedSec = (now - streamUsageLastTick) / 1000;
+  streamUsageLastTick = now;
+  streamSessionBytes += (streamBitrateKbps * 1000 / 8) * elapsedSec;
+  updateStreamStatsDisplay();
+}
+
+function startStreamUsageTracking() {
+  stopStreamUsageTracking();
+  streamUsageLastTick = Date.now();
+  streamUsageInterval = setInterval(tickStreamUsage, 1000);
+  updateStreamStatsDisplay();
+}
+
+function stopStreamUsageTracking() {
+  if (streamUsageInterval) {
+    clearInterval(streamUsageInterval);
+    streamUsageInterval = null;
+  }
+}
+
+function buildStreamStatsText() {
+  if (!lastPlayedStation?.station) return '';
+  const bitrate = streamBitrateKbps || DEFAULT_STREAM_BITRATE_KBPS;
+  const bitrateLabel = streamBitrateEstimated ? `~${bitrate} kbps` : `${bitrate} kbps`;
+  const perHourBytes = (bitrate * 1000 / 8) * 3600;
+  const parts = [bitrateLabel, `${formatDataSize(streamSessionBytes)} used`];
+  if (!audio.paused) parts.push(`~${formatDataSize(perHourBytes)}/hr`);
+  const network = getConnectionLabel();
+  if (network) parts.push(network);
+  return parts.join(' · ');
+}
+
+function updateStreamStatsDisplay() {
+  const text = buildStreamStatsText();
+  const show = !!text && !!lastPlayedStation?.station;
+  [pStreamStats, fsStreamStats].forEach(el => {
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = !show;
+    el.classList.toggle('is-estimate', streamBitrateEstimated);
+  });
+}
+
+function hideStreamStatsDisplay() {
+  stopStreamUsageTracking();
+  [pStreamStats, fsStreamStats].forEach(el => {
+    if (el) {
+      el.textContent = '';
+      el.hidden = true;
+    }
+  });
+}
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
@@ -4051,6 +4210,7 @@ function stopActiveStream() {
 
   audio.pause();
   audio.currentTime = 0;
+  hideStreamStatsDisplay();
   clearMediaNotification();
 }
 
@@ -4336,15 +4496,20 @@ function parseMetadataResponse(data, station) {
   if (data.icestats && data.icestats.source) {
     // Icecast format
     const source = data.icestats.source;
-    if (source.title) {
-      const parts = source.title.split(' - ');
+    const sources = Array.isArray(source) ? source : [source];
+    const withBitrate = sources.find(item => item && item.bitrate);
+    if (withBitrate?.bitrate) setStreamBitrate(withBitrate.bitrate, false);
+    const metaSource = sources[0] || source;
+    if (metaSource?.title) {
+      const parts = metaSource.title.split(' - ');
       artist = parts[0] || '';
-      song = parts[1] || source.title;
+      song = parts[1] || metaSource.title;
     }
   } else if (data.songtitle) {
     // Shoutcast format
     song = data.songtitle;
     artist = data.artist || '';
+    if (data.bitrate) setStreamBitrate(data.bitrate, false);
   } else if (data.title) {
     // Generic format
     const parts = data.title.split(' - ');
@@ -4406,6 +4571,11 @@ function fetchStreamHeaders(station) {
     mode: 'cors'
   })
   .then(response => {
+    const icyBr = response.headers.get('icy-br') || response.headers.get('Icecast-Bitrate');
+    if (icyBr) {
+      const parsed = parseInt(String(icyBr).replace(/[^0-9]/g, ''), 10);
+      if (parsed > 0) setStreamBitrate(parsed, false);
+    }
     const icyName = response.headers.get('icy-name');
     const icyDescription = response.headers.get('icy-description');
     const icyGenre = response.headers.get('icy-genre');
@@ -7649,6 +7819,10 @@ function updateWearOSMediaSession(st) {
 }
 /* ---- INITIALIZE MOBILE FEATURES ---- */
 window.addEventListener('load', () => {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn && typeof conn.addEventListener === 'function') {
+    conn.addEventListener('change', () => updateStreamStatsDisplay());
+  }
   // Initialize Google Cast support for Google Nest speakers/displays
   if (window.__tcrCastApiAvailable) {
     initGoogleNestCast();
