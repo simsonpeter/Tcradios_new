@@ -516,6 +516,42 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .empty-state i{font-size:2rem;color:var(--accent);opacity:0.85;margin-bottom:0.25rem}
 .empty-state p{margin:0;font-size:1rem;font-weight:700;color:var(--text)}
 .empty-state span{font-size:0.85rem;line-height:1.4;opacity:0.8;max-width:280px}
+.skeleton-item{pointer-events:none;cursor:default;min-height:64px}
+.skeleton-item::before{display:none}
+.skeleton-avatar{width:48px;height:48px;border-radius:50%;flex-shrink:0;
+                 background:linear-gradient(90deg,var(--border) 0%,rgba(249,115,22,0.12) 50%,var(--border) 100%);
+                 background-size:200% 100%;animation:skeletonShimmer 1.15s ease-in-out infinite}
+.skeleton-lines{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.45rem}
+.skeleton-line{height:10px;border-radius:999px;
+               background:linear-gradient(90deg,var(--border) 0%,rgba(249,115,22,0.12) 50%,var(--border) 100%);
+               background-size:200% 100%;animation:skeletonShimmer 1.15s ease-in-out infinite}
+.skeleton-line.w70{width:70%}.skeleton-line.w55{width:55%}.skeleton-line.w40{width:40%}
+.station-list.view-logo .skeleton-item{min-height:110px;justify-content:flex-start}
+.station-list.view-logo .skeleton-avatar{width:72px;height:72px}
+.station-list.view-logo .skeleton-lines{align-items:center;width:100%}
+.station-list.view-logo .skeleton-line.w70{width:80%}
+.skeleton-chip{width:58px;height:22px;border-radius:999px;flex-shrink:0;
+               background:linear-gradient(90deg,var(--border) 0%,rgba(249,115,22,0.12) 50%,var(--border) 100%);
+               background-size:200% 100%;animation:skeletonShimmer 1.15s ease-in-out infinite}
+.skeleton-dot{width:60px;height:60px;border-radius:50%;flex-shrink:0;
+              background:linear-gradient(90deg,var(--border) 0%,rgba(249,115,22,0.12) 50%,var(--border) 100%);
+              background-size:200% 100%;animation:skeletonShimmer 1.15s ease-in-out infinite}
+@keyframes skeletonShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){
+  .skeleton-avatar,.skeleton-line,.skeleton-chip,.skeleton-dot{animation:none;background:var(--border)}
+}
+.catalog-refresh-indicator{display:flex;align-items:center;justify-content:center;gap:0.45rem;
+                           height:0;opacity:0;overflow:hidden;color:var(--accent);
+                           font-size:0.78rem;font-weight:700;pointer-events:none}
+.catalog-refresh-indicator.is-visible{height:48px;opacity:1}
+.catalog-refresh-indicator.is-loading i{animation:catalogSpin 0.8s linear infinite}
+@keyframes catalogSpin{to{transform:rotate(360deg)}}
+.catalog-toast{position:fixed;left:50%;bottom:calc(var(--player-height) + 1.25rem + env(safe-area-inset-bottom,0px));
+               transform:translateX(-50%) translateY(12px);background:var(--card);color:var(--text);
+               border:1px solid var(--border);border-radius:999px;padding:0.45rem 0.9rem;
+               font-size:0.8rem;font-weight:700;box-shadow:var(--shadow-lg);z-index:160;
+               opacity:0;pointer-events:none;transition:opacity 0.2s ease,transform 0.2s ease;white-space:nowrap}
+.catalog-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0)}
 #stationActionSheet{position:fixed;inset:0;z-index:2100;display:none;align-items:flex-end;justify-content:center}
 #stationActionSheet.active{display:flex}
 .station-action-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(2px)}
@@ -625,7 +661,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #contentTop{flex-shrink:0;display:flex;flex-direction:column;gap:0;z-index:25}
 #stationScrollArea{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;
                     padding-bottom:var(--player-height);margin:0 -0.15rem;padding-left:0.15rem;
-                    padding-right:0.15rem;-webkit-overflow-scrolling:touch}
+                    padding-right:0.15rem;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 #favQuickRow.is-visible-on-all{flex-shrink:0}
 
 .about-share-btn{
@@ -1405,9 +1441,23 @@ audio{display:none}
     <div id="favQuickRow" hidden></div>
   </div>
   <div id="stationScrollArea">
-    <div class="station-list"></div>
+    <div id="catalogRefreshIndicator" class="catalog-refresh-indicator" aria-hidden="true">
+      <i class="fas fa-rotate"></i>
+      <span>Pull to refresh</span>
+    </div>
+    <div class="station-list" aria-busy="true">
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w70"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w55"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w70"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w55"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w70"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w55"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w70"></div><div class="skeleton-line w40"></div></div></div>
+      <div class="item skeleton-item" aria-hidden="true"><div class="skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton-line w55"></div><div class="skeleton-line w40"></div></div></div>
+    </div>
   </div>
 </div>
+<div id="catalogToast" class="catalog-toast" hidden></div>
 <div id="about-panel">
   <div class="about-page" id="aboutShell" aria-live="polite"></div>
 </div>
@@ -1836,6 +1886,12 @@ let authToken       = localStorage.getItem('tcr-token') || null; // Auth token
 let currentLang     = localStorage.getItem('currentLang') || 'tamil';
 let currentTab      = localStorage.getItem('currentTab') || 'all';
 let currentList     = [];
+let catalogLoading = true;
+let catalogRefreshing = false;
+let favMarqueeActive = false;
+let favMarqueePausedByUser = false;
+let favMarqueeRaf = null;
+let favMarqueeResumeTimer = null;
 let idx             = 0;
 let searchTerm      = '';
 let currentGenreFilter = localStorage.getItem('tcr-genre-filter') || '';
@@ -2080,23 +2136,24 @@ async function loadLanguageUrls() {
 async function loadAll() {
   console.log('Loading stations...');
   try {
-    stationsPerLang = {};
+    const nextStations = {};
     await loadLanguageUrls();
     const promises = Object.keys(LANG_URLS).map(async lang => {
       try {
         console.log(`Loading stations for ${lang}...`);
         const rawStations = await fetchLanguageStations(lang, LANG_URLS[lang]);
-        stationsPerLang[lang] = normalizeStationEntries(rawStations).map(station => ({
+        nextStations[lang] = normalizeStationEntries(rawStations).map(station => ({
           ...station,
           language: lang
         }));
-        console.log(`Loaded ${stationsPerLang[lang]?.length || 0} stations for ${lang}`);
+        console.log(`Loaded ${nextStations[lang]?.length || 0} stations for ${lang}`);
       } catch (error) {
         console.error(`Error loading ${lang}:`, error);
-        stationsPerLang[lang] = []; // Set empty array on error
+        nextStations[lang] = Array.isArray(stationsPerLang[lang]) ? stationsPerLang[lang] : [];
       }
     });
     await Promise.allSettled(promises);
+    stationsPerLang = nextStations;
     updateNewStationMarkers();
     console.log('All stations loaded. Total languages:', Object.keys(stationsPerLang).length);
   } catch (error) {
@@ -2172,6 +2229,12 @@ function clearAllCacheOnLaunch() {
 // Make the main initialization async
 (async function initApp() {
   console.log('Initializing app...');
+  catalogLoading = true;
+  try {
+    renderStationSkeletons();
+    if (currentTab === 'all') renderFavQuickSkeleton();
+  } catch (e) {}
+  initPullToRefresh();
   // Clear cache on every app launch
   clearAllCacheOnLaunch();
   
@@ -2196,6 +2259,7 @@ function clearAllCacheOnLaunch() {
       currentTab = tab;
       localStorage.setItem('currentTab', currentTab);
     }
+    catalogLoading = false;
     switchTab(currentTab);
     try {
       loadDailyBandwidthState();
@@ -2204,9 +2268,11 @@ function clearAllCacheOnLaunch() {
     console.log('App initialized successfully');
   } catch (error) {
     console.error('App initialization error:', error);
+    catalogLoading = false;
     // Show error to user
     if (stationList) {
       stationList.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text);">Error loading stations. Please refresh the page.</div>';
+      stationList.setAttribute('aria-busy', 'false');
     }
   }
   try { initBandwidthHistoryUi(); } catch (e) {}
@@ -2761,6 +2827,149 @@ function renderEmptyState(message, hint, icon = 'fa-radio') {
   </div>`;
 }
 
+function renderStationSkeletons(count = 8) {
+  if (!stationList) return;
+  applyStationViewMode();
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const wide = i % 2 === 0 ? 'w70' : 'w55';
+    items.push(`<div class="item skeleton-item" aria-hidden="true" style="animation-delay:${Math.min(i * 0.04, 0.3)}s">
+      <div class="skeleton-avatar"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton-line ${wide}"></div>
+        <div class="skeleton-line w40"></div>
+      </div>
+    </div>`);
+  }
+  stationList.innerHTML = items.join('');
+  stationList.setAttribute('aria-busy', 'true');
+}
+
+function renderFavQuickSkeleton() {
+  const row = document.getElementById('favQuickRow');
+  if (!row || currentTab !== 'all') return;
+  try { destroyFavMarquee(); } catch (e) {}
+  row.hidden = false;
+  row.classList.add('is-visible', 'is-visible-on-all');
+  row.innerHTML = `
+    <div class="fav-quick-panel">
+      <div class="fav-quick-label"><i class="fas fa-compass"></i> Quick picks</div>
+      <div class="fav-quick-chips">
+        <div class="skeleton-chip"></div><div class="skeleton-chip"></div><div class="skeleton-chip"></div>
+      </div>
+      <div class="fav-quick-scroll" role="presentation">
+        <div class="fav-quick-track" style="gap:0.85rem;padding:0.35rem 0.6rem 0.5rem">
+          <div class="skeleton-dot"></div><div class="skeleton-dot"></div><div class="skeleton-dot"></div>
+          <div class="skeleton-dot"></div><div class="skeleton-dot"></div><div class="skeleton-dot"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showCatalogToast(message) {
+  const toast = document.getElementById('catalogToast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.hidden = false;
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+  clearTimeout(showCatalogToast.timer);
+  showCatalogToast.timer = setTimeout(() => {
+    toast.classList.remove('is-visible');
+    setTimeout(() => { toast.hidden = true; }, 220);
+  }, 2200);
+}
+
+function setCatalogRefreshIndicator(state, pullDistance = 0) {
+  const el = document.getElementById('catalogRefreshIndicator');
+  if (!el) return;
+  const label = el.querySelector('span');
+  el.classList.toggle('is-loading', state === 'loading');
+  if (state === 'loading') {
+    el.classList.add('is-visible');
+    el.style.height = '48px';
+    el.style.opacity = '1';
+    if (label) label.textContent = 'Updating stations…';
+    return;
+  }
+  if (state === 'pull') {
+    const height = Math.min(64, Math.max(0, pullDistance * 0.55));
+    el.classList.toggle('is-visible', height > 8);
+    el.style.height = `${height}px`;
+    el.style.opacity = String(Math.min(1, height / 40));
+    if (label) label.textContent = pullDistance >= 72 ? 'Release to refresh' : 'Pull to refresh';
+    return;
+  }
+  el.classList.remove('is-visible', 'is-loading');
+  el.style.height = '';
+  el.style.opacity = '';
+  if (label) label.textContent = 'Pull to refresh';
+}
+
+async function refreshStationCatalog() {
+  if (catalogRefreshing || catalogLoading) return;
+  catalogRefreshing = true;
+  setCatalogRefreshIndicator('loading');
+  if (typeof hapticFeedback === 'function') hapticFeedback('light');
+  try {
+    await loadAll();
+    populateLangSelect();
+    if (currentTab === 'about') renderAboutPanel();
+    else switchTab(currentTab);
+    const total = Object.values(stationsPerLang).reduce((sum, list) => sum + (list?.length || 0), 0);
+    showCatalogToast(total ? `Updated · ${total} stations` : 'No stations returned');
+    if (typeof hapticFeedback === 'function') hapticFeedback('success');
+  } catch (error) {
+    console.error('Station catalog refresh failed:', error);
+    showCatalogToast('Could not refresh stations');
+  } finally {
+    catalogRefreshing = false;
+    setCatalogRefreshIndicator('idle');
+  }
+}
+
+function initPullToRefresh() {
+  const scroller = document.getElementById('stationScrollArea');
+  if (!scroller || scroller.dataset.ptrBound === '1') return;
+  scroller.dataset.ptrBound = '1';
+  let startY = 0;
+  let pulling = false;
+  let distance = 0;
+
+  const canPull = () =>
+    !catalogRefreshing &&
+    !catalogLoading &&
+    currentTab !== 'about' &&
+    scroller.scrollTop <= 0;
+
+  scroller.addEventListener('touchstart', (e) => {
+    if (!canPull()) { pulling = false; return; }
+    startY = e.touches[0].clientY;
+    pulling = true;
+    distance = 0;
+  }, { passive: true });
+
+  scroller.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    if (scroller.scrollTop > 0) {
+      pulling = false;
+      setCatalogRefreshIndicator('idle');
+      return;
+    }
+    distance = e.touches[0].clientY - startY;
+    if (distance > 0) setCatalogRefreshIndicator('pull', distance);
+    else setCatalogRefreshIndicator('idle');
+  }, { passive: true });
+
+  scroller.addEventListener('touchend', () => {
+    if (!pulling) return;
+    pulling = false;
+    if (distance >= 72) refreshStationCatalog();
+    else setCatalogRefreshIndicator('idle');
+    distance = 0;
+  });
+}
+
 function openStationActionSheet(station) {
   if (!station) return;
   stationActionTarget = station;
@@ -3133,10 +3342,6 @@ function switchTab(tab) {
   }
 }
 /* ---- RENDER ---- */
-let favMarqueeActive = false;
-let favMarqueePausedByUser = false;
-let favMarqueeRaf = null;
-let favMarqueeResumeTimer = null;
 const FAV_MARQUEE_SPEED = 0.55;
 const FAV_MARQUEE_RESUME_MS = 5000;
 
@@ -3422,9 +3627,15 @@ function findStationByName(stationName) {
 }
 
 function render(list, options = {}) {
+  if (catalogLoading && currentTab === 'all' && !searchTerm) {
+    renderFavQuickSkeleton();
+    renderStationSkeletons();
+    return;
+  }
   renderFavQuickRow();
   stationList.innerHTML = '';
   applyStationViewMode();
+  stationList.setAttribute('aria-busy', 'false');
 
   if (!list || !list.length) {
     if (currentTab === 'fav') {
