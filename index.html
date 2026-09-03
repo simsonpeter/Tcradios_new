@@ -1798,6 +1798,9 @@ let searchTerm      = '';
 let currentGenreFilter = localStorage.getItem('tcr-genre-filter') || '';
 let currentSortFilter = localStorage.getItem('tcr-sort-filter') || 'default';
 let favoritesOnlyFilter = localStorage.getItem('tcr-favorites-only') === 'true';
+const DAILY_BANDWIDTH_KEY = 'tcr-daily-bandwidth';
+let dailyBandwidthBytes = 0;
+let dailyBandwidthDateKey = '';
 let stationViewMode = localStorage.getItem('tcr-station-view') === 'logo' ? 'logo' : 'list';
 let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
@@ -2127,7 +2130,6 @@ function clearAllCacheOnLaunch() {
   console.log('Initializing app...');
   // Clear cache on every app launch
   clearAllCacheOnLaunch();
-  loadDailyBandwidthState();
   
   // Handle URL parameters for shortcuts (define action outside try block)
   const urlParams = new URLSearchParams(window.location.search);
@@ -2151,6 +2153,7 @@ function clearAllCacheOnLaunch() {
       localStorage.setItem('currentTab', currentTab);
     }
     switchTab(currentTab);
+    try { loadDailyBandwidthState(); } catch (e) { console.warn('Daily bandwidth init skipped:', e); }
     console.log('App initialized successfully');
   } catch (error) {
     console.error('App initialization error:', error);
@@ -3923,9 +3926,6 @@ let streamSessionBytes = 0;
 let streamUsageInterval = null;
 let streamUsageLastTick = 0;
 const DEFAULT_STREAM_BITRATE_KBPS = 128;
-const DAILY_BANDWIDTH_KEY = 'tcr-daily-bandwidth';
-let dailyBandwidthBytes = 0;
-let dailyBandwidthDateKey = '';
 
 function getTodayDateKey() {
   const d = new Date();
