@@ -281,7 +281,7 @@ body{display:flex;flex-direction:column;font-family:system-ui;
      padding-left:env(safe-area-inset-left);
      padding-right:env(safe-area-inset-right)}
 header{background:var(--header);border-bottom:1px solid var(--border);
-       display:grid;grid-template-columns:minmax(0,1fr) auto;
+       display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
        align-items:center;gap:0.5rem;
        padding:calc(1rem + env(safe-area-inset-top, 0px)) 1.2rem 1rem;
        font-size:1.25rem;font-weight:700;min-height:70px;
@@ -290,6 +290,13 @@ header{background:var(--header);border-bottom:1px solid var(--border);
 .header-title>span:first-child{font-size:1.25rem;font-weight:700}
 .header-subtitle{font-size:0.75rem;font-weight:400;opacity:0.7;font-style:italic;
                  color:var(--text)}
+.header-bandwidth{justify-self:center;display:inline-flex;align-items:center;gap:0.35rem;
+                  font-size:0.7rem;font-weight:700;color:var(--accent);
+                  background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.28);
+                  border-radius:999px;padding:0.3rem 0.7rem;white-space:nowrap;max-width:100%;
+                  overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.header-bandwidth i{font-size:0.65rem;flex-shrink:0}
+.header-bandwidth.is-live{box-shadow:0 0 0 1px rgba(249,115,22,0.15)}
 header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;
                background:var(--gradient-primary);opacity:0.05;z-index:-1}
 header button{background:none;border:none;font-size:1.4rem;cursor:pointer;
@@ -969,6 +976,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
   #p-play,#p-prev,#p-next{padding:0.6rem;min-width:44px;min-height:44px}
   #p-play i,#p-prev i,#p-next i{font-size:1.2rem}
   header{padding:0.8rem 1rem;min-height:60px}
+  .header-bandwidth{font-size:0.62rem;padding:0.24rem 0.55rem;max-width:42vw}
   .toolbar-fab-btn{width:48px;height:48px;min-width:48px;min-height:48px;font-size:1.05rem}
   .toolbar-fab{right:calc(0.75rem + env(safe-area-inset-right, 0px))}
   #headerControls{gap:0.6rem}
@@ -1314,6 +1322,10 @@ audio{display:none}
   <div class="header-title">
   <span>TC RADIOS</span>
     <span class="header-subtitle">by JayathaSoft</span>
+  </div>
+  <div id="headerBandwidth" class="header-bandwidth" title="Estimated streaming data used today">
+    <i class="fas fa-arrow-trend-up" aria-hidden="true"></i>
+    <span id="headerBandwidthValue">Today 0 B</span>
   </div>
   <div id="headerControls">
     <button id="sleepBtn" title="Sleep timer" class="header-btn"><i class="fas fa-clock"></i></button>
@@ -2087,6 +2099,7 @@ function clearAllCacheOnLaunch() {
     'tcr-sleep-deadline',
     'tcr-volume',
     'tcr-alarm',
+    'tcr-daily-bandwidth',
     'currentTheme',
     'currentLang',
     'currentTab'
@@ -2114,6 +2127,7 @@ function clearAllCacheOnLaunch() {
 // Make the main initialization async
 (async function initApp() {
   console.log('Initializing app...');
+  loadDailyBandwidthState();
   // Clear cache on every app launch
   clearAllCacheOnLaunch();
   
@@ -3911,6 +3925,66 @@ let streamSessionBytes = 0;
 let streamUsageInterval = null;
 let streamUsageLastTick = 0;
 const DEFAULT_STREAM_BITRATE_KBPS = 128;
+const DAILY_BANDWIDTH_KEY = 'tcr-daily-bandwidth';
+let dailyBandwidthBytes = 0;
+let dailyBandwidthDateKey = '';
+
+function getTodayDateKey() {
+  const d = new Date();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
+function loadDailyBandwidthState() {
+  dailyBandwidthDateKey = getTodayDateKey();
+  try {
+    const raw = JSON.parse(localStorage.getItem(DAILY_BANDWIDTH_KEY) || '{}');
+    dailyBandwidthBytes = raw.date === dailyBandwidthDateKey ? Number(raw.bytes) || 0 : 0;
+  } catch (e) {
+    dailyBandwidthBytes = 0;
+  }
+  updateDailyBandwidthDisplay();
+}
+
+function persistDailyBandwidth() {
+  localStorage.setItem(DAILY_BANDWIDTH_KEY, JSON.stringify({
+    date: dailyBandwidthDateKey,
+    bytes: Math.round(dailyBandwidthBytes)
+  }));
+}
+
+function addDailyBandwidthBytes(bytes) {
+  const delta = Number(bytes) || 0;
+  if (delta <= 0) return;
+  const today = getTodayDateKey();
+  if (today !== dailyBandwidthDateKey) {
+    dailyBandwidthDateKey = today;
+    dailyBandwidthBytes = 0;
+  }
+  dailyBandwidthBytes += delta;
+  persistDailyBandwidth();
+  updateDailyBandwidthDisplay();
+}
+
+function updateDailyBandwidthDisplay() {
+  const valueEl = document.getElementById('headerBandwidthValue');
+  const wrapEl = document.getElementById('headerBandwidth');
+  if (!valueEl) return;
+  const today = getTodayDateKey();
+  if (today !== dailyBandwidthDateKey) {
+    dailyBandwidthDateKey = today;
+    dailyBandwidthBytes = 0;
+    persistDailyBandwidth();
+  }
+  valueEl.textContent = `Today ${formatDataSize(dailyBandwidthBytes)}`;
+  if (wrapEl) {
+    wrapEl.classList.toggle('is-live', isPlaybackCurrentlyPlaying());
+    wrapEl.title = isPlaybackCurrentlyPlaying()
+      ? 'Live estimate — streaming data used today'
+      : 'Estimated streaming data used today';
+  }
+}
 
 function estimateBitrateFromUrl(url) {
   const clean = String(url || '').split('?')[0].toLowerCase();
@@ -3990,7 +4064,7 @@ function detectStreamBitrate(station) {
 }
 
 function tickStreamUsage() {
-  if (!streamBitrateKbps || audio.paused || isGoogleNestCasting()) return;
+  if (!streamBitrateKbps || !isPlaybackCurrentlyPlaying()) return;
   const now = Date.now();
   if (!streamUsageLastTick) {
     streamUsageLastTick = now;
@@ -3998,7 +4072,9 @@ function tickStreamUsage() {
   }
   const elapsedSec = (now - streamUsageLastTick) / 1000;
   streamUsageLastTick = now;
-  streamSessionBytes += (streamBitrateKbps * 1000 / 8) * elapsedSec;
+  const deltaBytes = (streamBitrateKbps * 1000 / 8) * elapsedSec;
+  streamSessionBytes += deltaBytes;
+  addDailyBandwidthBytes(deltaBytes);
   updateStreamStatsDisplay();
 }
 
@@ -4037,6 +4113,7 @@ function updateStreamStatsDisplay() {
     el.hidden = !show;
     el.classList.toggle('is-estimate', streamBitrateEstimated);
   });
+  updateDailyBandwidthDisplay();
 }
 
 function hideStreamStatsDisplay() {
