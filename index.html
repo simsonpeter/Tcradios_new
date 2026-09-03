@@ -4081,6 +4081,11 @@ function updatePlaybackUiForRemote(isPlaying) {
   if (lastPlayedStation && lastPlayedStation.station) {
     showMediaNotification(lastPlayedStation.station);
   }
+  if (isPlaying) startStreamUsageTracking();
+  else {
+    stopStreamUsageTracking();
+    updateStreamStatsDisplay();
+  }
 
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.toggle('playing', isPlaying);
