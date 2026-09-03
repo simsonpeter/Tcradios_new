@@ -3837,9 +3837,7 @@ audio.onplay = () => {
   player.classList.add('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
-  // Update Media Session playback state for lock screen / notification player
-  updateLockScreenPlaybackState('playing');
-  showMediaNotification(lastPlayedStation && lastPlayedStation.station);
+  syncMediaControls();
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.add('playing');
@@ -3858,9 +3856,7 @@ audio.onpause = () => {
   player.classList.remove('playing'); 
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
-  // Update Media Session playback state for lock screen / notification player
-  updateLockScreenPlaybackState('paused');
-  showMediaNotification(lastPlayedStation && lastPlayedStation.station);
+  syncMediaControls();
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
@@ -3876,6 +3872,8 @@ audio.onpause = () => {
   // Refresh display to remove playing state
   switchTab(currentTab);
 };
+audio.onplaying = () => syncMediaControls();
+audio.onwaiting = () => updateLockScreenPlaybackState('playing');
 /* ---- METADATA FUNCTIONS ---- */
 let metadataInterval;
 let currentMetadata = { song: '', artist: '' };
@@ -3919,6 +3917,7 @@ function updatePlaybackUiForRemote(isPlaying) {
 
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    updateMediaSessionPositionState();
   }
   if (lastPlayedStation && lastPlayedStation.station) {
     showMediaNotification(lastPlayedStation.station);
@@ -7048,18 +7047,49 @@ if (widgetVisible === 'true' && floatingWidget) {
 /* ---- LOCK SCREEN / NOTIFICATION PLAYER ---- */
 let lockScreenHandlersBound = false;
 
+function getMediaSessionTitle(st) {
+  const song = currentMetadata?.song?.trim();
+  return song || st?.name || 'TC RADIOS';
+}
+
+function getMediaSessionArtist(st) {
+  const song = currentMetadata?.song?.trim();
+  const artist = currentMetadata?.artist?.trim();
+  if (song) return artist || st?.name || 'TC RADIOS';
+  return `Live • ${st?.genre || 'Christian Radio'}`;
+}
+
+function getMediaSessionAlbum(st) {
+  return st?.name || 'TC RADIOS';
+}
+
 function mediaArtworkList(st) {
-  const origin = (location && location.origin) || '';
-  const fallback = origin + '/icons/icon-512x512.png';
-  const logo = (st && st.logo) || fallback;
+  const fallback = getAbsoluteAssetUrl('/icons/icon-512x512.png');
+  const logo = getAbsoluteAssetUrl((st && st.logo) || '/icons/icon-512x512.png');
   const type = /\.webp($|\?)/i.test(logo) ? 'image/webp'
     : /\.jpe?g($|\?)/i.test(logo) ? 'image/jpeg'
     : 'image/png';
-  return [
-    { src: fallback, sizes: '192x192', type: 'image/png' },
-    { src: fallback, sizes: '512x512', type: 'image/png' },
-    { src: logo, sizes: '512x512', type }
-  ];
+  const sizes = ['96x96', '128x128', '192x192', '256x256', '512x512'];
+  const list = sizes.map(size => ({ src: fallback, sizes: size, type: 'image/png' }));
+  sizes.forEach(size => list.push({ src: logo, sizes: size, type }));
+  return list;
+}
+
+function updateMediaSessionPositionState() {
+  if (!('mediaSession' in navigator) || typeof navigator.mediaSession.setPositionState !== 'function') return;
+  try {
+    if (isPlaybackCurrentlyPlaying()) {
+      navigator.mediaSession.setPositionState({
+        duration: Number.POSITIVE_INFINITY,
+        playbackRate: 1,
+        position: 0
+      });
+    } else {
+      navigator.mediaSession.setPositionState(null);
+    }
+  } catch (e) {
+    // Some browsers reject Infinity for live streams.
+  }
 }
 
 function bindLockScreenPlayerHandlers() {
@@ -7069,18 +7099,24 @@ function bindLockScreenPlayerHandlers() {
   };
   set('play', () => {
     playActiveStream();
-    updateLockScreenPlaybackState('playing');
+    syncMediaControls();
   });
   set('pause', () => {
     pauseActiveStream();
-    updateLockScreenPlaybackState('paused');
+    syncMediaControls();
   });
-  set('previoustrack', () => prevNext(-1));
-  set('nexttrack', () => prevNext(1));
+  set('previoustrack', () => {
+    prevNext(-1);
+    syncMediaControls();
+  });
+  set('nexttrack', () => {
+    prevNext(1);
+    syncMediaControls();
+  });
   set('stop', () => {
     stopActiveStream();
-    updateLockScreenPlaybackState('paused');
     clearMediaNotification();
+    syncMediaControls();
   });
   ['seekbackward', 'seekforward', 'seekto'].forEach(action => set(action, null));
   lockScreenHandlersBound = true;
@@ -7092,17 +7128,47 @@ function updateLockScreenPlaybackState(state) {
   }
 }
 
+function buildMediaNotificationPayload(station) {
+  const playing = isPlaybackCurrentlyPlaying();
+  const song = currentMetadata?.song?.trim();
+  const artist = currentMetadata?.artist?.trim();
+  const title = getMediaSessionTitle(station);
+  const subtitle = song
+    ? (artist ? `${artist} • ${station.name}` : station.name)
+    : `Live • ${station.genre || 'Christian Radio'}`;
+  return {
+    title,
+    name: station.name || 'TC RADIOS',
+    subtitle,
+    artist: getMediaSessionArtist(station),
+    album: getMediaSessionAlbum(station),
+    genre: station.genre || 'Christian Radio',
+    playing,
+    icon: getAbsoluteAssetUrl(station.logo || '/icons/icon-192x192.png'),
+    artwork: getAbsoluteAssetUrl(station.logo || '/icons/icon-512x512.png')
+  };
+}
+
+function syncMediaControls() {
+  const station = lastPlayedStation?.station;
+  if (!station) return;
+  updateMediaSession(station);
+}
+
 function updateMediaSession(st) {
-  if (!st || !('mediaSession' in navigator)) return;
+  if (!st || !('mediaSession' in navigator)) {
+    showMediaNotification(st);
+    return;
+  }
   bindLockScreenPlayerHandlers();
-  const song = currentMetadata && currentMetadata.song;
   navigator.mediaSession.metadata = new MediaMetadata({
-    title: st.name || 'TC RADIOS',
-    artist: song || 'TC RADIOS',
-    album: st.genre || 'Christian Radio',
+    title: getMediaSessionTitle(st),
+    artist: getMediaSessionArtist(st),
+    album: getMediaSessionAlbum(st),
     artwork: mediaArtworkList(st)
   });
   updateLockScreenPlaybackState(isPlaybackCurrentlyPlaying() ? 'playing' : 'paused');
+  updateMediaSessionPositionState();
   updateWidget('stationUpdate', { station: st });
   showMediaNotification(st);
 }
@@ -7118,20 +7184,23 @@ function postToServiceWorker(data) {
   }
 }
 
+function shouldUseServiceWorkerMediaNotification() {
+  if (!('serviceWorker' in navigator)) return false;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  return !(isAndroid && 'mediaSession' in navigator);
+}
+
 function showMediaNotification(station) {
   if (!station) return;
-  updateLockScreenPlaybackState(isPlaybackCurrentlyPlaying() ? 'playing' : 'paused');
-  const androidHasMediaSession = /Android/i.test(navigator.userAgent) && 'mediaSession' in navigator;
-  if (androidHasMediaSession) return;
-  postToServiceWorker({
-    type: 'MEDIA_NOTIFICATION',
-    name: station.name || 'TC RADIOS',
-    playing: isPlaybackCurrentlyPlaying(),
-    icon: station.logo || '/icons/icon-192x192.png'
-  });
+  const payload = buildMediaNotificationPayload(station);
+  updateLockScreenPlaybackState(payload.playing ? 'playing' : 'paused');
+  if (!shouldUseServiceWorkerMediaNotification()) return;
+  postToServiceWorker({ type: 'MEDIA_NOTIFICATION', ...payload });
 }
 
 function clearMediaNotification() {
+  updateLockScreenPlaybackState('paused');
+  updateMediaSessionPositionState();
   postToServiceWorker({ type: 'MEDIA_NOTIFICATION_CLEAR' });
 }
 
@@ -7207,7 +7276,7 @@ function initAndroidAutoIntegration() {
   initAndroidAutoVoiceCommands();
   bindLockScreenPlayerHandlers();
   document.addEventListener('visibilitychange', () => {
-    if (lastPlayedStation) updateMediaSession(lastPlayedStation.station);
+    if (lastPlayedStation?.station) syncMediaControls();
   });
   window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'android-auto') {
@@ -7411,7 +7480,7 @@ function hapticFeedback(type = 'light') {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add version parameter to force update
-    navigator.serviceWorker.register('/sw.js?v=6').then(registration => {
+    navigator.serviceWorker.register('/sw.js?v=7').then(registration => {
       // Check for updates immediately
       setInterval(() => {
         registration.update();
@@ -7430,7 +7499,7 @@ if ('serviceWorker' in navigator) {
     // Unregister old service workers
     navigator.serviceWorker.getRegistrations().then(registrations => {
       registrations.forEach(registration => {
-        if (registration.scope.includes('/') && !registration.active?.scriptURL.includes('v=6')) {
+        if (registration.scope.includes('/') && !registration.active?.scriptURL.includes('v=7')) {
           registration.unregister();
         }
       });

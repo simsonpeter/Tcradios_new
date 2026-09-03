@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v6';
+const CACHE = 'tcr-v7';
 const FILES = [
   '/',
   '/index.html',
@@ -67,24 +67,50 @@ self.addEventListener('message', event => {
   }
 });
 
+function resolveMediaUrl(path) {
+  if (!path) return new URL('/icons/icon-512x512.png', self.location.origin).href;
+  try {
+    return new URL(path, self.location.origin).href;
+  } catch (e) {
+    return new URL('/icons/icon-512x512.png', self.location.origin).href;
+  }
+}
+
 async function showNowPlayingNotification(data) {
   const playing = !!data.playing;
-  const name = data.name || 'TC RADIOS';
+  const title = data.title || data.name || 'TC RADIOS';
+  const subtitle = data.subtitle || data.artist || (playing ? 'Live • TC RADIOS' : 'Paused • TC RADIOS');
+  const album = data.album || data.name || 'TC RADIOS';
+  const icon = resolveMediaUrl(data.icon || data.artwork);
+  const artwork = resolveMediaUrl(data.artwork || data.icon);
+
+  if (!playing) {
+    const existing = await self.registration.getNotifications({ tag: MEDIA_TAG });
+    existing.forEach(n => n.close());
+    return;
+  }
+
   try {
-    await self.registration.showNotification(name, {
-      body: playing ? 'Live • TC RADIOS' : 'Paused • TC RADIOS',
-      icon: data.icon || '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png',
+    await self.registration.showNotification(title, {
+      body: subtitle,
+      icon,
+      image: artwork,
+      badge: resolveMediaUrl('/icons/icon-192x192.png'),
       tag: MEDIA_TAG,
-      renotify: false,
+      renotify: true,
       silent: true,
       requireInteraction: true,
       actions: [
-        { action: 'prev', title: 'Previous' },
-        { action: playing ? 'pause' : 'play', title: playing ? 'Pause' : 'Play' },
-        { action: 'next', title: 'Next' }
+        { action: 'prev', title: '⏮ Previous' },
+        { action: playing ? 'pause' : 'play', title: playing ? '⏸ Pause' : '▶ Play' },
+        { action: 'next', title: 'Next ⏭' }
       ],
-      data: { name, playing }
+      data: {
+        name: data.name || title,
+        album,
+        artist: data.artist || subtitle,
+        playing
+      }
     });
   } catch (e) {
     // Notification permission may be missing.
@@ -118,7 +144,7 @@ self.addEventListener('notificationclick', event => {
       return;
     }
     if (clientsList.length) {
-      await clientsList[0].focus();
+      if (clientsList[0].focus) await clientsList[0].focus();
       return;
     }
     await self.clients.openWindow('/');
