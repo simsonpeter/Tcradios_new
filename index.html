@@ -597,6 +597,12 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .bandwidth-history-row strong{display:block;font-size:0.88rem;font-weight:700;line-height:1.25}
 .bandwidth-history-row span{display:block;font-size:0.72rem;color:var(--text-secondary);margin-top:0.12rem}
 .bandwidth-history-empty{padding:1.4rem 0.5rem;text-align:center;color:var(--text-secondary);font-size:0.88rem}
+.bandwidth-history-limit-btn{margin-top:0.55rem;width:100%;border:1px solid rgba(249,115,22,0.35);
+                             background:rgba(249,115,22,0.12);color:var(--accent);border-radius:0.65rem;
+                             padding:0.55rem 0.7rem;font-size:0.82rem;font-weight:700;cursor:pointer;
+                             display:flex;align-items:center;justify-content:center;gap:0.4rem}
+.bandwidth-history-limit-btn:hover{background:rgba(249,115,22,0.2)}
+.data-cap-sheet-status{margin:0.25rem 0 0;font-size:0.75rem;color:var(--accent);font-weight:700}
 @media (hover:none) and (pointer:coarse){
   .fav-quick-item:hover .fav-quick-art-wrap{transform:none;box-shadow:var(--shadow-sm)}
   .fav-quick-item:active .fav-quick-art-wrap{transform:scale(0.95);border-color:var(--accent)}
@@ -604,7 +610,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #fullscreen-station-meta{font-size:0.9rem;opacity:0.8;margin-top:0.4rem}
 #fs-stream-stats{margin-top:0.35rem;font-size:0.82rem;opacity:0.78;line-height:1.35}
 #fs-stream-stats.is-estimate{opacity:0.65}
-#fs-sleep-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
+#fs-sleep-countdown,#fs-data-cap-countdown{font-size:0.85rem;color:var(--accent);margin-top:0.5rem;display:none}
 .admin-list,.request-vote-list{display:flex;flex-direction:column;gap:0.55rem;margin-top:0.75rem}
 .admin-row,.request-vote-row{background:rgba(255,255,255,0.05);border:1px solid var(--border);
                               border-radius:0.65rem;padding:0.65rem}
@@ -982,17 +988,17 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 /* Fullscreen Extra Controls (Timer & Alarm) */
 #fullscreen-extra-controls{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;
                             margin-top:1.5rem}
-#fs-sleep,#fs-alarm,#fs-favorite,#fs-share,#fs-report{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
+#fs-sleep,#fs-alarm,#fs-favorite,#fs-share,#fs-report,#fs-data-cap{background:rgba(249,115,22,0.2);border:none;color:var(--accent);
                      font-size:1.3rem;cursor:pointer;padding:0.8rem;border-radius:50%;
                      transition:var(--transition);min-width:50px;min-height:50px;
                      display:flex;align-items:center;justify-content:center;
                      box-shadow:0 2px 8px rgba(0,0,0,0.2);backdrop-filter:blur(10px)}
 #fs-report{background:rgba(239,68,68,0.18);color:#f87171}
-#fs-favorite.on{background:rgba(249,115,22,0.28);color:#f97316}
-#fs-sleep:hover,#fs-alarm:hover,#fs-favorite:hover,#fs-share:hover,#fs-report:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
+#fs-favorite.on,#fs-data-cap.on{background:rgba(249,115,22,0.28);color:#f97316}
+#fs-sleep:hover,#fs-alarm:hover,#fs-favorite:hover,#fs-share:hover,#fs-report:hover,#fs-data-cap:hover{background:rgba(249,115,22,0.3);transform:scale(1.1)}
 #fs-report:hover{background:rgba(239,68,68,0.28);color:#fca5a5}
-#fs-sleep:active,#fs-alarm:active,#fs-favorite:active,#fs-share:active,#fs-report:active{transform:scale(0.95)}
-#fs-sleep i,#fs-alarm i,#fs-favorite i,#fs-share i,#fs-report i{font-size:1.2rem}
+#fs-sleep:active,#fs-alarm:active,#fs-favorite:active,#fs-share:active,#fs-report:active,#fs-data-cap:active{transform:scale(0.95)}
+#fs-sleep i,#fs-alarm i,#fs-favorite i,#fs-share i,#fs-report i,#fs-data-cap i{font-size:1.2rem}
 /* Fullscreen Volume Control */
 #fullscreen-volume{display:flex;align-items:center;justify-content:center;gap:1rem;
                    margin-top:2rem;width:100%;max-width:400px;padding:0 2rem}
@@ -1231,13 +1237,14 @@ audio{display:none}
     transform: scale(0.98);
   }
 }
-#sleepModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
-           display:none;align-items:center;justify-content:center;z-index:2000}
-#sleepModal>div{background:var(--card);padding:1rem;border-radius:.5rem;
-                text-align:center;color:var(--text)}
-#sleepModal button{margin:.3rem;padding:.4rem .8rem;border:1px solid var(--border);
-                   border-radius:.3rem;background:var(--bg);color:var(--text)}
-#sleepModal button:hover{background:var(--accent);color:#fff}
+#sleepModal,#dataCapModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
+           display:none;align-items:center;justify-content:center;z-index:2200}
+#sleepModal>div,#dataCapModal>div{background:var(--card);padding:1rem;border-radius:.5rem;
+                text-align:center;color:var(--text);max-width:360px;width:90%}
+#sleepModal button,#dataCapModal button{margin:.3rem;padding:.4rem .8rem;border:1px solid var(--border);
+                   border-radius:.3rem;background:var(--bg);color:var(--text);cursor:pointer}
+#sleepModal button:hover,#dataCapModal button:hover{background:var(--accent);color:#fff}
+#dataCapModal .data-cap-hint{font-size:0.78rem;opacity:0.75;margin:0.35rem 0 0.7rem;line-height:1.4}
 #alarmModal{position:fixed;inset:0;background:rgba(0,0,0,.5);
            display:none;align-items:center;justify-content:center;z-index:2000}
 #alarmModal>div{background:var(--card);padding:1.5rem;border-radius:.5rem;
@@ -1402,6 +1409,7 @@ audio{display:none}
   </div>
   <div id="headerMenu" class="header-menu">
     <button id="menuSleepBtn" title="Sleep timer"><i class="fas fa-clock"></i> Sleep Timer</button>
+    <button id="menuDataCapBtn" title="Data stop limit"><i class="fas fa-gauge-high"></i> Data stop limit</button>
     <button id="menuAlarmBtn" title="Alarm Clock"><i class="fas fa-bell"></i> Alarm Clock</button>
     <button id="menuMiniPlayerBtn" title="Mini Player"><i class="fas fa-window-restore"></i> Mini Player</button>
     <button id="menuAccountBtn"><i class="fas fa-user"></i> Account</button>
@@ -1526,6 +1534,7 @@ audio{display:none}
     <div id="fullscreen-station-meta"></div>
     <div id="fs-stream-stats" hidden aria-live="polite"></div>
     <div id="fs-sleep-countdown"></div>
+    <div id="fs-data-cap-countdown"></div>
     <div id="fullscreen-metadata" style="display:none;">
       <div id="fullscreen-song"></div>
       <div id="fullscreen-artist"></div>
@@ -1538,6 +1547,7 @@ audio{display:none}
   </div>
   <div id="fullscreen-extra-controls">
     <button id="fs-sleep" title="Sleep Timer"><i class="fas fa-clock"></i></button>
+    <button id="fs-data-cap" title="Data stop limit"><i class="fas fa-gauge-high"></i></button>
     <button id="fs-alarm" title="Alarm Clock"><i class="fas fa-bell"></i></button>
     <button id="fs-favorite" title="Favorite Station"><i class="far fa-heart"></i></button>
     <button id="fs-share" title="Share Station"><i class="fas fa-share-alt"></i></button>
@@ -1600,6 +1610,23 @@ audio{display:none}
     <button id="setCustom">Set</button><br>
     <div id="sleepStatus" style="font-size:0.85rem;margin:0.5rem 0;color:var(--accent)"></div>
     <button id="cancelSleep">Cancel</button>
+  </div>
+</div>
+<div id="dataCapModal">
+  <div>
+    <h3>Data stop limit</h3>
+    <p class="data-cap-hint">Playback stops when this much streaming data is used from now.</p>
+    <button type="button" data-mb="25">25 MB</button>
+    <button type="button" data-mb="50">50 MB</button>
+    <button type="button" data-mb="100">100 MB</button><br>
+    <button type="button" data-mb="250">250 MB</button>
+    <button type="button" data-mb="500">500 MB</button>
+    <button type="button" data-mb="1024">1 GB</button><br>
+    <input type="number" id="customDataCapMb" placeholder="MB" min="1" max="10240" style="width:70px"/>
+    <button type="button" id="setCustomDataCap">Set</button><br>
+    <div id="dataCapStatus" style="font-size:0.85rem;margin:0.5rem 0;color:var(--accent)"></div>
+    <button type="button" id="cancelDataCap">Clear limit</button>
+    <button type="button" id="closeDataCapModal">Close</button>
   </div>
 </div>
 <div id="alarmModal">
@@ -1742,6 +1769,10 @@ audio{display:none}
       <div>
         <h3 id="bandwidthHistoryTitle">Today's internet usage</h3>
         <p id="bandwidthHistorySummary" class="bandwidth-history-summary">No streaming yet today.</p>
+        <p id="dataCapSheetStatus" class="data-cap-sheet-status" hidden></p>
+        <button type="button" id="openDataCapBtn" class="bandwidth-history-limit-btn">
+          <i class="fas fa-gauge-high"></i> Set data stop limit
+        </button>
       </div>
       <button type="button" class="bandwidth-history-close" id="bandwidthHistoryClose" title="Close" aria-label="Close">
         <i class="fas fa-times"></i>
@@ -1905,6 +1936,10 @@ let stationViewMode = localStorage.getItem('tcr-station-view') === 'logo' ? 'log
 let sleepDeadline = Number(localStorage.getItem('tcr-sleep-deadline') || 0);
 let sleepCountdownInterval = null;
 let sleepTimer;
+const DATA_CAP_KEY = 'tcr-data-cap';
+let dataCapLimitBytes = 0;
+let dataCapUsedBytes = 0;
+let dataCapStopNotified = false;
 let lastPlayedStation = JSON.parse(localStorage.getItem('tcr-last-played') || 'null');
 const stationAccentCache = new Map();
 /* ---- ELEMENTS ---- */
@@ -2199,6 +2234,7 @@ function clearAllCacheOnLaunch() {
     'tcr-sort-filter',
     'tcr-favorites-only',
     'tcr-sleep-deadline',
+    'tcr-data-cap',
     'tcr-volume',
     'tcr-alarm',
     'tcr-daily-bandwidth',
@@ -2254,6 +2290,8 @@ function clearAllCacheOnLaunch() {
     initStationViewToggle();
     initStationActionSheet();
     restoreSleepTimer();
+    restoreDataCap();
+    initDataCapUi();
     
     if (tab) {
       currentTab = tab;
@@ -2276,6 +2314,7 @@ function clearAllCacheOnLaunch() {
     }
   }
   try { initBandwidthHistoryUi(); } catch (e) {}
+  try { initDataCapUi(); } catch (e) {}
   
   // Auto-play last played station or first station
   setTimeout(() => {
@@ -3835,6 +3874,11 @@ function appendStationItem(st, i) {
 }
 /* ---- PLAYER ---- */
 function play(st, i) {
+  if (isDataCapExhausted()) {
+    tripDataCap();
+    openDataCapModal();
+    return;
+  }
   idx = i;
   audio.src = st.url;
   pImg.src = st.logo || '/icons/default-artwork.jpg';
@@ -4296,6 +4340,182 @@ function addDailyBandwidthBytes(bytes, seconds) {
   updateDailyBandwidthDisplay();
 }
 
+function isDataCapActive() {
+  return dataCapLimitBytes > 0;
+}
+
+function isDataCapExhausted() {
+  return isDataCapActive() && dataCapUsedBytes >= dataCapLimitBytes;
+}
+
+function persistDataCap() {
+  try {
+    if (!dataCapLimitBytes) {
+      localStorage.removeItem(DATA_CAP_KEY);
+      return;
+    }
+    localStorage.setItem(DATA_CAP_KEY, JSON.stringify({
+      limit: Math.round(dataCapLimitBytes),
+      used: Math.round(dataCapUsedBytes)
+    }));
+  } catch (e) {}
+}
+
+function restoreDataCap() {
+  dataCapLimitBytes = 0;
+  dataCapUsedBytes = 0;
+  try {
+    const raw = JSON.parse(localStorage.getItem(DATA_CAP_KEY) || 'null');
+    const limit = Number(raw?.limit) || 0;
+    const used = Number(raw?.used) || 0;
+    if (limit > 0) {
+      dataCapLimitBytes = limit;
+      dataCapUsedBytes = Math.max(0, used);
+      dataCapStopNotified = dataCapUsedBytes >= dataCapLimitBytes;
+    }
+  } catch (e) {}
+  updateDataCapDisplay();
+}
+
+function setDataCapMb(mb) {
+  const amount = Number(mb);
+  if (!amount || amount <= 0 || amount > 10240) return;
+  dataCapLimitBytes = amount * 1024 * 1024;
+  dataCapUsedBytes = 0;
+  dataCapStopNotified = false;
+  persistDataCap();
+  updateDataCapDisplay();
+  if (typeof hapticFeedback === 'function') hapticFeedback('success');
+  showCatalogToast(`Stops after ${formatDataSize(dataCapLimitBytes)}`);
+}
+
+function clearDataCap() {
+  dataCapLimitBytes = 0;
+  dataCapUsedBytes = 0;
+  dataCapStopNotified = false;
+  persistDataCap();
+  updateDataCapDisplay();
+}
+
+function addDataCapBytes(bytes) {
+  const delta = Number(bytes) || 0;
+  if (!isDataCapActive() || delta <= 0) return;
+  if (isDataCapExhausted()) {
+    tripDataCap();
+    return;
+  }
+  dataCapUsedBytes += delta;
+  persistDataCap();
+  updateDataCapDisplay();
+  if (isDataCapExhausted()) tripDataCap();
+}
+
+function tripDataCap() {
+  if (!isDataCapActive()) return;
+  dataCapUsedBytes = Math.max(dataCapUsedBytes, dataCapLimitBytes);
+  persistDataCap();
+  pauseActiveStream();
+  if (dataCapStopNotified) {
+    updateDataCapDisplay();
+    return;
+  }
+  dataCapStopNotified = true;
+  persistDataCap();
+  const nowEl = document.getElementById('p-now');
+  if (nowEl) nowEl.textContent = 'Data limit reached';
+  const fsNow = document.getElementById('fullscreen-now');
+  if (fsNow) fsNow.textContent = 'Data limit reached';
+  showCatalogToast(`Data limit reached · ${formatDataSize(dataCapLimitBytes)}`);
+  showNotification(`Stopped at ${formatDataSize(dataCapLimitBytes)} data limit`);
+  if (typeof hapticFeedback === 'function') hapticFeedback('error');
+  updateDataCapDisplay();
+}
+
+function getDataCapStatusText() {
+  if (!isDataCapActive()) return '';
+  if (isDataCapExhausted()) return `Data limit reached · ${formatDataSize(dataCapLimitBytes)}`;
+  const left = Math.max(0, dataCapLimitBytes - dataCapUsedBytes);
+  return `Stop after ${formatDataSize(left)} more · ${formatDataSize(dataCapUsedBytes)} / ${formatDataSize(dataCapLimitBytes)}`;
+}
+
+function updateDataCapDisplay() {
+  const text = getDataCapStatusText();
+  const status = document.getElementById('dataCapStatus');
+  if (status) status.textContent = text || 'No data stop limit set';
+  const sheetStatus = document.getElementById('dataCapSheetStatus');
+  if (sheetStatus) {
+    sheetStatus.hidden = !text;
+    sheetStatus.textContent = text;
+  }
+  const sheetBtn = document.getElementById('openDataCapBtn');
+  if (sheetBtn) {
+    sheetBtn.innerHTML = isDataCapActive()
+      ? '<i class="fas fa-gauge-high"></i> Change data stop limit'
+      : '<i class="fas fa-gauge-high"></i> Set data stop limit';
+  }
+  const fsCap = document.getElementById('fs-data-cap-countdown');
+  if (fsCap) {
+    fsCap.style.display = text ? 'block' : 'none';
+    fsCap.textContent = text;
+  }
+  const capBtn = document.getElementById('fs-data-cap');
+  if (capBtn) capBtn.classList.toggle('on', isDataCapActive());
+}
+
+function openDataCapModal() {
+  const modal = document.getElementById('dataCapModal');
+  if (!modal) return;
+  closeBandwidthHistory();
+  updateDataCapDisplay();
+  modal.style.display = 'flex';
+}
+
+function closeDataCapModal() {
+  const modal = document.getElementById('dataCapModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function initDataCapUi() {
+  const modal = document.getElementById('dataCapModal');
+  if (!modal || modal.dataset.bound === '1') return;
+  modal.dataset.bound = '1';
+  modal.querySelectorAll('button[data-mb]').forEach(btn => {
+    btn.onclick = () => {
+      setDataCapMb(btn.dataset.mb);
+      closeDataCapModal();
+    };
+  });
+  document.getElementById('setCustomDataCap')?.addEventListener('click', () => {
+    const mb = parseInt(document.getElementById('customDataCapMb')?.value, 10);
+    if (mb > 0) {
+      setDataCapMb(mb);
+      closeDataCapModal();
+    }
+  });
+  document.getElementById('cancelDataCap')?.addEventListener('click', () => {
+    clearDataCap();
+    closeDataCapModal();
+    showCatalogToast('Data stop limit cleared');
+  });
+  document.getElementById('closeDataCapModal')?.addEventListener('click', closeDataCapModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeDataCapModal();
+  });
+  document.getElementById('openDataCapBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openDataCapModal();
+  });
+  document.getElementById('menuDataCapBtn')?.addEventListener('click', () => {
+    document.getElementById('headerMenu')?.classList.remove('active');
+    openDataCapModal();
+    if (typeof hapticFeedback === 'function') hapticFeedback('light');
+  });
+  document.getElementById('fs-data-cap')?.addEventListener('click', () => {
+    openDataCapModal();
+    if (typeof hapticFeedback === 'function') hapticFeedback('light');
+  });
+}
+
 function recordDailyBandwidthPlay(station) {
   if (!station?.name) return;
   rollDailyBandwidthIfNeeded();
@@ -4315,6 +4535,7 @@ function renderBandwidthHistory() {
   const listEl = document.getElementById('bandwidthHistoryList');
   const summaryEl = document.getElementById('bandwidthHistorySummary');
   if (!listEl) return;
+  updateDataCapDisplay();
   const stations = getDailyBandwidthStationList();
   const totalSeconds = stations.reduce((sum, item) => sum + (Number(item.seconds) || 0), 0);
   const totalBytes = dailyBandwidthBytes || stations.reduce((sum, item) => sum + (Number(item.bytes) || 0), 0);
@@ -4349,6 +4570,7 @@ function renderBandwidthHistory() {
     btn.onclick = () => playStationFromBandwidthHistory(btn.dataset.name);
   });
   listEl.scrollTop = scrollTop;
+  updateDataCapDisplay();
 }
 
 function playStationFromBandwidthHistory(stationName) {
@@ -4524,10 +4746,15 @@ function tickStreamUsage() {
   const deltaBytes = (streamBitrateKbps * 1000 / 8) * elapsedSec;
   streamSessionBytes += deltaBytes;
   addDailyBandwidthBytes(deltaBytes, elapsedSec);
+  addDataCapBytes(deltaBytes);
   updateStreamStatsDisplay();
 }
 
 function startStreamUsageTracking() {
+  if (isDataCapExhausted()) {
+    tripDataCap();
+    return;
+  }
   stopStreamUsageTracking();
   streamUsageLastTick = Date.now();
   streamUsageInterval = setInterval(tickStreamUsage, 1000);
@@ -4550,6 +4777,11 @@ function buildStreamStatsText() {
   if (!audio.paused) parts.push(`~${formatDataSize(perHourBytes)}/hr`);
   const network = getConnectionLabel();
   if (network) parts.push(network);
+  if (isDataCapActive()) {
+    parts.push(isDataCapExhausted()
+      ? 'limit reached'
+      : `${formatDataSize(Math.max(0, dataCapLimitBytes - dataCapUsedBytes))} left`);
+  }
   return parts.join(' · ');
 }
 
@@ -4701,6 +4933,11 @@ async function loadStationOnGoogleNest(st, autoplay = true) {
 }
 
 function playActiveStream() {
+  if (isDataCapExhausted()) {
+    tripDataCap();
+    openDataCapModal();
+    return;
+  }
   if (isGoogleNestCasting()) {
     if (lastPlayedStation && lastPlayedStation.station) {
       return loadStationOnGoogleNest(lastPlayedStation.station, true);
