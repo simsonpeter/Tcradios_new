@@ -1439,7 +1439,7 @@ audio{display:none}
       <select id="sortFilter" title="Sort stations">
         <option value="default">Default order</option>
         <option value="name">Name A-Z</option>
-        <option value="most-played">Most played</option>
+        <option value="most-played">Most played (everyone)</option>
         <option value="top-rated">Top rated</option>
         <option value="recent">Recently played</option>
       </select>
@@ -1908,10 +1908,15 @@ let favoritesOrder  = JSON.parse(localStorage.getItem('tcr-fav-order') || '[]');
 let playbackHistory = JSON.parse(localStorage.getItem('tcr-history') || '[]'); // Playback history with timestamps
 let playCounts      = JSON.parse(localStorage.getItem('tcr-play-counts') || '{}'); // Play counts for most played
 let stationRatings  = JSON.parse(localStorage.getItem('tcr-ratings') || '{}'); // User ratings for stations
+let globalRatings   = {}; // Global ratings from server (will be fetched)
+let globalPlayCounts = {}; // Community play counts from all app users
+try { globalPlayCounts = JSON.parse(localStorage.getItem('tcr-global-plays') || '{}'); } catch (e) { globalPlayCounts = {}; }
+let lastPlayReportAt = {};
+try { lastPlayReportAt = JSON.parse(localStorage.getItem('tcr-play-report-at') || '{}'); } catch (e) { lastPlayReportAt = {}; }
+let communityPlaysSynced = Object.keys(globalPlayCounts).length > 0;
 let nowPlayingHistory = JSON.parse(localStorage.getItem('tcr-now-playing-history') || '[]');
 let newStationKeys  = new Set(JSON.parse(localStorage.getItem('tcr-new-station-keys') || '[]'));
 let localRadioRequests = JSON.parse(localStorage.getItem('tcr-radio-requests') || '[]');
-let globalRatings   = {}; // Global ratings from server (will be fetched)
 let currentUser     = JSON.parse(localStorage.getItem('tcr-user') || 'null'); // Current logged in user
 let authToken       = localStorage.getItem('tcr-token') || null; // Auth token
 let currentLang     = localStorage.getItem('currentLang') || 'tamil';
@@ -2221,6 +2226,9 @@ function clearAllCacheOnLaunch() {
     'tcr-last-played',
     'tcr-history',
     'tcr-play-counts',
+    'tcr-global-plays',
+    'tcr-play-report-at',
+    'tcr-device-id',
     'tcr-ratings',
     'tcr-user',
     'tcr-token',
@@ -2699,7 +2707,7 @@ function applyStationFilters(base) {
   if (currentSortFilter === 'name') {
     list.sort((a, b) => a.name.localeCompare(b.name));
   } else if (currentSortFilter === 'most-played') {
-    list.sort((a, b) => (playCounts[b.name]?.count || 0) - (playCounts[a.name]?.count || 0));
+    list.sort((a, b) => getEffectivePlayCount(b.name) - getEffectivePlayCount(a.name));
   } else if (currentSortFilter === 'top-rated') {
     list.sort((a, b) => (stationRatings[b.name]?.rating || globalRatings[b.name]?.total || 0) - (stationRatings[a.name]?.rating || globalRatings[a.name]?.total || 0));
   } else if (currentSortFilter === 'recent') {
@@ -3226,7 +3234,7 @@ function renderAboutPanel() {
     ['fa-globe', 'Global Christian stations'],
     ['fa-language', 'Multi-language radio'],
     ['fa-image', 'List & logo views'],
-    ['fa-compass', 'Recent, top, rated & new quick picks'],
+    ['fa-compass', 'Recent, most played (everyone), rated & new'],
     ['fa-search', 'Search & filters'],
     ['fa-clock', 'Sleep timer & alarm'],
     ['fa-palette', 'Themes & dark mode'],
@@ -3303,6 +3311,7 @@ function renderAboutPanel() {
       <div class="about-rows">
         <div class="about-row"><i class="fas fa-mobile-alt"></i><span><strong>On your device:</strong> favorites, play history, play counts, theme, language, filters, last-played station, and widget preferences (browser local storage).</span></div>
         <div class="about-row"><i class="fas fa-cloud"></i><span><strong>In the cloud (signed-in users):</strong> account login via Supabase, synced favorites, and community star ratings you submit.</span></div>
+        <div class="about-row"><i class="fas fa-globe"></i><span><strong>Community most played:</strong> an anonymous device id and station play counts are sent so everyone can see which radios are most listened to. No name or email is attached unless you sign in.</span></div>
         <div class="about-row"><i class="fas fa-ban"></i><span><strong>We do not sell</strong> your personal data. Stream URLs are loaded directly from station providers when you press play.</span></div>
       </div>
     </div>
@@ -3451,7 +3460,7 @@ function buildQuickPickGroups() {
   }
 
   addGroup('recent', 'Recent', 'fa-clock-rotate-left', getRecentlyPlayed(12).map(entry => entry.station));
-  addGroup('top', 'Top', 'fa-chart-line', getMostPlayed(12).map(entry => entry.station));
+  addGroup('top', 'Most', 'fa-globe', getMostPlayed(12).map(entry => entry.station));
   addGroup('rated', 'Rated', 'fa-star', getTopRatedStations(12, 3, 5));
   addGroup('new', 'New', 'fa-flag', getNewlyAddedStations(12));
   return groups;
@@ -5419,6 +5428,7 @@ function addToHistory(station) {
   localStorage.setItem('tcr-history', JSON.stringify(playbackHistory));
   localStorage.setItem('tcr-play-counts', JSON.stringify(playCounts));
   syncLibraryToNativeApp();
+  reportStationPlay(station);
 }
 
 function getRecentlyPlayed(limit = 20) {
@@ -5449,22 +5459,60 @@ function getRecentlyPlayed(limit = 20) {
   return recent;
 }
 
+function getAppDeviceId() {
+  try {
+    let id = localStorage.getItem('tcr-device-id');
+    if (id) return id;
+    id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `tcr-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem('tcr-device-id', id);
+    return id;
+  } catch (e) {
+    return 'tcr-anonymous';
+  }
+}
+
+function formatPlayCount(count) {
+  const value = Math.max(0, Number(count) || 0);
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  return String(Math.round(value));
+}
+
+function getEffectivePlayCount(name) {
+  if (!name) return 0;
+  const local = Number(playCounts[name]?.count) || 0;
+  if (!communityPlaysSynced) return local;
+  const worldwide = Number(globalPlayCounts[name]?.count) || 0;
+  return Math.max(worldwide, local);
+}
+
+function hasCommunityPlayData() {
+  return communityPlaysSynced;
+}
+
 function getMostPlayed(limit = 20) {
-  // Sort by play count, then by last played
-  const sorted = Object.entries(playCounts)
+  const names = new Set([...Object.keys(globalPlayCounts), ...Object.keys(playCounts)]);
+  const sorted = Array.from(names).map(name => {
+    const global = globalPlayCounts[name];
+    const local = playCounts[name];
+    const station = findStationByName(name) || local?.station || global?.station || { name };
+    return {
+      station,
+      count: getEffectivePlayCount(name),
+      listeners: Number(global?.listeners) || 0,
+      lastPlayed: local?.lastPlayed || global?.lastPlayed || '',
+      worldwide: communityPlaysSynced && !!global
+    };
+  }).filter(item => item.station?.name && item.count > 0)
     .sort((a, b) => {
-      if (b[1].count !== a[1].count) {
-        return b[1].count - a[1].count;
-      }
-      return new Date(b[1].lastPlayed) - new Date(a[1].lastPlayed);
+      if (b.count !== a.count) return b.count - a.count;
+      if ((b.listeners || 0) !== (a.listeners || 0)) return (b.listeners || 0) - (a.listeners || 0);
+      return new Date(b.lastPlayed || 0) - new Date(a.lastPlayed || 0);
     })
-    .slice(0, limit)
-    .map(([name, data]) => ({
-      station: data.station,
-      count: data.count,
-      lastPlayed: data.lastPlayed
-    }));
-  
+    .slice(0, limit);
+
   return sorted;
 }
 
@@ -5570,11 +5618,21 @@ function renderHistory() {
       if (stations.length === 0) {
         historyContainer.innerHTML = searchTerm
           ? renderEmptyState('No matching stations', 'Try another search term.', 'fa-search')
-          : renderEmptyState('No play history yet', 'Your most played stations will show up here.', 'fa-chart-line');
+          : renderEmptyState('No play history yet', 'Play a station to start the worldwide most-played list.', 'fa-globe');
         return;
       }
     }
     
+    if (tab === 'most') {
+      const hint = document.createElement('div');
+      hint.className = 'history-meta';
+      hint.style.cssText = 'padding:0.2rem 0.15rem 0.7rem;font-size:0.78rem;opacity:0.85';
+      hint.innerHTML = hasCommunityPlayData()
+        ? '<i class="fas fa-globe"></i> Ranked by everyone using TC RADIOS'
+        : '<i class="fas fa-mobile-alt"></i> Plays on this device — worldwide ranking appears after sync';
+      historyContainer.appendChild(hint);
+    }
+
     stations.forEach((item, i) => {
       const st = item.station;
       const div = document.createElement('div');
@@ -5590,8 +5648,12 @@ function renderHistory() {
         div.className += ' playing';
       }
       
-      const timestamp = tab === 'recent' ? formatTimestamp(item.timestamp) : `${item.count} play${item.count > 1 ? 's' : ''}`;
-      const lastPlayed = tab === 'most' ? formatTimestamp(item.lastPlayed) : '';
+      const timestamp = tab === 'recent'
+        ? formatTimestamp(item.timestamp)
+        : item.worldwide
+          ? `${formatPlayCount(item.count)} plays worldwide${item.listeners ? ` · ${formatPlayCount(item.listeners)} listeners` : ''}`
+          : `${item.count} play${item.count > 1 ? 's' : ''} on this device`;
+      const lastPlayed = tab === 'most' && item.lastPlayed ? formatTimestamp(item.lastPlayed) : '';
       
       div.innerHTML = `
         <img src="${st.logo || '/icons/default-artwork.jpg'}" alt="" class="station-icon">
@@ -5599,7 +5661,7 @@ function renderHistory() {
           <div class="station-name">${st.name}</div>
           <div class="station-genre">${st.genre || ''}</div>
           <div class="history-meta" style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem">
-            ${tab === 'recent' ? `<i class="fas fa-clock"></i> ${timestamp}` : `<i class="fas fa-play-circle"></i> ${timestamp}${lastPlayed ? ` • <i class="fas fa-clock"></i> ${lastPlayed}` : ''}`}
+            ${tab === 'recent' ? `<i class="fas fa-clock"></i> ${timestamp}` : `<i class="fas ${item.worldwide ? 'fa-globe' : 'fa-play-circle'}"></i> ${timestamp}${lastPlayed ? ` • <i class="fas fa-clock"></i> ${lastPlayed}` : ''}`}
           </div>
         </div>
         ${buildStationRatingSideMarkup(st)}
@@ -7147,6 +7209,7 @@ async function loginUser(email, password) {
     try {
       await syncUserRatingsFromServer();
       await fetchGlobalRatings();
+      await fetchGlobalPlayCounts();
     } catch (error) {
       console.error('Error syncing ratings on login:', error);
     }
@@ -7302,6 +7365,114 @@ async function submitRatingToGlobal(stationName, rating, existingRating = 0) {
   } catch (error) {
     console.error('Failed to submit rating:', error);
     return false;
+  }
+}
+
+async function fetchGlobalPlayCounts() {
+  if (!supabaseClient) {
+    try {
+      globalPlayCounts = JSON.parse(localStorage.getItem('tcr-global-plays') || '{}');
+    } catch (e) {
+      globalPlayCounts = {};
+    }
+    return globalPlayCounts;
+  }
+
+  try {
+    const rows = [];
+    const pageSize = 1000;
+    for (let from = 0; from < 20000; from += pageSize) {
+      const { data, error } = await supabaseClient
+        .from('station_plays')
+        .select('station_name, play_count')
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      if (!data?.length) break;
+      rows.push(...data);
+      if (data.length < pageSize) break;
+    }
+
+    const aggregated = {};
+    rows.forEach(row => {
+      const name = row?.station_name;
+      if (!name) return;
+      if (!aggregated[name]) aggregated[name] = { count: 0, listeners: 0 };
+      aggregated[name].count += Math.max(0, Number(row.play_count) || 0);
+      aggregated[name].listeners += 1;
+    });
+
+    globalPlayCounts = aggregated;
+    communityPlaysSynced = true;
+    localStorage.setItem('tcr-global-plays', JSON.stringify(globalPlayCounts));
+    if (!catalogLoading && (currentTab === 'all' || currentTab === 'history' || currentTab === 'fav')) {
+      switchTab(currentTab);
+    }
+    return globalPlayCounts;
+  } catch (error) {
+    console.warn('Community play counts unavailable:', error?.message || error);
+    try {
+      globalPlayCounts = JSON.parse(localStorage.getItem('tcr-global-plays') || '{}');
+    } catch (e) {
+      globalPlayCounts = {};
+    }
+    return globalPlayCounts;
+  }
+}
+
+async function reportStationPlay(station) {
+  if (!station?.name) return;
+  const name = station.name;
+  const now = Date.now();
+  if (now - (Number(lastPlayReportAt[name]) || 0) < 15 * 60 * 1000) return;
+  lastPlayReportAt[name] = now;
+  try {
+    localStorage.setItem('tcr-play-report-at', JSON.stringify(lastPlayReportAt));
+  } catch (e) {}
+
+  if (communityPlaysSynced) {
+    if (!globalPlayCounts[name]) globalPlayCounts[name] = { count: 0, listeners: 1 };
+    globalPlayCounts[name].count = (Number(globalPlayCounts[name].count) || 0) + 1;
+  }
+
+  if (!supabaseClient) return;
+  try {
+    const deviceId = getAppDeviceId();
+    const { data: existing, error: lookupError } = await supabaseClient
+      .from('station_plays')
+      .select('id, play_count')
+      .eq('station_name', name)
+      .eq('device_id', deviceId)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+
+    if (existing?.id) {
+      const { error } = await supabaseClient
+        .from('station_plays')
+        .update({
+          play_count: (Number(existing.play_count) || 0) + 1,
+          last_played: new Date().toISOString()
+        })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseClient
+        .from('station_plays')
+        .insert([{
+          station_name: name,
+          device_id: deviceId,
+          play_count: 1,
+          last_played: new Date().toISOString()
+        }]);
+      if (error) throw error;
+      if (globalPlayCounts[name]) {
+        globalPlayCounts[name].listeners = (Number(globalPlayCounts[name].listeners) || 0) + 1;
+      }
+    }
+    try {
+      localStorage.setItem('tcr-global-plays', JSON.stringify(globalPlayCounts));
+    } catch (e) {}
+  } catch (error) {
+    console.warn('Could not report community play:', error?.message || error);
   }
 }
 
@@ -7898,6 +8069,11 @@ window.addEventListener('load', async () => {
       await fetchGlobalRatings();
     } catch (error) {
       console.error('Failed to fetch global ratings:', error);
+    }
+    try {
+      await fetchGlobalPlayCounts();
+    } catch (error) {
+      console.warn('Failed to fetch community play counts:', error);
     }
 
     // Personal greeting every time the app starts
