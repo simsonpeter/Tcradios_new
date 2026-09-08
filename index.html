@@ -3447,14 +3447,15 @@ function getTopRatedStations(limit = 12, minRating = 3, maxRating = 5) {
 }
 
 function buildQuickPickGroups() {
-  const seen = new Set();
   const groups = [];
 
   function addGroup(key, label, icon, stations) {
-    const unique = (stations || []).filter(st => {
-      if (!st?.name || seen.has(st.name)) return false;
+    const unique = [];
+    const seen = new Set();
+    (stations || []).forEach(st => {
+      if (!st?.name || seen.has(st.name)) return;
       seen.add(st.name);
-      return true;
+      unique.push(st);
     });
     if (unique.length) groups.push({ key, label, icon, stations: unique });
   }
@@ -3607,7 +3608,7 @@ function renderFavQuickRow() {
     row.innerHTML = `
       <div class="fav-quick-panel">
         <div class="fav-quick-label"><i class="fas fa-compass"></i> Quick picks</div>
-        ${renderEmptyState('Nothing here yet', 'Play a station to see recent and top picks here.', 'fa-compass')}
+        ${renderEmptyState('Nothing here yet', 'Play a station — worldwide most-played appears here after sync.', 'fa-compass')}
       </div>
     `;
     return;
@@ -5489,7 +5490,7 @@ function getEffectivePlayCount(name) {
 }
 
 function hasCommunityPlayData() {
-  return communityPlaysSynced;
+  return communityPlaysSynced && Object.values(globalPlayCounts).some(entry => (Number(entry?.count) || 0) > 0);
 }
 
 function getMostPlayed(limit = 20) {
