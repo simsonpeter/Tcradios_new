@@ -8509,7 +8509,7 @@ function hapticFeedback(type = 'light') {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // Add version parameter to force update
-    navigator.serviceWorker.register('/sw.js?v=7').then(registration => {
+    navigator.serviceWorker.register('/sw.js?v=8').then(registration => {
       // Check for updates immediately
       setInterval(() => {
         registration.update();
