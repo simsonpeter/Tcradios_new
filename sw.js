@@ -1,4 +1,4 @@
-const CACHE = 'tcr-v7';
+const CACHE = 'tcr-v8';
 const FILES = [
   '/',
   '/index.html',
@@ -29,6 +29,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.destination === 'audio' || e.request.destination === 'video') {
+    return;
+  }
   const url = new URL(e.request.url);
   if (e.request.url.endsWith('.html') || url.pathname === '/') {
     e.respondWith(

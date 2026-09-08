@@ -2100,6 +2100,35 @@ function collectStationUrls(station) {
   return [...new Set(candidates)];
 }
 
+// HTTPS pages (the PWA / Play Store app) cannot play plain HTTP streams.
+// Map known Shoutcast IPs to the station's SSL proxy, and upgrade http→https
+// for named hosts that already speak TLS on the same port.
+const STREAM_HTTPS_ALIASES = {
+  'http://217.182.133.224:9000/stream': 'https://centova71.instainternet.com/proxy/varner75?mp=/stream',
+  'http://217.182.133.224:9000': 'https://centova71.instainternet.com/proxy/varner75?mp=/stream'
+};
+
+function normalizeStreamUrlKey(url) {
+  return String(url || '').trim().replace(/\/+$/, '').replace(/;+$/, '').toLowerCase();
+}
+
+function getPlayableStreamUrl(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return raw;
+  const aliased = STREAM_HTTPS_ALIASES[normalizeStreamUrlKey(raw)];
+  if (aliased) return aliased;
+  if (!/^http:\/\//i.test(raw)) return raw;
+  try {
+    const parsed = new URL(raw);
+    const isIp = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(parsed.hostname);
+    if (!isIp) {
+      parsed.protocol = 'https:';
+      return parsed.href;
+    }
+  } catch (e) {}
+  return raw;
+}
+
 function normalizeStationEntries(rawPayload) {
   const sourceStations = Array.isArray(rawPayload)
     ? rawPayload
@@ -2115,14 +2144,14 @@ function normalizeStationEntries(rawPayload) {
 
     if (!urls.length) return [];
     if (urls.length === 1) {
-      return [{ ...station, name: baseName, url: urls[0] }];
+      return [{ ...station, name: baseName, url: getPlayableStreamUrl(urls[0]) }];
     }
 
     // Expand multi-stream station objects into individually playable rows.
     return urls.map((url, urlIndex) => ({
       ...station,
       name: `${baseName} (${urlIndex + 1})`,
-      url
+      url: getPlayableStreamUrl(url)
     }));
   });
 }
@@ -3880,7 +3909,8 @@ function play(st, i) {
     return;
   }
   idx = i;
-  audio.src = st.url;
+  const streamUrl = getPlayableStreamUrl(st.url);
+  audio.src = streamUrl;
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
   player.classList.add('playing');
@@ -3893,7 +3923,11 @@ function play(st, i) {
   } else {
     audio.play().catch(error => {
       console.error('Play error:', error);
-      showNotification('Unable to play this station');
+      if (/^http:\/\//i.test(streamUrl) && location.protocol === 'https:') {
+        showNotification('This station uses an unsecured HTTP stream, which the HTTPS app cannot play');
+      } else {
+        showNotification('Unable to play this station');
+      }
     });
   }
   updateMediaSession(st);
@@ -4892,7 +4926,8 @@ function inferCastContentType(url) {
 }
 
 function buildGoogleNestMediaInfo(st) {
-  const mediaInfo = new chrome.cast.media.MediaInfo(st.url, inferCastContentType(st.url));
+  const streamUrl = getPlayableStreamUrl(st.url);
+  const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, inferCastContentType(streamUrl));
   mediaInfo.streamType = chrome.cast.media.StreamType.LIVE;
 
   const metadata = new chrome.cast.media.MusicTrackMediaMetadata();

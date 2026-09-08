@@ -981,10 +981,23 @@ public class AndroidAutoMediaService extends MediaBrowserServiceCompat {
 
     private void addUrl(List<String> urls, String url) {
         if (TextUtils.isEmpty(url)) return;
-        String trimmedUrl = url.trim();
+        String trimmedUrl = secureStreamUrl(url.trim());
         if (!urls.contains(trimmedUrl)) {
             urls.add(trimmedUrl);
         }
+    }
+
+    /** HTTPS app / MediaPlayer cannot use plain HTTP shoutcast IPs. */
+    private String secureStreamUrl(String url) {
+        if (TextUtils.isEmpty(url)) return url;
+        String key = url.trim().replaceAll("/+$", "").toLowerCase(Locale.US);
+        if (key.startsWith("http://217.182.133.224:9000")) {
+            return "https://centova71.instainternet.com/proxy/varner75?mp=/stream";
+        }
+        if (key.startsWith("http://") && !key.matches("http://\\d{1,3}(?:\\.\\d{1,3}){3}.*")) {
+            return "https://" + url.trim().substring("http://".length());
+        }
+        return url.trim();
     }
 
     private String firstNonEmpty(String... values) {

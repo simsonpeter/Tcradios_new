@@ -94,7 +94,7 @@ public final class StationSyncStore {
 
     private static void putLastStationFields(SharedPreferences.Editor editor, JSONObject station) {
         String name = station.optString("name", "").trim();
-        String url = firstNonEmpty(station.optString("url", ""), station.optString("streamUrl", ""));
+        String url = secureStreamUrl(firstNonEmpty(station.optString("url", ""), station.optString("streamUrl", "")));
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(url)) return;
         String lang = station.optString("lang", station.optString("language", "tamil"));
         String genre = station.optString("genre", "Christian Radio");
@@ -245,5 +245,17 @@ public final class StationSyncStore {
             if (!TextUtils.isEmpty(value)) return value;
         }
         return "";
+    }
+
+    private static String secureStreamUrl(String url) {
+        if (TextUtils.isEmpty(url)) return url;
+        String key = url.trim().replaceAll("/+$", "").toLowerCase(Locale.US);
+        if (key.startsWith("http://217.182.133.224:9000")) {
+            return "https://centova71.instainternet.com/proxy/varner75?mp=/stream";
+        }
+        if (key.startsWith("http://") && !key.matches("http://\\d{1,3}(?:\\.\\d{1,3}){3}.*")) {
+            return "https://" + url.trim().substring("http://".length());
+        }
+        return url.trim();
     }
 }
