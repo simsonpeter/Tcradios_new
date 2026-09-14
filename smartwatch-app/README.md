@@ -1,8 +1,14 @@
-# Smartwatch App for TC RADIOS
+# Smartwatch Reference for TC RADIOS
 
 ## Overview
 
-TC RADIOS Smartwatch app brings uplifting Christian music and messages to your wrist. The app is designed for multiple smartwatch platforms including Wear OS, watchOS, Tizen, and Fitbit with optimized interfaces for small screens and gesture-based navigation.
+This folder is kept as a smartwatch UI/reference prototype only. TC RADIOS should
+ship as **one main radio APK/AAB** from the Bubblewrap TWA project; do not build
+or publish a separate Wear OS APK.
+
+Wear OS support is included in the main Android package through responsive watch
+styles and Android Media Session controls. When the phone/radio APK is playing,
+Wear OS can control playback through system media controls.
 
 ## Features
 
@@ -32,8 +38,8 @@ TC RADIOS Smartwatch app brings uplifting Christian music and messages to your w
 
 ### Wear OS (Google)
 - **Models**: Samsung Galaxy Watch, Fossil Gen 6, TicWatch Pro 3
-- **Features**: Full voice control, complications, always-on display
-- **Installation**: Google Play Store
+- **Features**: Main radio APK playback control through Wear OS media controls
+- **Installation**: No separate APK; use the main TC RADIOS Android package
 
 ### watchOS (Apple)
 - **Models**: Apple Watch Series 3+, Apple Watch SE
@@ -59,12 +65,10 @@ TC RADIOS Smartwatch app brings uplifting Christian music and messages to your w
 
 ### Installation Methods
 
-#### 1. App Store Installation
+#### 1. Main Android APK
 ```bash
-# Wear OS: Google Play Store
-# watchOS: App Store
-# Tizen: Galaxy Store
-# Fitbit: Fitbit App Gallery
+# Build/install the main Bubblewrap TC RADIOS APK/AAB.
+# Do not create a separate Wear OS APK from this folder.
 ```
 
 #### 2. Developer Installation
@@ -272,18 +276,14 @@ setInterval(() => {
 ## Deployment
 
 ### Production Build
-1. **Optimize Assets**: Compress images and minify code
-2. **Test Thoroughly**: Test on multiple smartwatch models
-3. **Voice Testing**: Verify all voice commands work
-4. **Gesture Testing**: Ensure all gestures work correctly
-5. **Battery Testing**: Verify power optimization
-6. **Submit to Store**: Submit to respective app stores
+1. **Build Main APK/AAB**: Use the Bubblewrap TWA build from `twa/`
+2. **Install Main APK**: Install TC RADIOS on the Android phone
+3. **Wear OS Testing**: Confirm Wear OS media controls work while the main app plays
+4. **No Separate Watch Build**: Do not submit this reference folder to app stores
 
 ### Distribution
-- **Wear OS**: Google Play Store
-- **watchOS**: App Store
-- **Tizen**: Galaxy Store
-- **Fitbit**: Fitbit App Gallery
+- **Android / Wear OS controls**: Main TC RADIOS Bubblewrap APK/AAB only
+- **watchOS / Tizen / Fitbit**: Reference UI only; no separate package is generated
 
 ## Troubleshooting
 

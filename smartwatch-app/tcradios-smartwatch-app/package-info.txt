@@ -1,8 +1,8 @@
-TC RADIOS - Smartwatch App
-==========================
+TC RADIOS - Smartwatch Reference
+================================
 
 Version: 1.0.0
-Platforms: Wear OS, watchOS, Tizen, Fitbit
+Platforms: Main Android APK with Wear OS media controls; reference UI for other watches
 Screen Sizes: 240x240, 320x320, 360x360, 400x400
 Form Factors: Round, Square, Rectangular
 
@@ -18,17 +18,15 @@ Features:
 - Battery optimization
 - Bluetooth audio support
 
-Supported Platforms:
-- Wear OS (Google)
-- watchOS (Apple)
-- Tizen (Samsung)
-- Fitbit
+Distribution:
+- Use the main TC RADIOS Bubblewrap APK/AAB.
+- Do not build or publish a separate Wear OS APK from this folder.
+- watchOS, Tizen, and Fitbit files are reference UI assets only.
 
 Installation:
-1. Install platform-specific SDK
-2. Import project files
-3. Build and test
-4. Submit to app store
+1. Build the main TC RADIOS APK/AAB from the twa/ project
+2. Install the main APK on Android
+3. Use Wear OS system media controls while the radio APK is playing
 
 Voice Commands:
 - "Play Christian Music"
