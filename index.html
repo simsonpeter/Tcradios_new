@@ -441,7 +441,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 #stationFilterBar label{display:flex;align-items:center;gap:0.35rem;font-size:0.85rem}
 #stationFilterBar button{cursor:pointer;color:var(--accent)}
 #favQuickRow{display:none;margin:0}
-#favQuickRow.is-visible{display:block;animation:favRowIn 0.4s ease;margin:0 0 0.55rem}
+#favQuickRow.is-visible{display:block;margin:0 0 0.55rem}
 .fav-quick-panel{background:var(--card);border:1px solid var(--border);border-radius:0.85rem;
                  padding:0.7rem 0.5rem 0.55rem;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .fav-quick-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -474,8 +474,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
 .fav-quick-item{flex:0 0 86px;scroll-snap-align:start;display:flex;flex-direction:column;
                 align-items:center;gap:0.35rem;cursor:pointer;text-align:center;
                 background:transparent;border:none;color:inherit;padding:0.5rem 0.55rem;
-                position:relative;transition:transform 0.25s ease;
-                animation:favItemIn 0.45s ease backwards}
+                position:relative;transition:transform 0.25s ease}
 .fav-quick-item:not(:last-child)::after{content:'';position:absolute;top:14%;bottom:18%;right:0;
                                         width:1px;background:linear-gradient(180deg,transparent,
                                         rgba(249,115,22,0.35) 20%,rgba(249,115,22,0.35) 80%,transparent)}
