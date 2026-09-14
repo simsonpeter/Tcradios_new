@@ -513,7 +513,7 @@ header button i{font-size:1.2rem;color:var(--header-btn);transition:var(--transi
                          50%{transform:scale(1.08);opacity:0.35}}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
              text-align:center;padding:2rem 1.25rem;color:var(--text-secondary);gap:0.45rem}
-.empty-state i{font-size:2rem;color:var(--accent);opacity:0.85;margin-bottom:0.25rem}
+.empty-state i{font-size:2rem;color:var(--accent);opacity:0.85;margin-bottom:0.25rem;animation:tcrFloatIcon 2.4s ease-in-out infinite}
 .empty-state p{margin:0;font-size:1rem;font-weight:700;color:var(--text)}
 .empty-state span{font-size:0.85rem;line-height:1.4;opacity:0.8;max-width:280px}
 .skeleton-item{pointer-events:none;cursor:default;min-height:64px}
@@ -1342,6 +1342,182 @@ audio{display:none}
 .sync-indicator.syncing{background:#f59e0b;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 
+/* ---- Cross-platform motion polish ---- */
+@keyframes tcrFadeUp{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes tcrPopIn{
+  from{opacity:0;transform:scale(.92)}
+  to{opacity:1;transform:scale(1)}
+}
+@keyframes tcrSoftPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.35)}
+  50%{box-shadow:0 0 0 10px rgba(249,115,22,0)}
+}
+@keyframes tcrEqBar{
+  0%,100%{transform:scaleY(.35)}
+  50%{transform:scaleY(1)}
+}
+@keyframes tcrTabIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.item{
+  animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both;
+}
+.item:nth-child(1){animation-delay:0s}
+.item:nth-child(2){animation-delay:.03s}
+.item:nth-child(3){animation-delay:.06s}
+.item:nth-child(4){animation-delay:.09s}
+.item:nth-child(5){animation-delay:.12s}
+.item:nth-child(6){animation-delay:.15s}
+.item:nth-child(7){animation-delay:.18s}
+.item:nth-child(8){animation-delay:.21s}
+.item:nth-child(n+9){animation-delay:.24s}
+.item.playing{
+  animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both,tcrSoftPulse 2.2s ease-in-out infinite;
+}
+.language-section-title{
+  animation:tcrFadeUp .32s cubic-bezier(.22,1,.36,1) both;
+}
+#content.tcr-tab-anim,#about-panel.tcr-tab-anim{
+  animation:tcrTabIn .28s cubic-bezier(.22,1,.36,1);
+}
+#player.playing{
+  animation:tcrSoftPulse 2.8s ease-in-out infinite;
+}
+#p-play.tcr-bounce,#fs-play.tcr-bounce,#widget-play-mini.tcr-bounce{
+  animation:tcrPopIn .28s cubic-bezier(.34,1.4,.64,1);
+}
+.favorite-button.on i{
+  animation:tcrPopIn .35s cubic-bezier(.34,1.4,.64,1);
+}
+.tcr-eq{display:none;align-items:flex-end;gap:2px;height:14px;margin-left:auto;padding:0 .2rem}
+.item.playing .tcr-eq{display:inline-flex}
+.tcr-eq span{
+  width:3px;height:100%;border-radius:2px;background:currentColor;
+  transform-origin:bottom;animation:tcrEqBar .9s ease-in-out infinite;
+}
+.tcr-eq span:nth-child(2){animation-delay:.15s}
+.tcr-eq span:nth-child(3){animation-delay:.3s}
+#sleepModal>div,#alarmModal>div,#ratingModal>div,#accountModal>div,
+#feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div{
+  animation:tcrPopIn .32s cubic-bezier(.22,1,.36,1);
+}
+#fullscreen-player.active #fullscreen-artwork{
+  transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease;
+}
+#fullscreen-player.playing #fullscreen-artwork{
+  box-shadow:0 20px 60px rgba(249,115,22,.35),0 0 0 6px rgba(249,115,22,.15);
+}
+
+/* ---- Extra motion ideas ---- */
+@keyframes tcrCoastSpin{from{transform:rotate(0deg)}to{transform:rotate(110deg)}}
+@keyframes tcrWave{0%,100%{height:22%}50%{height:100%}}
+@keyframes tcrMorphNext{0%{opacity:.55;transform:translateX(18px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes tcrMorphPrev{0%{opacity:.55;transform:translateX(-18px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes tcrHeartBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}70%{opacity:1;transform:translate(-50%,-120%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-160%) scale(.9)}}
+@keyframes tcrGlowTrail{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.45),inset 0 0 0 1px rgba(249,115,22,.35)}50%{box-shadow:0 0 22px 2px rgba(249,115,22,.28),inset 0 0 0 1px rgba(249,115,22,.55)}}
+@keyframes tcrShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes tcrFsOpen{from{opacity:0;transform:translateY(28%) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes tcrThemeWipe{0%{transform:scaleX(0);opacity:.85}55%{transform:scaleX(1);opacity:.55}100%{transform:scaleX(1);opacity:0}}
+@keyframes tcrSplashOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+@keyframes tcrFloatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes tcrCastPulse{0%{box-shadow:0 0 0 0 rgba(249,115,22,.55)}100%{box-shadow:0 0 0 14px rgba(249,115,22,0)}}
+@keyframes tcrAlarmFlash{0%,100%{opacity:0}20%,60%{opacity:.35}40%,80%{opacity:.15}}
+@keyframes tcrFilterIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tcrRingSpin{to{transform:rotate(360deg)}}
+
+#player img{animation:spin 3s linear infinite paused}
+#player.playing img{animation-play-state:running}
+#player.coasting img{
+  animation:tcrCoastSpin 1.15s cubic-bezier(.12,.7,.2,1) forwards !important;
+}
+#player .tcr-live-meter{
+  display:none;align-items:flex-end;gap:3px;height:22px;margin:0 .15rem 0 0;
+}
+#player.playing .tcr-live-meter{display:inline-flex}
+#player .tcr-live-meter span{
+  width:3px;border-radius:2px;background:var(--accent);
+  animation:tcrWave 0.85s ease-in-out infinite;
+}
+#player .tcr-live-meter span:nth-child(1){animation-delay:0s;height:40%}
+#player .tcr-live-meter span:nth-child(2){animation-delay:.12s;height:70%}
+#player .tcr-live-meter span:nth-child(3){animation-delay:.24s;height:55%}
+#player .tcr-live-meter span:nth-child(4){animation-delay:.08s;height:90%}
+#player .tcr-live-meter span:nth-child(5){animation-delay:.2s;height:45%}
+#player.tcr-morph-next .info,#player.tcr-morph-next img{animation:tcrMorphNext .32s cubic-bezier(.22,1,.36,1)}
+#player.tcr-morph-prev .info,#player.tcr-morph-prev img{animation:tcrMorphPrev .32s cubic-bezier(.22,1,.36,1)}
+.item.playing{animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both,tcrGlowTrail 2.4s ease-in-out infinite}
+.tcr-heart-burst{
+  position:fixed;z-index:4000;pointer-events:none;color:#f97316;font-size:1.4rem;
+  animation:tcrHeartBurst .7s cubic-bezier(.22,1,.36,1) forwards;
+}
+body.tcr-loading #content::before{
+  content:'';position:sticky;top:0;display:block;height:3px;width:100%;z-index:5;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  background-size:200% 100%;animation:tcrShimmer 1.1s linear infinite;
+}
+#fullscreen-player.active{
+  display:flex;animation:tcrFsOpen .38s cubic-bezier(.22,1,.36,1);
+}
+#tcrThemeWipe{
+  position:fixed;inset:0;z-index:5000;pointer-events:none;origin:left center;
+  background:linear-gradient(90deg,rgba(249,115,22,.55),rgba(234,88,12,.35),transparent);
+  transform:scaleX(0);transform-origin:left center;opacity:0;
+}
+#tcrThemeWipe.run{animation:tcrThemeWipe .55s cubic-bezier(.22,1,.36,1) forwards}
+#tcrSplash{
+  position:fixed;inset:0;z-index:6000;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:1rem;background:radial-gradient(circle at 50% 30%,#1f2937,#0a0a0a 70%);
+  color:#fff;transition:opacity .45s ease,visibility .45s ease;
+}
+#tcrSplash img{
+  width:96px;height:96px;border-radius:50%;border:3px solid #f97316;
+  box-shadow:0 0 0 8px rgba(249,115,22,.18);animation:tcrPopIn .5s cubic-bezier(.34,1.4,.64,1);
+}
+#tcrSplash .tcr-splash-title{font-weight:800;letter-spacing:.04em;color:#f97316;font-size:1.35rem}
+#tcrSplash.hide{animation:tcrSplashOut .45s ease forwards}
+.tcr-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;
+  padding:2.5rem 1.25rem;text-align:center;color:var(--text-secondary);opacity:.9;
+}
+.tcr-empty i{font-size:2.2rem;color:var(--accent);animation:tcrFloatIcon 2.4s ease-in-out infinite}
+#castBtn.cast-connected,#menuCastBtn.cast-connected{
+  animation:tcrCastPulse 1.2s ease-out 1;
+}
+#sleepBtn.tcr-sleep-active,#fs-sleep.tcr-sleep-active{
+  position:relative;
+}
+#sleepBtn.tcr-sleep-active::after,#fs-sleep.tcr-sleep-active::after{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  background:conic-gradient(var(--accent) calc(var(--sleep-progress,0)*1%),transparent 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));
+  animation:tcrRingSpin 12s linear infinite;
+  pointer-events:none;
+}
+#tcrAlarmFlash{
+  position:fixed;inset:0;z-index:5500;pointer-events:none;background:#f97316;opacity:0;
+}
+#tcrAlarmFlash.run{animation:tcrAlarmFlash 1.4s ease-in-out 2}
+#stationFilterBar.is-visible{animation:tcrFilterIn .28s cubic-bezier(.22,1,.36,1)}
+@media (prefers-reduced-motion: reduce){
+  .item,.item.playing,.language-section-title,#content.tcr-tab-anim,#about-panel.tcr-tab-anim,
+  #player.playing,#p-play.tcr-bounce,#fs-play.tcr-bounce,#widget-play-mini.tcr-bounce,
+  .favorite-button.on i,#sleepModal>div,#alarmModal>div,#ratingModal>div,#accountModal>div,
+  #feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div,.tcr-eq span,
+  #player .tcr-live-meter span,#player.coasting img,#player.tcr-morph-next .info,
+  #player.tcr-morph-prev .info,#fullscreen-player.active,.tcr-empty i,#tcrSplash img,
+  #castBtn.cast-connected,#menuCastBtn.cast-connected,#stationFilterBar.is-visible,
+  #sleepBtn.tcr-sleep-active::after,#fs-sleep.tcr-sleep-active::after{
+    animation:none !important;
+  }
+  #fullscreen-player.playing #fullscreen-artwork{box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  body.tcr-loading #content::before,#tcrThemeWipe,#tcrAlarmFlash,#tcrSplash{display:none !important}
+}
+
 /* Floating Mini Player Widget */
 #floating-widget{position:fixed;bottom:90px;right:20px;z-index:1000;
                  background:var(--card);border-radius:1rem;padding:0.85rem 1rem 0.95rem;
@@ -1387,6 +1563,12 @@ audio{display:none}
 </style>
 </head>
 <body>
+<div id="tcrSplash" aria-hidden="true">
+  <img src="/icons/icon-512x512.png" alt=""/>
+  <div class="tcr-splash-title">TC RADIOS</div>
+</div>
+<div id="tcrThemeWipe" aria-hidden="true"></div>
+<div id="tcrAlarmFlash" aria-hidden="true"></div>
 <header>
   <div class="header-title">
   <span>TC RADIOS</span>
@@ -1471,6 +1653,7 @@ audio{display:none}
 </div>
 <div id="player">
   <img id="p-img" src="/icons/default-artwork.jpg" alt="Artwork"/>
+  <div class="tcr-live-meter" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
   <div class="info">
     <div class="name"><span id="p-name"></span></div>
     <div class="p-now-row">
@@ -1580,7 +1763,7 @@ audio{display:none}
       <div class="share-app-hero-glow" aria-hidden="true"></div>
       <img src="/icons/icon-512x512.png" alt="" class="share-app-logo" width="96" height="96"/>
       <h3 id="shareAppTitle">Share this App</h3>
-      <p class="share-app-copy">Share uplifting Christian radio — songs, messages, programmes, and more in many languages.</p>
+      <p class="share-app-copy">Share uplifting Christian radio — songs, messages &amp; programmes in 8 languages, with Android Auto, Nest casting, favorites sync, sleep timer &amp; more.</p>
     </div>
     <div class="share-app-body">
       <div class="share-app-options">
@@ -1707,7 +1890,7 @@ audio{display:none}
     <div class="greeting-icon"><i class="fas fa-praying-hands"></i></div>
     <div>
       <div class="greeting-text">Feeling blessed?</div>
-      <div class="greeting-sub">If TC RADIOS has blessed you, please rate us on Play Store and share the app with friends.</div>
+      <div class="greeting-sub">If TC RADIOS has blessed you — with music, messages, Android Auto, Nest casting, or quiet time — please rate us on Play Store and share with friends.</div>
       <div class="greeting-actions">
         <button type="button" id="blessRateBtn"><i class="fas fa-star"></i> Rate us</button>
         <button type="button" id="blessRatedBtn"><i class="fas fa-check"></i> Rated</button>
@@ -2199,6 +2382,7 @@ async function loadLanguageUrls() {
 
 async function loadAll() {
   console.log('Loading stations...');
+  document.body.classList.add('tcr-loading');
   try {
     const nextStations = {};
     await loadLanguageUrls();
@@ -2222,6 +2406,13 @@ async function loadAll() {
     console.log('All stations loaded. Total languages:', Object.keys(stationsPerLang).length);
   } catch (error) {
     console.error('Error loading stations:', error);
+  } finally {
+    document.body.classList.remove('tcr-loading');
+    const splash = document.getElementById('tcrSplash');
+    if (splash) {
+      splash.classList.add('hide');
+      setTimeout(() => splash.remove(), 500);
+    }
   }
 }
 // Clear cache on every app launch
@@ -2526,6 +2717,12 @@ function populateThemeSelect() {
   sel.onchange = () => {
     currentTheme = sel.value;
     localStorage.setItem('currentTheme', currentTheme);
+    const wipe = document.getElementById('tcrThemeWipe');
+    if (wipe) {
+      wipe.classList.remove('run');
+      void wipe.offsetWidth;
+      wipe.classList.add('run');
+    }
     applyTheme(currentTheme);
     
     // Add visual feedback
@@ -3377,16 +3574,26 @@ function switchTab(tab) {
   localStorage.setItem('currentTab', tab);
   document.querySelectorAll('#tabs span').forEach(s => s.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
+  const contentEl = document.getElementById('content');
+  const aboutEl = document.getElementById('about-panel');
+  const bumpTabAnim = (el) => {
+    if (!el || previousTab === tab) return;
+    el.classList.remove('tcr-tab-anim');
+    void el.offsetWidth;
+    el.classList.add('tcr-tab-anim');
+  };
   if (tab === 'about') {
-    document.getElementById('content').style.display = 'none';
-    document.getElementById('about-panel').style.display = 'flex';
+    contentEl.style.display = 'none';
+    aboutEl.style.display = 'flex';
+    bumpTabAnim(aboutEl);
     setSearchBarVisible(false);
     setStationFiltersVisible(false);
     renderFavQuickRow();
     renderAboutPanel();
   } else if (tab === 'history') {
-    document.getElementById('content').style.display = 'flex';
-    document.getElementById('about-panel').style.display = 'none';
+    contentEl.style.display = 'flex';
+    aboutEl.style.display = 'none';
+    bumpTabAnim(contentEl);
     setSearchBarVisible(false);
     setStationFiltersVisible(false);
     syncContentTopVisibility();
@@ -3394,8 +3601,9 @@ function switchTab(tab) {
     applyStationViewMode();
     renderHistory();
   } else {
-    document.getElementById('content').style.display = 'flex';
-    document.getElementById('about-panel').style.display = 'none';
+    contentEl.style.display = 'flex';
+    aboutEl.style.display = 'none';
+    bumpTabAnim(contentEl);
     syncContentTopVisibility();
     if (previousTab !== tab) setSearchBarVisible(false);
     applyStationViewMode();
@@ -3857,6 +4065,7 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
     ? ' <span class="new-badge" title="Newly added station"><i class="fas fa-flag"></i> NEW</span>'
     : '';
   const ratingsMarkup = buildStationRatingMarkup(st);
+  const eq = '<span class="tcr-eq" aria-hidden="true"><span></span><span></span><span></span></span>';
 
   if (stationViewMode === 'logo') {
     return `
@@ -3868,6 +4077,7 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
         <div class="station-genre">${st.genre}</div>
         ${ratingsMarkup}
       </div>
+      ${eq}
     `;
   }
 
@@ -3877,6 +4087,7 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
         <div class="station-name">${st.name}${newBadge}</div>
         <div class="station-genre">${st.genre}</div>
       </div>
+      ${eq}
       ${buildStationRatingSideMarkup(st)}
     `;
 }
@@ -3913,6 +4124,7 @@ function play(st, i) {
   audio.src = streamUrl;
   pImg.src = st.logo || '/icons/default-artwork.jpg';
   pName.innerHTML = '<span>' + st.name + '</span>';
+  player.classList.remove('coasting');
   player.classList.add('playing');
   applyPlayerAccent(st.logo);
   resetStreamUsageTracking(st);
@@ -3958,8 +4170,15 @@ pPlay.onclick = (e) => {
   hapticFeedback('medium');
   toggleActivePlayback();
 };
+function morphStationChange(dir) {
+  if (!player) return;
+  player.classList.remove('tcr-morph-next', 'tcr-morph-prev');
+  void player.offsetWidth;
+  player.classList.add(dir > 0 ? 'tcr-morph-next' : 'tcr-morph-prev');
+}
 function prevNext(dir) {
   if (!currentList.length) return;
+  morphStationChange(dir);
   idx = (idx + dir + currentList.length) % currentList.length;
   play(currentList[idx], idx);
   hapticFeedback('light');
@@ -3975,6 +4194,8 @@ document.getElementById('p-next').onclick = (e) => {
 /* ---- FULL SCREEN PLAYER ---- */
 function openFullscreenPlayer() {
   if (!audio.src) return; // Don't open if nothing is playing
+  fullscreenPlayer.classList.remove('active');
+  void fullscreenPlayer.offsetWidth;
   fullscreenPlayer.classList.add('active');
   updateFullscreenPlayer();
   document.body.style.overflow = 'hidden';
@@ -4211,10 +4432,21 @@ if (savedVolume !== null) {
     updateVolumeIcon(parseInt(savedVolume));
   }
 }
+function bouncePlayButtons() {
+  [pPlay, fsPlay, widgetPlayMini].forEach(btn => {
+    if (!btn) return;
+    btn.classList.remove('tcr-bounce');
+    void btn.offsetWidth;
+    btn.classList.add('tcr-bounce');
+  });
+}
+
 // Update fullscreen player when audio state changes
 audio.onplay = () => { 
   pPlay.innerHTML = '<i class="fas fa-pause"></i>'; 
+  player.classList.remove('coasting');
   player.classList.add('playing'); 
+  bouncePlayButtons();
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: true });
   syncMediaControls();
@@ -4234,7 +4466,10 @@ audio.onplay = () => {
 };
 audio.onpause = () => { 
   pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
-  player.classList.remove('playing'); 
+  player.classList.remove('playing');
+  player.classList.add('coasting');
+  setTimeout(() => player.classList.remove('coasting'), 1200);
+  bouncePlayButtons();
   hapticFeedback('light');
   updateWidget('playStateUpdate', { playing: false });
   syncMediaControls();
@@ -4879,6 +5114,7 @@ function isPlaybackCurrentlyPlaying() {
 function updatePlaybackUiForRemote(isPlaying) {
   pPlay.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
   player.classList.toggle('playing', isPlaying);
+  bouncePlayButtons();
   updateWidget('playStateUpdate', { playing: isPlaying });
 
   if ('mediaSession' in navigator) {
@@ -5063,14 +5299,26 @@ function updateGoogleNestCastControls() {
 
   if (castControl) {
     castControl.style.display = canCast ? 'flex' : 'none';
+    const wasConnected = castControl.classList.contains('cast-connected');
     castControl.classList.toggle('cast-connected', connected);
+    if (connected && !wasConnected) {
+      castControl.classList.remove('cast-connected');
+      void castControl.offsetWidth;
+      castControl.classList.add('cast-connected');
+    }
     castControl.title = label;
     castControl.setAttribute('aria-label', label);
   }
 
   if (menuCastControl) {
     menuCastControl.style.display = canCast ? 'flex' : 'none';
+    const wasMenuConnected = menuCastControl.classList.contains('cast-connected');
     menuCastControl.classList.toggle('cast-connected', connected);
+    if (connected && !wasMenuConnected) {
+      menuCastControl.classList.remove('cast-connected');
+      void menuCastControl.offsetWidth;
+      menuCastControl.classList.add('cast-connected');
+    }
     menuCastControl.innerHTML = `<i class="fab fa-chromecast"></i> ${label}`;
   }
 }
@@ -5666,7 +5914,17 @@ function renderHistory() {
   renderHistoryList(historyActiveTab);
 }
 /* ---- FAVORITES ---- */
-function toggleFav(name) {
+function burstHeartAt(x, y) {
+  const el = document.createElement('div');
+  el.className = 'tcr-heart-burst';
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.innerHTML = '<i class="fas fa-heart"></i>';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 750);
+}
+
+function toggleFav(name, event) {
   const wasFavorite = favorites.includes(name);
   
   if (wasFavorite) {
@@ -5677,6 +5935,10 @@ function toggleFav(name) {
     // Add to favorites
     favorites = [...favorites, name];
     favoritesOrder = [...favoritesOrder, name];
+    const point = event && event.clientX != null
+      ? { x: event.clientX, y: event.clientY }
+      : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    burstHeartAt(point.x, point.y);
   }
   
   localStorage.setItem('tcr-fav', JSON.stringify(favorites));
@@ -5853,6 +6115,7 @@ document.getElementById('cancelSleep').onclick = () => {
   clearInterval(sleepCountdownInterval);
   sleepDeadline = 0;
   localStorage.removeItem('tcr-sleep-deadline');
+  localStorage.removeItem('tcr-sleep-total-ms');
   updateSleepCountdown();
   sleepModal.style.display = 'none';
 };
@@ -5868,12 +6131,14 @@ function setSleep(min) {
   clearInterval(sleepCountdownInterval);
   sleepDeadline = Date.now() + min * 60000;
   localStorage.setItem('tcr-sleep-deadline', String(sleepDeadline));
+  localStorage.setItem('tcr-sleep-total-ms', String(min * 60000));
   sleepTimer = setTimeout(() => {
     pauseActiveStream();
     document.getElementById('p-now').textContent = 'Live';
     sleepModal.style.display = 'none';
     sleepDeadline = 0;
     localStorage.removeItem('tcr-sleep-deadline');
+    localStorage.removeItem('tcr-sleep-total-ms');
     updateSleepCountdown();
   }, min * 60000);
   sleepCountdownInterval = setInterval(updateSleepCountdown, 1000);
@@ -5898,6 +6163,20 @@ function updateSleepCountdown() {
     fsSleepCountdown.style.display = active ? 'block' : 'none';
     fsSleepCountdown.textContent = text;
   }
+  const progress = active && sleepDeadline
+    ? Math.max(0, Math.min(100, (remaining / Math.max(1, sleepDeadline - (Date.now() - remaining))) * 100))
+    : 0;
+  // Prefer elapsed-based progress from stored duration when available
+  let sleepProgress = 0;
+  if (active) {
+    const totalMs = Number(localStorage.getItem('tcr-sleep-total-ms') || 0);
+    sleepProgress = totalMs > 0 ? Math.max(0, Math.min(100, ((totalMs - remaining) / totalMs) * 100)) : 0;
+  }
+  document.documentElement.style.setProperty('--sleep-progress', String(sleepProgress));
+  [sleepBtn, document.getElementById('fs-sleep')].forEach(btn => {
+    if (!btn) return;
+    btn.classList.toggle('tcr-sleep-active', active);
+  });
   if (!active && sleepCountdownInterval) {
     clearInterval(sleepCountdownInterval);
     sleepCountdownInterval = null;
@@ -6060,6 +6339,13 @@ function setAlarm() {
 
 // Trigger alarm
 function triggerAlarm() {
+  const flash = document.getElementById('tcrAlarmFlash');
+  if (flash) {
+    flash.classList.remove('run');
+    void flash.offsetWidth;
+    flash.classList.add('run');
+  }
+  hapticFeedback('heavy');
   const alarmSettings = JSON.parse(localStorage.getItem('tcr-alarm') || '{}');
   let stationToPlay = null;
   

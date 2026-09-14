@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TC RADIOS</string>
+    <string name="publisher_name">JayathaSoft</string>
+    <string name="loading">Loading…</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="languages_title">Languages</string>
+    <string name="stations_title">Stations</string>
+    <string name="browse">Browse</string>
+    <string name="back">Back</string>
+    <string name="play_pause">Play or pause</string>
+    <string name="next_station">Next station</string>
+    <string name="previous_station">Previous station</string>
+    <string name="playback_channel_name">TC RADIOS playback</string>
+    <string name="playback_channel_description">Shows when TC RADIOS is playing on your watch</string>
+    <string name="buffering">Buffering…</string>
+    <string name="no_stations">No stations found</string>
+    <string name="connection_failed">Connection failed</string>
+    <string name="select_language">Select a language</string>
+    <string name="volume">Volume</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="volume_up">Volume up</string>
+    <string name="volume_down">Volume down</string>
+</resources>

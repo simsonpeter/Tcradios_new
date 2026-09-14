@@ -1032,3 +1032,53 @@ html {
 .fade-in-up {
     animation: fadeInUp 0.6s ease-out;
 }
+
+/* Extra motion polish */
+@keyframes tcrReveal {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tcrFloatSoft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.feature-card,
+.platform-card,
+.download-card,
+.stat-item {
+    animation: tcrReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.feature-card:nth-child(1), .platform-card:nth-child(1), .download-card:nth-child(1) { animation-delay: 0.05s; }
+.feature-card:nth-child(2), .platform-card:nth-child(2), .download-card:nth-child(2) { animation-delay: 0.12s; }
+.feature-card:nth-child(3), .platform-card:nth-child(3), .download-card:nth-child(3) { animation-delay: 0.19s; }
+.feature-card:nth-child(4), .platform-card:nth-child(4), .download-card:nth-child(4) { animation-delay: 0.26s; }
+.feature-card:nth-child(n+5), .platform-card:nth-child(n+5), .download-card:nth-child(n+5) { animation-delay: 0.32s; }
+
+.hero-content {
+    animation: tcrReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cta-button,
+.download-btn {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+.cta-button:hover,
+.download-btn:hover {
+    transform: translateY(-3px);
+}
+.cta-button:active,
+.download-btn:active {
+    transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .feature-card,
+    .platform-card,
+    .download-card,
+    .stat-item,
+    .hero-content,
+    .card {
+        animation: none !important;
+    }
+}

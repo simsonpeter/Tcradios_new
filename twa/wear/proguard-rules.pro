@@ -1,0 +1,3 @@
+-keep class com.jayathasoft.tcradios.wear.** { *; }
+-keep class androidx.media.** { *; }
+-keep class android.support.v4.media.** { *; }

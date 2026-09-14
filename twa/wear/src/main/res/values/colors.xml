@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wear_primary">#F97316</color>
+    <color name="wear_primary_dark">#EA580C</color>
+    <color name="wear_background">#0A0A0A</color>
+    <color name="wear_surface">#1C1C1E</color>
+    <color name="wear_surface_elevated">#2C2C2E</color>
+    <color name="wear_text_primary">#FFFFFF</color>
+    <color name="wear_text_secondary">#AEAEB2</color>
+    <color name="wear_divider">#3A3A3C</color>
+    <color name="wear_accent_glow">#33F97316</color>
+</resources>

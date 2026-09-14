@@ -910,3 +910,103 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--tesla-accent-hover);
 }
+
+/* ---- Motion polish ---- */
+@keyframes tcrFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tcrPopIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes tcrSoftPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.35); }
+    50% { box-shadow: 0 0 0 12px rgba(249, 115, 22, 0); }
+}
+@keyframes tcrEqBar {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+}
+
+.station-item,
+.station-card {
+    animation: tcrFadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.station-item:nth-child(1), .station-card:nth-child(1) { animation-delay: 0s; }
+.station-item:nth-child(2), .station-card:nth-child(2) { animation-delay: 0.04s; }
+.station-item:nth-child(3), .station-card:nth-child(3) { animation-delay: 0.08s; }
+.station-item:nth-child(4), .station-card:nth-child(4) { animation-delay: 0.12s; }
+.station-item:nth-child(5), .station-card:nth-child(5) { animation-delay: 0.16s; }
+.station-item:nth-child(n+6), .station-card:nth-child(n+6) { animation-delay: 0.2s; }
+
+.station-item.playing,
+.station-card.playing {
+    animation: tcrFadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both, tcrSoftPulse 2.4s ease-in-out infinite;
+}
+
+.control-btn:active,
+.play-btn:active,
+.language-btn:active,
+.lang-btn:active {
+    transform: scale(0.94);
+    transition: transform 0.12s ease;
+}
+
+.now-playing img,
+.player-artwork img,
+.station-artwork img {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.playing .now-playing img,
+.playing .player-artwork img,
+.playing .station-artwork img,
+.station-artwork.playing img {
+    animation: tcrSoftPulse 2.8s ease-in-out infinite;
+}
+
+.favorites-panel,
+.modal,
+.settings-panel {
+    animation: tcrPopIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .station-item,
+    .station-card,
+    .station-item.playing,
+    .station-card.playing,
+    .favorites-panel,
+    .modal,
+    .settings-panel,
+    .playing .now-playing img,
+    .playing .player-artwork img,
+    .playing .station-artwork img,
+    .station-artwork.playing img {
+        animation: none !important;
+    }
+}
+
+/* Ideas 15-18 platform polish */
+.station-card:focus,
+.language-btn:focus,
+.control-btn:focus {
+  outline: none;
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px rgba(249,115,22,.55), 0 12px 28px rgba(249,115,22,.25);
+  transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s ease;
+}
+.tesla-dashboard .station-item,
+.tesla-dashboard .control-btn {
+  transition: all .45s cubic-bezier(.22,1,.36,1);
+}
+.watch-main > section {
+  transition: opacity .38s ease, transform .38s cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .station-card:focus, .language-btn:focus, .control-btn:focus {
+    transform: none;
+    box-shadow: 0 0 0 2px rgba(249,115,22,.7);
+  }
+}
