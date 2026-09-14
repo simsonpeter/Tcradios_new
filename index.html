@@ -1462,6 +1462,99 @@ body.tcr-loading #content::before{
 #fullscreen-player.active{
   display:flex;animation:tcrFsOpen .38s cubic-bezier(.22,1,.36,1);
 }
+#fullscreen-player.tcr-fs-closing{
+  display:flex;animation:tcrFsClose .28s cubic-bezier(.4,0,1,1) forwards;
+}
+@keyframes tcrFsClose{
+  from{opacity:1;transform:translateY(0) scale(1)}
+  to{opacity:0;transform:translateY(18%) scale(.97)}
+}
+@keyframes tcrFsStagger{
+  from{opacity:0;transform:translateY(18px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes tcrFsRingPulse{
+  0%,100%{transform:scale(1);opacity:.55}
+  50%{transform:scale(1.08);opacity:.9}
+}
+@keyframes tcrFsGlow{
+  0%,100%{box-shadow:0 20px 60px rgba(249,115,22,.28),0 0 0 6px rgba(249,115,22,.12)}
+  50%{box-shadow:0 24px 70px rgba(249,115,22,.42),0 0 0 10px rgba(249,115,22,.2)}
+}
+#fullscreen-art-wrap{
+  position:relative;width:280px;height:280px;margin-bottom:2rem;
+  display:flex;align-items:center;justify-content:center;
+}
+#fullscreen-art-ring{
+  position:absolute;inset:-10px;border-radius:50%;pointer-events:none;
+  border:2px solid rgba(249,115,22,.35);
+  box-shadow:0 0 0 8px rgba(249,115,22,.08);
+  opacity:.45;transform:scale(.96);
+}
+#fullscreen-player.playing #fullscreen-art-ring{
+  animation:tcrFsRingPulse 2.4s ease-in-out infinite;
+  border-color:rgba(249,115,22,.7);
+}
+#fullscreen-art-wrap #fullscreen-artwork{
+  width:100%;height:100%;margin-bottom:0;position:relative;z-index:1;
+}
+#fullscreen-player.playing #fullscreen-artwork{
+  animation:spin 3s linear infinite,tcrFsGlow 2.8s ease-in-out infinite;
+}
+#fullscreen-player.coasting #fullscreen-artwork{
+  animation:tcrCoastSpin 1.15s cubic-bezier(.12,.7,.2,1) forwards !important;
+}
+#fullscreen-player.tcr-morph-next #fullscreen-art-wrap,
+#fullscreen-player.tcr-morph-next #fullscreen-info{
+  animation:tcrMorphNext .34s cubic-bezier(.22,1,.36,1);
+}
+#fullscreen-player.tcr-morph-prev #fullscreen-art-wrap,
+#fullscreen-player.tcr-morph-prev #fullscreen-info{
+  animation:tcrMorphPrev .34s cubic-bezier(.22,1,.36,1);
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-art-wrap{
+  animation:tcrFsStagger .45s cubic-bezier(.22,1,.36,1) both;
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-info{
+  animation:tcrFsStagger .45s cubic-bezier(.22,1,.36,1) .06s both;
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-controls{
+  animation:tcrFsStagger .45s cubic-bezier(.22,1,.36,1) .12s both;
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-extra-controls{
+  animation:tcrFsStagger .45s cubic-bezier(.22,1,.36,1) .18s both;
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-volume{
+  animation:tcrFsStagger .45s cubic-bezier(.22,1,.36,1) .24s both;
+}
+#fullscreen-player.active.tcr-fs-enter #fullscreen-close{
+  animation:tcrPopIn .35s cubic-bezier(.34,1.4,.64,1) .2s both;
+}
+#fs-waveform{
+  display:none;align-items:flex-end;justify-content:center;gap:3px;
+  height:18px;margin:0.35rem auto 0.55rem;
+}
+#fullscreen-player.playing #fs-waveform{display:inline-flex}
+#fs-waveform span{
+  width:3px;border-radius:2px;background:var(--accent);
+  animation:tcrWave .85s ease-in-out infinite;
+}
+#fs-waveform span:nth-child(1){height:40%;animation-delay:0s}
+#fs-waveform span:nth-child(2){height:75%;animation-delay:.1s}
+#fs-waveform span:nth-child(3){height:55%;animation-delay:.2s}
+#fs-waveform span:nth-child(4){height:90%;animation-delay:.05s}
+#fs-waveform span:nth-child(5){height:48%;animation-delay:.18s}
+#fs-prev.tcr-bounce,#fs-next.tcr-bounce,#fs-favorite.tcr-bounce,
+#fs-sleep.tcr-bounce,#fs-alarm.tcr-bounce,#fs-share.tcr-bounce,
+#fs-report.tcr-bounce,#fs-data-cap.tcr-bounce,#fs-volume-btn.tcr-bounce{
+  animation:tcrPopIn .28s cubic-bezier(.34,1.4,.64,1);
+}
+#fullscreen-player.playing #fullscreen-name{
+  text-shadow:0 0 18px rgba(249,115,22,.25);
+}
+@media (max-width:480px){
+  #fullscreen-art-wrap{width:220px;height:220px;margin-bottom:1.5rem}
+}
 #tcrThemeWipe{
   position:fixed;inset:0;z-index:5000;pointer-events:none;origin:left center;
   background:linear-gradient(90deg,rgba(249,115,22,.55),rgba(234,88,12,.35),transparent);
@@ -1509,7 +1602,17 @@ body.tcr-loading #content::before{
   .favorite-button.on i,#sleepModal>div,#alarmModal>div,#ratingModal>div,#accountModal>div,
   #feedbackModal>div,#radioRequestModal>div,#adminDashboardModal>div,.tcr-eq span,
   #player .tcr-live-meter span,#player.coasting img,#player.tcr-morph-next .info,
-  #player.tcr-morph-prev .info,#fullscreen-player.active,.tcr-empty i,#tcrSplash img,
+  #player.tcr-morph-prev .info,#fullscreen-player.active,#fullscreen-player.tcr-fs-closing,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-art-wrap,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-info,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-controls,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-extra-controls,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-volume,
+  #fullscreen-player.active.tcr-fs-enter #fullscreen-close,
+  #fullscreen-player.playing #fullscreen-art-ring,#fullscreen-player.playing #fullscreen-artwork,
+  #fullscreen-player.coasting #fullscreen-artwork,#fs-waveform span,
+  #fs-prev.tcr-bounce,#fs-next.tcr-bounce,#fs-favorite.tcr-bounce,
+  .tcr-empty i,#tcrSplash img,
   #castBtn.cast-connected,#menuCastBtn.cast-connected,#stationFilterBar.is-visible,
   #sleepBtn.tcr-sleep-active::after,#fs-sleep.tcr-sleep-active::after{
     animation:none !important;
@@ -1710,9 +1813,13 @@ body.tcr-loading #content::before{
 </div>
 <div id="fullscreen-player">
   <button id="fullscreen-close" title="Close"><i class="fas fa-times"></i></button>
-  <img id="fullscreen-artwork" src="/icons/default-artwork.jpg" alt="Artwork"/>
+  <div id="fullscreen-art-wrap">
+    <div id="fullscreen-art-ring" aria-hidden="true"></div>
+    <img id="fullscreen-artwork" src="/icons/default-artwork.jpg" alt="Artwork"/>
+  </div>
   <div id="fullscreen-info">
     <div id="fullscreen-name"></div>
+    <div id="fs-waveform" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
     <div id="fullscreen-now">Live</div>
     <div id="fullscreen-station-meta"></div>
     <div id="fs-stream-stats" hidden aria-live="polite"></div>
@@ -4175,6 +4282,17 @@ function morphStationChange(dir) {
   player.classList.remove('tcr-morph-next', 'tcr-morph-prev');
   void player.offsetWidth;
   player.classList.add(dir > 0 ? 'tcr-morph-next' : 'tcr-morph-prev');
+  if (fullscreenPlayer && fullscreenPlayer.classList.contains('active')) {
+    fullscreenPlayer.classList.remove('tcr-morph-next', 'tcr-morph-prev');
+    void fullscreenPlayer.offsetWidth;
+    fullscreenPlayer.classList.add(dir > 0 ? 'tcr-morph-next' : 'tcr-morph-prev');
+  }
+}
+function bounceFsControl(btn) {
+  if (!btn) return;
+  btn.classList.remove('tcr-bounce');
+  void btn.offsetWidth;
+  btn.classList.add('tcr-bounce');
 }
 function prevNext(dir) {
   if (!currentList.length) return;
@@ -4194,17 +4312,23 @@ document.getElementById('p-next').onclick = (e) => {
 /* ---- FULL SCREEN PLAYER ---- */
 function openFullscreenPlayer() {
   if (!audio.src) return; // Don't open if nothing is playing
-  fullscreenPlayer.classList.remove('active');
+  fullscreenPlayer.classList.remove('active', 'tcr-fs-closing', 'tcr-fs-enter', 'coasting');
   void fullscreenPlayer.offsetWidth;
-  fullscreenPlayer.classList.add('active');
+  fullscreenPlayer.classList.add('active', 'tcr-fs-enter');
   updateFullscreenPlayer();
   document.body.style.overflow = 'hidden';
   hapticFeedback('light');
+  setTimeout(() => fullscreenPlayer.classList.remove('tcr-fs-enter'), 700);
 }
 function closeFullscreenPlayer() {
-  fullscreenPlayer.classList.remove('active');
-  document.body.style.overflow = '';
+  if (!fullscreenPlayer.classList.contains('active')) return;
+  fullscreenPlayer.classList.remove('tcr-fs-enter');
+  fullscreenPlayer.classList.add('tcr-fs-closing');
   hapticFeedback('light');
+  setTimeout(() => {
+    fullscreenPlayer.classList.remove('active', 'tcr-fs-closing', 'tcr-morph-next', 'tcr-morph-prev', 'coasting');
+    document.body.style.overflow = '';
+  }, 260);
 }
 function updateFullscreenPlayer() {
   fullscreenArtwork.src = pImg.src;
@@ -4328,24 +4452,28 @@ if (fullscreenControls) fullscreenControls.addEventListener('click', (e) => e.st
 if (fullscreenArtwork) fullscreenArtwork.addEventListener('click', (e) => e.stopPropagation());
 // Fullscreen player controls
 fsPlay.onclick = () => {
+  bounceFsControl(fsPlay);
   toggleActivePlayback();
   hapticFeedback('medium');
 };
 fsPrev.onclick = () => {
+  bounceFsControl(fsPrev);
   prevNext(-1);
   hapticFeedback('light');
 };
 fsNext.onclick = () => {
+  bounceFsControl(fsNext);
   prevNext(1);
   hapticFeedback('light');
 };
 if (fsFavorite) {
-  fsFavorite.onclick = () => {
+  fsFavorite.onclick = (e) => {
     if (!lastPlayedStation) {
       showNotification('No station playing');
       return;
     }
-    toggleFav(lastPlayedStation.station.name);
+    bounceFsControl(fsFavorite);
+    toggleFav(lastPlayedStation.station.name, e);
     updateFullscreenPlayer();
     updateFloatingWidget();
   };
@@ -4407,6 +4535,7 @@ if (fsVolumeSlider) {
 // Mute/unmute button
 if (fsVolumeBtn) {
   fsVolumeBtn.onclick = () => {
+    bounceFsControl(fsVolumeBtn);
     if (audio.volume > 0) {
       // Mute
       previousVolume = Math.round(audio.volume * 100);
@@ -4453,6 +4582,7 @@ audio.onplay = () => {
   startStreamUsageTracking();
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
+    fullscreenPlayer.classList.remove('coasting');
     fullscreenPlayer.classList.add('playing');
     fsPlay.innerHTML = '<i class="fas fa-pause"></i>';
   }
@@ -4478,7 +4608,9 @@ audio.onpause = () => {
   // Update fullscreen player if open
   if (fullscreenPlayer.classList.contains('active')) {
     fullscreenPlayer.classList.remove('playing');
+    fullscreenPlayer.classList.add('coasting');
     fsPlay.innerHTML = '<i class="fas fa-play"></i>';
+    setTimeout(() => fullscreenPlayer.classList.remove('coasting'), 1200);
   }
   // Update floating widget if visible
   if (floatingWidget && floatingWidget.classList.contains('active')) {
@@ -6484,6 +6616,7 @@ const fsSleep = document.getElementById('fs-sleep');
 const fsAlarm = document.getElementById('fs-alarm');
 if (fsSleep && sleepModal && sleepBtn) {
   fsSleep.onclick = () => {
+    bounceFsControl(fsSleep);
     // Use the same handler as the header sleep button
     if (typeof sleepBtn.onclick === 'function') {
       sleepBtn.onclick();
@@ -6495,6 +6628,7 @@ if (fsSleep && sleepModal && sleepBtn) {
 }
 if (fsAlarm && alarmBtn) {
   fsAlarm.onclick = () => {
+    bounceFsControl(fsAlarm);
     if (typeof alarmBtn.onclick === 'function') {
       alarmBtn.onclick();
     } else {
