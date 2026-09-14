@@ -1364,28 +1364,34 @@ audio{display:none}
   to{opacity:1;transform:translateY(0)}
 }
 .item{
+  /* Entrance only when intentionally enabled — default is static to avoid boot flicker */
+}
+.station-list.tcr-list-enter .item{
   animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both;
 }
-.item:nth-child(1){animation-delay:0s}
-.item:nth-child(2){animation-delay:.03s}
-.item:nth-child(3){animation-delay:.06s}
-.item:nth-child(4){animation-delay:.09s}
-.item:nth-child(5){animation-delay:.12s}
-.item:nth-child(6){animation-delay:.15s}
-.item:nth-child(7){animation-delay:.18s}
-.item:nth-child(8){animation-delay:.21s}
-.item:nth-child(n+9){animation-delay:.24s}
+.station-list.tcr-list-enter .item:nth-child(1){animation-delay:0s}
+.station-list.tcr-list-enter .item:nth-child(2){animation-delay:.03s}
+.station-list.tcr-list-enter .item:nth-child(3){animation-delay:.06s}
+.station-list.tcr-list-enter .item:nth-child(4){animation-delay:.09s}
+.station-list.tcr-list-enter .item:nth-child(5){animation-delay:.12s}
+.station-list.tcr-list-enter .item:nth-child(6){animation-delay:.15s}
+.station-list.tcr-list-enter .item:nth-child(7){animation-delay:.18s}
+.station-list.tcr-list-enter .item:nth-child(8){animation-delay:.21s}
+.station-list.tcr-list-enter .item:nth-child(n+9){animation-delay:.24s}
 .item.playing{
-  animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both,tcrSoftPulse 2.2s ease-in-out infinite;
+  box-shadow:0 0 0 1px rgba(249,115,22,.35);
 }
 .language-section-title{
+  /* no entrance animation by default */
+}
+.station-list.tcr-list-enter .language-section-title{
   animation:tcrFadeUp .32s cubic-bezier(.22,1,.36,1) both;
 }
 #content.tcr-tab-anim,#about-panel.tcr-tab-anim{
   animation:tcrTabIn .28s cubic-bezier(.22,1,.36,1);
 }
 #player.playing{
-  animation:tcrSoftPulse 2.8s ease-in-out infinite;
+  /* Avoid whole-bar soft-pulse — it reads as flicker on open/autoplay */
 }
 #p-play.tcr-bounce,#fs-play.tcr-bounce,#widget-play-mini.tcr-bounce{
   animation:tcrPopIn .28s cubic-bezier(.34,1.4,.64,1);
@@ -1449,7 +1455,9 @@ audio{display:none}
 #player .tcr-live-meter span:nth-child(5){animation-delay:.2s;height:45%}
 #player.tcr-morph-next .info,#player.tcr-morph-next img{animation:tcrMorphNext .32s cubic-bezier(.22,1,.36,1)}
 #player.tcr-morph-prev .info,#player.tcr-morph-prev img{animation:tcrMorphPrev .32s cubic-bezier(.22,1,.36,1)}
-.item.playing{animation:tcrFadeUp .38s cubic-bezier(.22,1,.36,1) both,tcrGlowTrail 2.4s ease-in-out infinite}
+.item.playing{
+  box-shadow:0 0 0 1px rgba(249,115,22,.35);
+}
 .tcr-heart-burst{
   position:fixed;z-index:4000;pointer-events:none;color:#f97316;font-size:1.4rem;
   animation:tcrHeartBurst .7s cubic-bezier(.22,1,.36,1) forwards;
@@ -1561,17 +1569,8 @@ body.tcr-loading #content::before{
   transform:scaleX(0);transform-origin:left center;opacity:0;
 }
 #tcrThemeWipe.run{animation:tcrThemeWipe .55s cubic-bezier(.22,1,.36,1) forwards}
-#tcrSplash{
-  position:fixed;inset:0;z-index:6000;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:1rem;background:radial-gradient(circle at 50% 30%,#1f2937,#0a0a0a 70%);
-  color:#fff;transition:opacity .45s ease,visibility .45s ease;
-}
-#tcrSplash img{
-  width:96px;height:96px;border-radius:50%;border:3px solid #f97316;
-  box-shadow:0 0 0 8px rgba(249,115,22,.18);animation:tcrPopIn .5s cubic-bezier(.34,1.4,.64,1);
-}
-#tcrSplash .tcr-splash-title{font-weight:800;letter-spacing:.04em;color:#f97316;font-size:1.35rem}
-#tcrSplash.hide{animation:tcrSplashOut .45s ease forwards}
+#tcrSplash{display:none !important}
+#tcrSplash.hide{display:none !important}
 .tcr-empty{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;
   padding:2.5rem 1.25rem;text-align:center;color:var(--text-secondary);opacity:.9;
@@ -1666,10 +1665,6 @@ body.tcr-loading #content::before{
 </style>
 </head>
 <body>
-<div id="tcrSplash" aria-hidden="true">
-  <img src="/icons/icon-512x512.png" alt=""/>
-  <div class="tcr-splash-title">TC RADIOS</div>
-</div>
 <div id="tcrThemeWipe" aria-hidden="true"></div>
 <div id="tcrAlarmFlash" aria-hidden="true"></div>
 <header>
@@ -2515,11 +2510,6 @@ async function loadAll() {
     console.error('Error loading stations:', error);
   } finally {
     document.body.classList.remove('tcr-loading');
-    const splash = document.getElementById('tcrSplash');
-    if (splash) {
-      splash.classList.add('hide');
-      setTimeout(() => splash.remove(), 500);
-    }
   }
 }
 // Clear cache on every app launch
@@ -2830,19 +2820,20 @@ function populateThemeSelect() {
       void wipe.offsetWidth;
       wipe.classList.add('run');
     }
-    applyTheme(currentTheme);
+    applyTheme(currentTheme, { animate: true });
     
     // Add visual feedback
     const body = document.body;
-    body.style.transition = 'all 0.3s ease';
+    body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
     setTimeout(() => {
       body.style.transition = '';
     }, 300);
   };
 }
 
-function applyTheme(theme) {
+function applyTheme(theme, options = {}) {
   const body = document.body;
+  const animate = options.animate === true;
   
   // Remove all theme classes
   const themes = ['dark', 'light', 'ocean', 'forest', 'sunset', 'rose', 'midnight', 'aurora', 'christmas', 'easter', 'gold', 'minimal'];
@@ -2857,8 +2848,16 @@ function applyTheme(theme) {
 
   updateThemeColorMeta(theme);
   
-  // Add theme-specific animations
-  addThemeAnimations(theme);
+  // Only animate when the user picks a theme — never on cold start (causes flicker)
+  if (animate) {
+    addThemeAnimations(theme);
+  } else {
+    body.classList.remove(
+      'theme-transition-ocean', 'theme-transition-forest', 'theme-transition-sunset',
+      'theme-transition-rose', 'theme-transition-midnight', 'theme-transition-aurora',
+      'theme-transition-christmas', 'theme-transition-easter', 'theme-transition-gold'
+    );
+  }
 }
 
 function updateThemeColorMeta(theme) {
@@ -3721,7 +3720,8 @@ function switchTab(tab) {
       ? getFavoritesInOrder()
       : (stationsPerLang[currentLang] || []);
     currentList = applyStationFilters(base);
-    render(currentList);
+    const animateList = previousTab !== tab;
+    render(currentList, { animateList });
   }
 }
 /* ---- RENDER ---- */
@@ -4018,6 +4018,7 @@ function render(list, options = {}) {
   renderFavQuickRow();
   stationList.innerHTML = '';
   applyStationViewMode();
+  stationList.classList.toggle('tcr-list-enter', !!options.animateList);
   stationList.setAttribute('aria-busy', 'false');
 
   if (!list || !list.length) {
@@ -4055,10 +4056,16 @@ function render(list, options = {}) {
       stationList.appendChild(section);
       sectionStations.forEach(st => appendStationItem(st, currentList.indexOf(st)));
     });
+    if (options.animateList) {
+      setTimeout(() => stationList.classList.remove('tcr-list-enter'), 700);
+    }
     return;
   }
 
   list.forEach((st, i) => appendStationItem(st, i));
+  if (options.animateList) {
+    setTimeout(() => stationList.classList.remove('tcr-list-enter'), 700);
+  }
 }
 
 function isStationCurrentlyPlaying(st) {
@@ -4202,6 +4209,7 @@ function buildStationItemMarkup(st, isCurrentlyPlaying) {
 function appendStationItem(st, i) {
     const div = document.createElement('div');
     div.className = 'item';
+    div.dataset.stationName = st.name;
     
     const isCurrentlyPlaying = isStationCurrentlyPlaying(st);
     
@@ -4218,6 +4226,20 @@ function appendStationItem(st, i) {
     bindStationLongPress(div, st);
     applyStationAccent(div, st.logo);
     stationList.appendChild(div);
+}
+
+function updatePlayingHighlights() {
+  if (!stationList) return;
+  const playingName = lastPlayedStation?.station?.name;
+  const isPlaying = player?.classList.contains('playing') || (typeof isPlaybackCurrentlyPlaying === 'function' && isPlaybackCurrentlyPlaying());
+  stationList.querySelectorAll('.item').forEach(el => {
+    const match = playingName && el.dataset.stationName === playingName && isPlaying;
+    el.classList.toggle('playing', !!match);
+  });
+  document.querySelectorAll('.fav-quick-item').forEach(el => {
+    const match = playingName && el.dataset.name === playingName && isPlaying;
+    el.classList.toggle('playing', !!match);
+  });
 }
 /* ---- PLAYER ---- */
 function play(st, i) {
@@ -4266,7 +4288,7 @@ function play(st, i) {
     updateFloatingWidget();
   }
   // Refresh the display to show playing state
-  switchTab(currentTab);
+  updatePlayingHighlights();
   // Haptic feedback for mobile
   hapticFeedback('success');
   // Request notification permission on first play
@@ -4592,7 +4614,7 @@ audio.onplay = () => {
     widgetPlayMini.innerHTML = '<i class="fas fa-pause"></i>';
   }
   // Refresh display to show playing state
-  switchTab(currentTab);
+  updatePlayingHighlights();
 };
 audio.onpause = () => { 
   pPlay.innerHTML = '<i class="fas fa-play"></i>'; 
@@ -4620,7 +4642,7 @@ audio.onpause = () => {
   // Stop metadata fetching when paused
   stopMetadataFetching();
   // Refresh display to remove playing state
-  switchTab(currentTab);
+  updatePlayingHighlights();
 };
 audio.onplaying = () => syncMediaControls();
 audio.onwaiting = () => updateLockScreenPlaybackState('playing');
@@ -5273,7 +5295,7 @@ function updatePlaybackUiForRemote(isPlaying) {
     widgetPlayMini.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
   }
 
-  switchTab(currentTab);
+  updatePlayingHighlights();
 }
 
 function getAbsoluteAssetUrl(src) {
