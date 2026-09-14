@@ -4912,6 +4912,7 @@ function initDataCapUi() {
     if (typeof hapticFeedback === 'function') hapticFeedback('light');
   });
   document.getElementById('fs-data-cap')?.addEventListener('click', () => {
+    bounceFsControl(document.getElementById('fs-data-cap'));
     openDataCapModal();
     if (typeof hapticFeedback === 'function') hapticFeedback('light');
   });
@@ -7272,6 +7273,7 @@ if (fsShare) {
       showNotification('No station playing');
       return;
     }
+    bounceFsControl(fsShare);
     // Share with "what you're listening to" by default
     await shareStation(lastPlayedStation.station, true);
   };
@@ -7284,6 +7286,7 @@ if (fsReport) {
       showNotification('No station playing');
       return;
     }
+    bounceFsControl(fsReport);
     showStreamReportModal(lastPlayedStation.station);
   };
 }
