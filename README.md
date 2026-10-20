@@ -20,7 +20,7 @@ A modern Progressive Web App (PWA) and Android application that brings uplifting
 
 ### 📱 **Cross-Platform**
 - **Progressive Web App (PWA)** - Install on any device
-- **Android App** - Native Android application
+- **Android App** - One Bubblewrap radio APK for phone, Android Auto, and Wear OS media controls
 - **Google Nest / Chromecast** - Cast live stations to Nest speakers and smart displays
 - **Responsive Design** - Works on all screen sizes
 - **Offline Support** - Cached content for offline listening
@@ -107,6 +107,10 @@ bubblewrap build
 
 If you do not have Java/Android SDK locally, use the GitHub Actions workflow
 `Build Bubblewrap TWA APK / AAB` to build the Bubblewrap TWA in the cloud.
+
+The project does **not** generate a separate Wear OS APK. Wear OS support is
+included in the main radio APK through responsive watch styling and Media
+Session controls.
 
 ## 📁 Project Structure
 
