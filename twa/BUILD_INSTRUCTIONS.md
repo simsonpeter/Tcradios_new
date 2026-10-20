@@ -11,8 +11,21 @@ cloud workflow installs those for you.
 Use the repository workflow from GitHub:
 
 1. Open **Actions** in GitHub.
-2. Run **Build TCRadios APK / AAB** manually, or push to `main`.
-3. Download the generated APK/AAB artifacts.
+2. Run **Build TCRadios phone + Wear release** manually, or push to `main`.
+3. Download the generated release artifacts:
+   - `TCRadios-phone-apk` / `TCRadios-phone-aab`
+   - `TCRadios-wear-apk` / `TCRadios-wear-aab`
+
+For **signed** release builds in CI, add these repository secrets under
+**Settings → Secrets and variables → Actions**:
+
+- `KEYSTORE_PASSWORD` (required for signing)
+- `KEY_PASSWORD` (optional; defaults to `KEYSTORE_PASSWORD`)
+- `KEY_ALIAS` (optional; defaults to `jayathasoft-keystore`)
+
+The keystore file is already in the repo at `twa/jayathasoft.keystore`.
+Without those secrets, CI still builds release APK/AAB files, but they may be
+unsigned.
 
 This is the best path when you do not have an Android environment locally.
 
@@ -62,7 +75,7 @@ project directly:
 
 ```bash
 cd twa
-./gradlew assembleRelease
+./gradlew :app:assembleRelease :app:bundleRelease :wear:assembleRelease :wear:bundleRelease
 ```
 
 ## Android Studio

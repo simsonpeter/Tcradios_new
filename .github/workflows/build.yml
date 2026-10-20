@@ -1,9 +1,9 @@
-name: Build Bubblewrap TWA APK / AAB
+name: Build TCRadios phone + Wear release
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:   # manual trigger
+  workflow_dispatch:
 
 jobs:
   build-android:
@@ -27,27 +27,50 @@ jobs:
           sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Make Gradle executable
-        run: |
-          chmod +x twa/gradlew
+        run: chmod +x twa/gradlew
 
-      - name: Build Bubblewrap TWA APK (debug)
-        run: |
-          cd twa
-          ./gradlew :app:assembleDebug
-
-      - name: Build Bubblewrap TWA AAB (debug)
+      - name: Build phone + Wear release APK/AAB
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           cd twa
-          ./gradlew :app:bundleDebug
+          ./gradlew \
+            :app:assembleRelease \
+            :app:bundleRelease \
+            :wear:assembleRelease \
+            :wear:bundleRelease \
+            --no-daemon
 
-      - name: Upload APK
+      - name: Upload phone APK
         uses: actions/upload-artifact@v4
         with:
-          name: TCRadios-debug-apk
-          path: twa/app/build/outputs/apk/debug/*.apk
+          name: TCRadios-phone-apk
+          path: |
+            twa/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
 
-      - name: Upload AAB
+      - name: Upload phone AAB
         uses: actions/upload-artifact@v4
         with:
-          name: TCRadios-debug-aab
-          path: twa/app/build/outputs/bundle/debug/*.aab
+          name: TCRadios-phone-aab
+          path: |
+            twa/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Upload Wear APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCRadios-wear-apk
+          path: |
+            twa/wear/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Upload Wear AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: TCRadios-wear-aab
+          path: |
+            twa/wear/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
