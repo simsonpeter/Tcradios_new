@@ -1,2 +1,4 @@
 include ':app'
-include ':wear'
+# Optional local Wear module (not published). Ship one phone APK/AAB; watch
+# controls come from MediaSession in :app. Keep :wear out of CI artifacts.
+# include ':wear'

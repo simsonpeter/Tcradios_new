@@ -1,4 +1,4 @@
-name: Build TCRadios phone + Wear release
+name: Build Bubblewrap TWA APK / AAB
 
 on:
   push:
@@ -29,7 +29,9 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x twa/gradlew
 
-      - name: Build phone + Wear release APK/AAB
+      # Single phone release package. Wear OS / Android Auto watch controls ship via
+      # MediaSession in :app (no separate Wear APK/AAB artifact).
+      - name: Build release APK/AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -39,38 +41,20 @@ jobs:
           ./gradlew \
             :app:assembleRelease \
             :app:bundleRelease \
-            :wear:assembleRelease \
-            :wear:bundleRelease \
             --no-daemon
 
-      - name: Upload phone APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: TCRadios-phone-apk
+          name: TCRadios-release-apk
           path: |
             twa/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
-      - name: Upload phone AAB
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: TCRadios-phone-aab
+          name: TCRadios-release-aab
           path: |
             twa/app/build/outputs/bundle/release/*.aab
-          if-no-files-found: error
-
-      - name: Upload Wear APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: TCRadios-wear-apk
-          path: |
-            twa/wear/build/outputs/apk/release/*.apk
-          if-no-files-found: error
-
-      - name: Upload Wear AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: TCRadios-wear-aab
-          path: |
-            twa/wear/build/outputs/bundle/release/*.aab
           if-no-files-found: error

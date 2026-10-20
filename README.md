@@ -108,6 +108,9 @@ bubblewrap build
 If you do not have Java/Android SDK locally, use the GitHub Actions workflow
 `Build Bubblewrap TWA APK / AAB` to build the Bubblewrap TWA in the cloud.
 
+The project does **not** generate a separate Wear OS APK. Wear OS support is
+included in the main radio APK through Media Session controls.
+
 ## 📁 Project Structure
 
 ```

@@ -11,10 +11,14 @@ cloud workflow installs those for you.
 Use the repository workflow from GitHub:
 
 1. Open **Actions** in GitHub.
-2. Run **Build TCRadios phone + Wear release** manually, or push to `main`.
+2. Run **Build Bubblewrap TWA APK / AAB** manually, or push to `main`.
 3. Download the generated release artifacts:
-   - `TCRadios-phone-apk` / `TCRadios-phone-aab`
-   - `TCRadios-wear-apk` / `TCRadios-wear-aab`
+   - `TCRadios-release-apk`
+   - `TCRadios-release-aab`
+
+This workflow builds the **single TC RADIOS Android package**. Do not generate a
+separate Wear OS APK. Watch support ships in the main APK through Android
+Media Session / Android Auto controls (`AndroidAutoMediaService`).
 
 For **signed** release builds in CI, add these repository secrets under
 **Settings → Secrets and variables → Actions**:
@@ -75,8 +79,11 @@ project directly:
 
 ```bash
 cd twa
-./gradlew :app:assembleRelease :app:bundleRelease :wear:assembleRelease :wear:bundleRelease
+./gradlew :app:assembleRelease :app:bundleRelease
 ```
+
+There is no separate Wear OS output. Use the same radio APK/AAB for Android
+phone, Android Auto, and Wear OS media controls.
 
 ## Android Studio
 
