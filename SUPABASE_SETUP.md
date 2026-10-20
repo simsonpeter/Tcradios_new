@@ -103,11 +103,24 @@ CREATE TABLE IF NOT EXISTS radio_requests (
 CREATE INDEX IF NOT EXISTS idx_stream_reports_status_created ON stream_reports(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_radio_requests_status_created ON radio_requests(status, created_at DESC);
 
+-- Community most-played: one row per device per station
+CREATE TABLE IF NOT EXISTS station_plays (
+  id BIGSERIAL PRIMARY KEY,
+  station_name TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  play_count INTEGER NOT NULL DEFAULT 1 CHECK (play_count >= 1),
+  last_played TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(station_name, device_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_station_plays_station_name ON station_plays(station_name);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE user_favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stream_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE radio_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE station_plays ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for user_favorites
 CREATE POLICY "Users can view their own favorites"
@@ -144,10 +157,53 @@ CREATE POLICY "Anyone can submit stream reports"
 CREATE POLICY "Anyone can submit radio requests"
   ON radio_requests FOR INSERT
   WITH CHECK (true);
+
+CREATE POLICY "Anyone can view community play counts"
+  ON station_plays FOR SELECT
+  USING (true);
+
+CREATE POLICY "Anyone can insert community plays"
+  ON station_plays FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Devices can update their own play counts"
+  ON station_plays FOR UPDATE
+  USING (true);
 ```
 
 4. Click **Run** (or press Ctrl+Enter)
 5. You should see "Success. No rows returned"
+
+If the other tables already exist, run only this block:
+
+```sql
+CREATE TABLE IF NOT EXISTS station_plays (
+  id BIGSERIAL PRIMARY KEY,
+  station_name TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  play_count INTEGER NOT NULL DEFAULT 1 CHECK (play_count >= 1),
+  last_played TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(station_name, device_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_station_plays_station_name ON station_plays(station_name);
+
+ALTER TABLE station_plays ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view community play counts"
+  ON station_plays FOR SELECT
+  USING (true);
+
+CREATE POLICY "Anyone can insert community plays"
+  ON station_plays FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Devices can update their own play counts"
+  ON station_plays FOR UPDATE
+  USING (true);
+```
+
+Until `station_plays` exists, Most Played still works from this device and falls back quietly.
 
 ## Step 5: Enable Email Authentication
 
